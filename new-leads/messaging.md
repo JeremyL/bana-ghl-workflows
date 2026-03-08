@@ -1,4 +1,4 @@
-# Bana Land — New Leads Account (Account 2): Message Templates
+# Bana Land — New Leads Account: Message Templates
 
 All outreach for Bana Land must follow this voice:
 
@@ -12,7 +12,7 @@ Use `{{first_name}}` for GHL merge tag (first name of contact).
 Use `{{agent_name}}` for the team member's name.
 Replace `[CALLBACK NUMBER]` with the agent's dedicated phone line.
 
-For the Warm Response account (Account 1) templates, see [../warm-response/messaging.md](../warm-response/messaging.md).
+For the Warm Response account templates, see [../warm-response/messaging.md](../warm-response/messaging.md).
 
 ---
 
@@ -20,48 +20,52 @@ For the Warm Response account (Account 1) templates, see [../warm-response/messa
 
 All template IDs follow the pattern: `STAGE-CHANNEL-##`
 
-| Prefix | Stage                                     |
-| ------ | ----------------------------------------- |
-| NL     | New Leads (Day 1-30, Acquisition Manager) |
-| COLD   | Cold Monthly Drip (Day 30-180)            |
-| COLDQ  | Cold Quarterly Drip (Day 180+)            |
-| NUR    | Nurture Monthly (Months 0-3)              |
-| NURQ   | Nurture Quarterly (Month 3+)              |
+
+| Prefix | Stage                          |
+| ------ | ------------------------------ |
+| NL     | New Leads (Day 1-30)           |
+| COLD   | Cold Monthly Drip (Day 30-180) |
+| COLDQ  | Cold Quarterly Drip (Day 180+) |
+| NUR    | Nurture Monthly (Months 0-3)   |
+| NURQ   | Nurture Quarterly (Month 3+)   |
+
 
 ---
 
-## Quick Reference — All Templates (Account 2)
+## Quick Reference — All Templates (Account: New Leads)
 
-| ID             | Channel | Stage                       | Timing            | Workflow             | Auto/Manual |
-| -------------- | ------- | --------------------------- | ----------------- | -------------------- | ----------- |
-| NL-SMS-01      | SMS     | New Leads — Day 1-2         | Day 1, Morning    | WF-02 Step 2         | Auto        |
-| NL-SMS-02      | SMS     | New Leads — Day 1-2 / 3-14  | Day 2, Day 4      | WF-02 Step 12        | Auto        |
-| NL-SMS-03      | SMS     | New Leads — Day 3-14        | Day 8             | WF-03                | Auto        |
-| NL-SMS-04      | SMS     | New Leads — Day 3-14        | Day 11            | WF-03                | Auto        |
-| NL-SMS-05      | SMS     | New Leads — Day 15-30       | Day 22            | WF-04                | Auto        |
-| NL-SMS-06      | SMS     | New Leads — Day 15-30       | Day 30            | WF-04                | Auto        |
-| NL-EMAIL-01    | Email   | New Leads — Day 1-2         | Day 2, Morning    | WF-02 Step 7         | Auto        |
-| NL-EMAIL-02    | Email   | New Leads — Day 3-14        | Day 7             | WF-03                | Auto        |
-| NL-EMAIL-03    | Email   | New Leads — Day 15-30       | Day 15            | WF-04                | Auto        |
-| NL-EMAIL-04    | Email   | New Leads — Day 15-30       | Day 29            | WF-04                | Auto        |
-| NL-SMS-07      | SMS     | New Leads — Day 1-2         | Day 1, Afternoon  | WF-02 Step 5         | Auto        |
-| NL-EMAIL-05    | Email   | New Leads — Day 3-14        | Day 5             | WF-03                | Auto        |
-| NL-SMS-08      | SMS     | New Leads — Day 3-14        | Day 10            | WF-03                | Auto        |
-| NL-SMS-09      | SMS     | New Leads — Day 15-30       | Day 17            | WF-04                | Auto        |
-| COLD-SMS-01    | SMS     | Cold Monthly                | Month 1           | WF-05 Step 2         | Auto        |
-| COLD-SMS-02    | SMS     | Cold Monthly                | Month 4           | WF-05 Step 8         | Auto        |
-| COLD-SMS-03    | SMS     | Cold Monthly                | Month 6           | WF-05 Step 12        | Auto        |
-| COLD-EMAIL-01  | Email   | Cold Monthly                | Month 2           | WF-05 Step 4         | Auto        |
-| COLD-EMAIL-02  | Email   | Cold Monthly                | Month 5           | WF-05 Step 10        | Auto        |
-| COLD-SMS-04    | SMS     | Cold Monthly                | Month 3           | WF-05 Step 6         | Auto        |
-| COLDQ-SMS-01   | SMS     | Cold Quarterly              | Every 90 days     | WF-06 Step 2         | Auto        |
-| COLDQ-EMAIL-01 | Email   | Cold Quarterly              | Every 90 days     | WF-06 Step 4         | Auto        |
-| NUR-SMS-01     | SMS     | Nurture Monthly             | Month 0           | WF-08 Step 2         | Auto        |
-| NUR-SMS-02     | SMS     | Nurture Monthly / Quarterly | Month 2, Month 15 | WF-08 Steps 6, 17    | Auto        |
-| NUR-EMAIL-01   | Email   | Nurture Monthly / Quarterly | Month 1, Month 9  | WF-08 Steps 4, 13    | Auto        |
-| NURQ-EMAIL-01  | Email   | Nurture Quarterly           | Month 3           | WF-08 Step 9         | Auto        |
-| NURQ-SMS-01    | SMS     | Nurture Quarterly           | Month 6           | WF-08 Step 11        | Auto        |
-| NURQ-SMS-02    | SMS     | Nurture Quarterly           | Month 12 (1-Year) | WF-08 Step 15        | Auto        |
+
+| ID             | Channel | Stage                       | Timing            | Workflow | Auto/Manual |
+| -------------- | ------- | --------------------------- | ----------------- | -------- | ----------- |
+| NL-SMS-01      | SMS     | New Leads — Day 1-2         | Day 1, Morning    | WF-02    | Auto        |
+| NL-SMS-07      | SMS     | New Leads — Day 1-2         | Day 1, Afternoon  | WF-02    | Auto        |
+| NL-EMAIL-01    | Email   | New Leads — Day 1-2         | Day 2, Morning    | WF-02    | Auto        |
+| NL-SMS-02      | SMS     | New Leads — Day 1-2 / 3-14  | Day 2, Day 4      | WF-02    | Auto        |
+| NL-EMAIL-05    | Email   | New Leads — Day 3-14        | Day 5             | WF-03    | Auto        |
+| NL-EMAIL-02    | Email   | New Leads — Day 3-14        | Day 7             | WF-03    | Auto        |
+| NL-SMS-03      | SMS     | New Leads — Day 3-14        | Day 8             | WF-03    | Auto        |
+| NL-SMS-08      | SMS     | New Leads — Day 3-14        | Day 10            | WF-03    | Auto        |
+| NL-SMS-04      | SMS     | New Leads — Day 3-14        | Day 11            | WF-03    | Auto        |
+| NL-EMAIL-03    | Email   | New Leads — Day 15-30       | Day 15            | WF-04    | Auto        |
+| NL-SMS-09      | SMS     | New Leads — Day 15-30       | Day 17            | WF-04    | Auto        |
+| NL-SMS-05      | SMS     | New Leads — Day 15-30       | Day 22            | WF-04    | Auto        |
+| NL-EMAIL-04    | Email   | New Leads — Day 15-30       | Day 29            | WF-04    | Auto        |
+| NL-SMS-06      | SMS     | New Leads — Day 15-30       | Day 30            | WF-04    | Auto        |
+| COLD-SMS-01    | SMS     | Cold Monthly                | Month 1           | WF-05    | Auto        |
+| COLD-EMAIL-01  | Email   | Cold Monthly                | Month 2           | WF-05    | Auto        |
+| COLD-SMS-04    | SMS     | Cold Monthly                | Month 3           | WF-05    | Auto        |
+| COLD-SMS-02    | SMS     | Cold Monthly                | Month 4           | WF-05    | Auto        |
+| COLD-EMAIL-02  | Email   | Cold Monthly                | Month 5           | WF-05    | Auto        |
+| COLD-SMS-03    | SMS     | Cold Monthly                | Month 6           | WF-05    | Auto        |
+| COLDQ-SMS-01   | SMS     | Cold Quarterly              | Every 90 days     | WF-06    | Auto        |
+| COLDQ-EMAIL-01 | Email   | Cold Quarterly              | Every 90 days     | WF-06    | Auto        |
+| NUR-SMS-01     | SMS     | Nurture Monthly             | Month 0           | WF-08    | Auto        |
+| NUR-EMAIL-01   | Email   | Nurture Monthly / Quarterly | Month 1, Month 9  | WF-08    | Auto        |
+| NUR-SMS-02     | SMS     | Nurture Monthly / Quarterly | Month 2, Month 15 | WF-08    | Auto        |
+| NURQ-EMAIL-01  | Email   | Nurture Quarterly           | Month 3           | WF-08    | Auto        |
+| NURQ-SMS-01    | SMS     | Nurture Quarterly           | Month 6           | WF-08    | Auto        |
+| NURQ-SMS-02    | SMS     | Nurture Quarterly           | Month 12 (1-Year) | WF-08    | Auto        |
+
 
 ---
 
@@ -384,28 +388,5 @@ Continue rotating NUR-SMS-02, NUR-EMAIL-01, NURQ-SMS-01, NURQ-SMS-02 every 90 da
 
 ---
 
-## NEPQ Question Bank (Use in Qualifying Conversations)
 
-**Situation questions (understand their world):**
 
-- "How long have you owned the property?"
-- "Are you doing anything with the land right now, or is it just sitting?"
-- "What made you hold onto it this long?"
-
-**Problem / implication questions (uncover pain):**
-
-- "Has the property been costing you anything — taxes, maintenance, that kind of thing?"
-- "Is it getting harder to manage from where you are?"
-- "Have you thought about what you'd do with the money if it were sold?"
-
-**Solution-awareness questions (position us as the answer):**
-
-- "Have you looked into selling before? What stopped you?"
-- "What would make this an easy decision for you?"
-- "If the price and terms were right, is this something you'd want to move on quickly or take your time?"
-
-**Closing questions (move toward next step):**
-
-- "Would it make sense for me to run some numbers and come back to you with a real offer?"
-- "If I could get you a fair cash offer with no fees or agents, is that something worth a conversation?"
-- "What would need to happen on your end to make this work?"

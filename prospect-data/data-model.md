@@ -1,6 +1,6 @@
 # Prospect Data — Data Model
 
-Account 3 in the Bana Land GHL system. Stores all raw property and skip trace data in a single flat Custom Object. No contacts, no opportunities, no pipeline.
+Prospect Data in the Bana Land GHL system. Stores all raw property and skip trace data in a single flat Custom Object. No contacts, no opportunities, no pipeline.
 
 Automations push data from here into New Leads and Warm Response as needed for campaigns and lead follow-up.
 

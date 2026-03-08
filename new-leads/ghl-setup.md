@@ -1,4 +1,4 @@
-# Bana Land — New Leads Account (Account 2): GHL Setup Guide
+# Bana Land — New Leads Account: GHL Setup Guide
 
 This guide walks through building the New Leads GHL sub-account from scratch.
 Follow the steps in order — each section depends on the previous one being complete.
@@ -11,7 +11,7 @@ Reference files:
 - [sequences.md](sequences.md) — cadence map
 - [messaging.md](messaging.md) — message templates
 - [rules.md](rules.md) — compliance rules
-- For Account 1: [../warm-response/ghl-setup.md](../warm-response/ghl-setup.md)
+- For Warm Response: [../warm-response/ghl-setup.md](../warm-response/ghl-setup.md)
 
 ---
 
@@ -42,24 +42,24 @@ There are three entry paths into this account. Every incoming lead follows exact
 
 ---
 
-### Entry Path 1 — Transfer from Account 1 (Warm Response)
+### Entry Path 1 — Transfer from Warm Response
 
 **Who:** Warm Response leads that successfully connected — Lead Manager transferred them.
 **Where they land:** New Leads pipeline stage (Acquisition Manager owns from here).
-**How:** Account 1's WF-HANDOFF fires a webhook to n8n → n8n creates contact in this account.
+**How:** Warm Response's WF-HANDOFF fires a webhook to n8n → n8n creates contact in this account.
 
 **What n8n must send to this account:**
 
 | Field                            | Value                                                                 |
 | -------------------------------- | --------------------------------------------------------------------- |
-| First name, last name            | From Account 1 contact record                                        |
-| Email address                    | From Account 1                                                        |
-| All phone numbers (Phone 1–4)    | From Account 1                                                        |
-| All tags                         | Carry over from Account 1 (Source tags, Warm: Email/SMS, etc.)        |
-| Custom field: Original Source    | From Account 1 (never overwritten)                                    |
-| Custom field: Latest Source      | From Account 1                                                        |
-| Custom field: Latest Source Date | From Account 1                                                        |
-| Contact notes                    | From Account 1                                                        |
+| First name, last name            | From Warm Response contact record                                        |
+| Email address                    | From Warm Response                                                        |
+| All phone numbers (Phone 1–4)    | From Warm Response                                                        |
+| All tags                         | Carry over from Warm Response (Source tags, Warm: Email/SMS, etc.)        |
+| Custom field: Original Source    | From Warm Response (never overwritten)                                    |
+| Custom field: Latest Source      | From Warm Response                                                        |
+| Custom field: Latest Source Date | From Warm Response                                                        |
+| Contact notes                    | From Warm Response                                                        |
 | Pipeline stage                   | New Leads                                                             |
 
 ---
@@ -68,7 +68,7 @@ There are three entry paths into this account. Every incoming lead follows exact
 
 **Who:** Prospects from cold calling, direct mail, or inbound VAPI calls — anyone who did NOT come through the cold email/SMS Warm Response path.
 **Where they land:** New Leads pipeline stage (Acquisition Manager owns from here).
-**How:** Entered via n8n flow. These leads skip Account 1 entirely.
+**How:** Entered via n8n flow. These leads skip Warm Response entirely.
 
 **What must be set on entry:**
 
@@ -97,7 +97,7 @@ There are three entry paths into this account. Every incoming lead follows exact
 4. Update custom field: Latest Source Date = Today
 5. Add tag: `Re-Submitted`
 6. Move Opportunity to New Leads (same property) or create a new Opportunity (new property)
-7. **If contact also exists in Account 1:** Fire cleanup webhook to Account 1 (stop drip, move to Transferred)
+7. **If contact also exists in Warm Response:** Fire cleanup webhook to Warm Response (stop drip, move to Transferred)
 
 **Rules:**
 
@@ -191,13 +191,13 @@ Go to **Settings > Tags** and create these tags:
 
 | Tag Name                | Use                                                                                                                     |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| DNC                     | Do Not Contact — blocks all outreach. Triggers DNC sync to Account 1.                                                  |
+| DNC                     | Do Not Contact — blocks all outreach. Triggers DNC sync to Warm Response.                                                  |
 | Hot                     | Team-assigned tag for priority leads (manual)                                                                            |
 | Re-Engaged              | Lead responded to our existing GHL follow-up/drip. Triggers WF-11 (pause + AM review).                                  |
 | Re-Submitted            | Lead came back in from a new external campaign (different source). Resets to New Leads.                                  |
 | Paused                  | Holds all automated workflows at their next send gate. Added by WF-11 on inbound response.                             |
-| Warm: Email             | Carried over from Account 1 — entered via cold email response (historical tracking)                                     |
-| Warm: SMS               | Carried over from Account 1 — entered via cold SMS response (historical tracking)                                       |
+| Warm: Email             | Carried over from Warm Response — entered via cold email response (historical tracking)                                     |
+| Warm: SMS               | Carried over from Warm Response — entered via cold SMS response (historical tracking)                                       |
 | Drip: Cold Monthly      | Cold stage monthly cadence (WF-05). Added when contact enters Cold stage or Dispo Re-Engage.                             |
 | Drip: Cold Quarterly    | Cold stage quarterly cadence (WF-06). Swapped in from Cold Monthly at 6-month mark.                                     |
 | Drip: Nurture Monthly   | Nurture monthly cadence (WF-08 Phase 1). Added when contact enters Nurture stage.                                        |
@@ -292,7 +292,7 @@ Build each workflow in **Automation > Workflows**.
    - Remove tag: `Re-Engaged` (if present from a prior cycle)
    - Remove tag: `Re-Submitted` (cleanup — it has served its purpose as a trigger)
 2. Assign contact to acquisition manager (specific team member)
-3. Update custom field: Lead Entry Date = Today (skip if already set — contact may be coming from Account 1 or re-submission)
+3. Update custom field: Lead Entry Date = Today (skip if already set — contact may be coming from Warm Response or re-submission)
 4. Update custom field: Original Source (skip if already set — only set on first-ever entry)
 5. Update custom field: Latest Source = current source value
 6. Update custom field: Latest Source Date = Today
@@ -601,12 +601,12 @@ Before going live, verify:
 ## Step 9 — Go-Live Checklist
 
 - All pipeline stages created and in correct order
-- All custom fields created (matching Account 1 schema)
+- All custom fields created (matching Warm Response schema)
 - All tags created
 - All 11 workflows built and tested (WF-01 through WF-11)
 - Smart lists created
 - Team members trained on GHL task queue and stage movement
-- n8n routing confirmed: direct leads → Account 2, Account 1 transfers → Account 2
+- n8n routing confirmed: direct leads → New Leads, Warm Response transfers → New Leads
 - DNC sync tested bidirectionally
 - First batch of leads imported and enrolled in WF-01
 - Monitoring dashboard set up (Reporting > Conversations, Tasks, Pipeline)

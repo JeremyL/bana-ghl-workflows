@@ -1,9 +1,9 @@
 # Bana Land — Warm Response Account: Contact Rules & Compliance
 
-This file defines the operational rules that govern all outreach in **Account 1 (Warm Response)**.
+This file defines the operational rules that govern all outreach in **Warm Response**.
 Every GHL workflow, automation, and team member action must respect these rules.
 
-For the New Leads account (Account 2) rules, see [../new-leads/rules.md](../new-leads/rules.md).
+For the New Leads account rules, see [../new-leads/rules.md](../new-leads/rules.md).
 
 ---
 
@@ -93,13 +93,13 @@ Not answering calls, not replying to texts, and not opening emails does NOT cons
 | Phone call completed (SMS track)        | Lead Manager moves to Transferred → WF-HANDOFF           |
 | 14 days pass with no connection         | GHL auto-moves to Cold → Cold drip begins                |
 | Lead says stop / opt-out                | GHL or Lead Manager moves to Dispo: DNC → DNC sync       |
-| Re-submitted from new external campaign | n8n cleanup webhook → Account 2 handles as new lead      |
+| Re-submitted from new external campaign | n8n cleanup webhook → New Leads handles as new lead      |
 
 ---
 
 ## 6. Positive Response Protocol
 
-### Re-Engagement — Lead responds to our Account 1 Cold drip
+### Re-Engagement — Lead responds to our Warm Response Cold drip
 
 **Definition:** Lead replies to an SMS or email sent from a Cold drip workflow in this account.
 
@@ -110,7 +110,7 @@ Not answering calls, not replying to texts, and not opening emails does NOT cons
 3. Create call task assigned to Lead Manager: "Call {{first_name}} — re-engaged from Cold drip"
 4. Send internal notification with contact link
 5. **Resolution:**
-   - Lead Manager connects → move to Transferred → WF-HANDOFF → Account 2
+   - Lead Manager connects → move to Transferred → WF-HANDOFF → New Leads
    - Not actionable → remove `Paused` tag → drip resumes
    - No action after 7 days → auto-remove `Paused` tag → drip resumes
 
@@ -120,10 +120,10 @@ Not answering calls, not replying to texts, and not opening emails does NOT cons
 
 **Protocol:**
 
-1. n8n sends contact to Account 2 as a new lead (always goes to Account 2)
-2. n8n fires cleanup webhook to Account 1: stop all drips, move to terminal stage
-3. Account 2's WF-01 fires: assigns to AM, creates task
-4. Lead is worked from scratch in Account 2
+1. n8n sends contact to New Leads as a new lead (always goes to New Leads)
+2. n8n fires cleanup webhook to Warm Response: stop all drips, move to terminal stage
+3. New Leads' WF-01 fires: assigns to AM, creates task
+4. Lead is worked from scratch in New Leads
 
 ---
 
@@ -141,7 +141,7 @@ Not answering calls, not replying to texts, and not opening emails does NOT cons
 
 If a lead becomes hostile, threatening, or legally threatening:
 
-1. Immediately move to Dispo: DNC (+ DNC sync to Account 2)
+1. Immediately move to Dispo: DNC (+ DNC sync to New Leads)
 2. Flag for manager review
 3. Document the interaction with full notes in GHL contact record
 4. Do not re-engage under any circumstances
@@ -155,7 +155,7 @@ If a lead becomes hostile, threatening, or legally threatening:
 | Contact hours                        | 9am–7pm local time only                 |
 | DNC opt-out response time            | Immediate — within the same interaction |
 | DNC re-contact                       | Never                                   |
-| DNC sync to Account 2               | Always — via n8n webhook                |
+| DNC sync to New Leads               | Always — via n8n webhook                |
 | No response = opt-out?               | No — keep following up per cadence      |
 | Who can transfer a lead?             | Lead Manager only — no automation       |
 | SMS opt-out keywords handled by GHL? | Yes — verify configured                 |

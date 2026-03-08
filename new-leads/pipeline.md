@@ -1,9 +1,9 @@
-# Bana Land — New Leads Account (Account 2): Pipeline Stage Definitions
+# Bana Land — New Leads Account: Pipeline Stage Definitions
 
-This is the pipeline reference for **Account 2 (New Leads)**. This account handles all leads
+This is the pipeline reference for **New Leads**. This account handles all leads
 from New Leads through close, disqualification, or long-term drip.
 
-For the Warm Response account (Account 1), see [../warm-response/pipeline.md](../warm-response/pipeline.md).
+For the Warm Response account, see [../warm-response/pipeline.md](../warm-response/pipeline.md).
 
 ---
 
@@ -38,7 +38,7 @@ They have not yet been spoken to and qualified. Every lead starts here.
 | Field          | Detail                                                                                              |
 | -------------- | --------------------------------------------------------------------------------------------------- |
 | **Definition** | Lead assigned to acquisition manager. Holding stage — no outreach automations fire here.            |
-| **Entry**      | Transferred from Account 1 (Warm Response) OR direct entry from cold call / direct mail / VAPI callback OR re-submission. |
+| **Entry**      | Transferred from Warm Response OR direct entry from cold call / direct mail / VAPI callback OR re-submission. |
 | **Exit**       | AM reviews lead, makes one manual contact attempt, then manually moves to Day 1-2 → WF-02 kicks off |
 | **Owner**      | Acquisition manager (assigned on entry via WF-01)                                                   |
 | **Actions**    | WF-01 assigns to AM and creates a review task. AM manually calls. AM manually pushes to Day 1-2.    |
@@ -145,7 +145,7 @@ Disqualified stages fall into two groups:
 | **Definition** | Lead has explicitly requested to not be contacted.                               |
 | **Entry**      | Lead says "stop calling," "remove me," "don't contact me," or similar            |
 | **Follow-Up**  | **Zero contact.** Immediately stop all workflows. Tag DNC. Log date.             |
-| **DNC Sync**   | WF-10 fires DNC sync webhook → n8n → Account 1 marks DNC if contact exists there. |
+| **DNC Sync**   | WF-10 fires DNC sync webhook → n8n → Warm Response marks DNC if contact exists there. |
 | **Compliance** | TCPA — failure to honor opt-out is a legal liability. Treat as highest priority. |
 
 ---
@@ -271,7 +271,7 @@ These leads have been spoken to and are actively progressing through the deal cy
 ## Stage Transition Quick Reference
 
 ```
-[ACCOUNT 1 TRANSFER / COLD CALL / DIRECT MAIL / VAPI / RE-SUBMISSION]
+[WARM RESPONSE TRANSFER / COLD CALL / DIRECT MAIL / VAPI / RE-SUBMISSION]
   └─► NEW LEADS (Acquisition Manager)
         └─► Day 1-2 (2x daily)
               └─► Qualifies ──────────────────────────────────────► Due Diligence

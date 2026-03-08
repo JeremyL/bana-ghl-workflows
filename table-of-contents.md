@@ -30,7 +30,7 @@ Owned by Acquisition Manager.
 | [pipeline.md](new-leads/pipeline.md)   | Stage definitions: New Leads → Cold, all Dispo stages, Qualified stages, Nurture |
 | [sequences.md](new-leads/sequences.md) | Cadence map: New Leads + Cold drip + Nurture + Qualified sequences               |
 | [messaging.md](new-leads/messaging.md) | Message templates: NL-* + COLD-* + COLDQ-* + NUR-* + NURQ-* + NEPQ question bank |
-| [rules.md](new-leads/rules.md)         | Contact rules, compliance, DNC handling + DNC sync to Account 1                  |
+| [rules.md](new-leads/rules.md)         | Contact rules, compliance, DNC handling + DNC sync to Warm Response                  |
 | [ghl-setup.md](new-leads/ghl-setup.md) | GHL build guide: 11 workflows (WF-01 through WF-11)                              |
 
 
@@ -40,7 +40,7 @@ Owned by Acquisition Manager.
 ## Account: Warm Response (`warm-response/`)
 
 Handles cold email and cold SMS responders from initial response through either successful
-transfer to Account 2 or long-term Cold drip. Owned by Lead Manager.
+transfer to New Leads or long-term Cold drip. Owned by Lead Manager.
 
 
 | File                                       | Purpose                                                                               |
@@ -48,7 +48,7 @@ transfer to Account 2 or long-term Cold drip. Owned by Lead Manager.
 | [pipeline.md](warm-response/pipeline.md)   | Stage definitions: Warm Response, Cold, Transferred, DNC                              |
 | [sequences.md](warm-response/sequences.md) | Cadence map: Warm Response sequence + Cold drip (monthly → quarterly)                 |
 | [messaging.md](warm-response/messaging.md) | Message templates: WR-* + COLD-* + COLDQ-*                                            |
-| [rules.md](warm-response/rules.md)         | Contact rules, compliance, DNC handling + DNC sync to Account 2                       |
+| [rules.md](warm-response/rules.md)         | Contact rules, compliance, DNC handling + DNC sync to New Leads                       |
 | [ghl-setup.md](warm-response/ghl-setup.md) | GHL build guide: 7 workflows (WF-00A, WF-00B, WF-05, WF-06, WF-10, WF-HANDOFF, WF-11) |
 
 

@@ -1,11 +1,11 @@
-# Bana Land — New Leads Account (Account 2): Follow-Up Sequences
+# Bana Land — New Leads Account: Follow-Up Sequences
 
-This is the cadence document for **Account 2 (New Leads)**. It defines exactly when to touch a lead,
+This is the cadence document for **New Leads**. It defines exactly when to touch a lead,
 with which channel, and whether that touch is human-driven or automated.
 
 All rules (time windows, DNC handling, etc.) are governed by [rules.md](rules.md).
 All message content lives in [messaging.md](messaging.md).
-For the Warm Response account (Account 1), see [../warm-response/sequences.md](../warm-response/sequences.md).
+For the Warm Response account, see [../warm-response/sequences.md](../warm-response/sequences.md).
 
 ---
 
@@ -237,7 +237,7 @@ When hitting a lead on the same day with multiple channels (Day 1-2 phase), use 
 | --------------------------------------- | ------------------------------------------------------------------------------ |
 | Lead re-engages (replies to drip)       | WF-11: Stop drip → tag `Re-Engaged` → AM review task → 7-day window. AM acts or drip auto-resumes. |
 | Lead re-submitted (new external source) | WF-01: Stop all drips → tag `Re-Submitted` → move to New Leads → full restart. |
-| Lead says stop / opt-out                | Kill all workflows → move to Dispo: DNC immediately → DNC sync to Account 1   |
+| Lead says stop / opt-out                | Kill all workflows → move to Dispo: DNC immediately → DNC sync to Warm Response   |
 | Lead moves to qualified stage           | Stop uncontacted sequence → start Sequence — Qualified Leads                   |
 | Lead moves to Nurture                   | Stop active sequence → start Sequence — Nurture                                |
 | Lead moves to Dispo — Terminal          | Stop all sequences permanently                                                 |
@@ -266,4 +266,4 @@ A contact already in GHL is reached by a separate marketing campaign outside GHL
 - **WF-01 fires:** Cleans up all active drips, assigns to AM, creates task.
 - **Lead is worked from scratch:** Full Day 1-2 → Day 3-14 → Day 15-30 → Cold sequence, identical to a brand-new lead.
 - **Original Source field preserved:** First-touch attribution never overwritten. Tags stack all sources.
-- **If contact also exists in Account 1:** n8n fires cleanup webhook to Account 1 (stop drip, move to Transferred).
+- **If contact also exists in Warm Response:** n8n fires cleanup webhook to Warm Response (stop drip, move to Transferred).

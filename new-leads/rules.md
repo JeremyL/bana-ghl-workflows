@@ -1,9 +1,9 @@
-# Bana Land — New Leads Account (Account 2): Contact Rules & Compliance
+# Bana Land — New Leads Account: Contact Rules & Compliance
 
-This file defines the operational rules that govern all outreach in **Account 2 (New Leads)**.
+This file defines the operational rules that govern all outreach in **New Leads**.
 Every GHL workflow, automation, and team member action must respect these rules.
 
-For the Warm Response account (Account 1) rules, see [../warm-response/rules.md](../warm-response/rules.md).
+For the Warm Response account rules, see [../warm-response/rules.md](../warm-response/rules.md).
 
 ---
 
@@ -135,7 +135,7 @@ There are two distinct re-entry events. Each has its own protocol.
 4. WF-01 fires: cleans up all active drips, assigns to AM, creates task
 5. Lead is worked from scratch — full Day 1-2 sequence, identical to a brand-new lead
 6. Original Source field is never overwritten — first-touch attribution preserved
-7. **If contact also exists in Account 1:** n8n fires cleanup webhook to Account 1 (stop drip, move to Transferred)
+7. **If contact also exists in Warm Response:** n8n fires cleanup webhook to Warm Response (stop drip, move to Transferred)
 
 **Key distinction:** Re-engagement = responding to *our* outreach. Re-submission = entering from a *new external source*. The first pauses and reviews; the second fully resets.
 
@@ -172,7 +172,7 @@ When a lead enters any of these stages, WF-09 automatically adds tag `Drip: Cold
 
 If a lead becomes hostile, threatening, or legally threatening:
 
-1. Immediately move to Dispo: DNC (+ DNC sync to Account 1)
+1. Immediately move to Dispo: DNC (+ DNC sync to Warm Response)
 2. Flag for manager review
 3. Document the interaction with full notes in GHL contact record
 4. Do not re-engage under any circumstances
@@ -186,7 +186,7 @@ If a lead becomes hostile, threatening, or legally threatening:
 | Contact hours                        | 9am–7pm local time only                 |
 | DNC opt-out response time            | Immediate — within the same interaction |
 | DNC re-contact                       | Never                                   |
-| DNC sync to Account 1               | Always — via n8n webhook                |
+| DNC sync to Warm Response               | Always — via n8n webhook                |
 | No response = opt-out?               | No — keep following up per cadence      |
 | Who can qualify a lead?              | Human only — no automation              |
 | SMS opt-out keywords handled by GHL? | Yes — verify configured                 |

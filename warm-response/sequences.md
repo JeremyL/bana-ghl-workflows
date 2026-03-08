@@ -1,18 +1,18 @@
 # Bana Land — Warm Response Account: Follow-Up Sequences
 
-This is the cadence document for **Account 1 (Warm Response)**. It defines exactly when to touch a lead,
+This is the cadence document for **Warm Response**. It defines exactly when to touch a lead,
 with which channel, and whether that touch is human-driven or automated.
 
 All rules (time windows, DNC handling, etc.) are governed by [rules.md](rules.md).
 All message content lives in [messaging.md](messaging.md).
-For the New Leads account (Account 2), see [../new-leads/sequences.md](../new-leads/sequences.md).
+For the New Leads account, see [../new-leads/sequences.md](../new-leads/sequences.md).
 
 ---
 
 ## Sequence — Warm Response (Cold Email & Cold SMS Responders)
 
 **Owner:** Lead Manager (not acquisition manager)
-**Goal:** Varies by track. SMS responders: get them on the phone (number already known). Email responders: obtain their phone number — once received, Lead Manager transfers contact to Account 2 for the Acquisition Manager to call.
+**Goal:** Varies by track. SMS responders: get them on the phone (number already known). Email responders: obtain their phone number — once received, Lead Manager transfers contact to New Leads for the Acquisition Manager to call.
 **Entry:** Prospect replied "yes" to cold email or cold SMS outreach (via n8n webhook into this account).
 **Duration:** Up to 14 days. If no phone connection by Day 14 → move to **Cold** stage (within this account).
 
@@ -25,7 +25,7 @@ Two tracks run in parallel based on the source channel, identified by tag.
 The prospect replied "yes" to a cold email. We have their email address but may not have a verified phone number.
 
 **Entry tag:** `Warm: Email` (set by n8n on contact creation)
-**Goal:** Collect their phone number via email. Once received, transfer contact to Account 2 — Acquisition Manager makes the call.
+**Goal:** Collect their phone number via email. Once received, transfer contact to New Leads — Acquisition Manager makes the call.
 
 | Touch # | Timing            | Channel    | Type   | Message Ref                                          |
 | ------- | ----------------- | ---------- | ------ | ---------------------------------------------------- |
@@ -34,12 +34,12 @@ The prospect replied "yes" to a cold email. We have their email address but may 
 | 3       | Day 4 (no # yet)  | Email      | Auto   | WR-EMAIL-03 (check-in)                               |
 | 4       | Day 7 (no # yet)  | Email      | Auto   | WR-EMAIL-04 (mid-window)                             |
 | 5       | Day 10 (no # yet) | Email      | Auto   | WR-EMAIL-05 (soft close)                             |
-| —       | When # received   | Stage Move | Manual | → Move to Transferred → WF-HANDOFF → Account 2      |
+| —       | When # received   | Stage Move | Manual | → Move to Transferred → WF-HANDOFF → New Leads      |
 
 **Logic:**
 
-- The moment a phone number is received (via email reply), Lead Manager enters the phone number, moves contact to Transferred stage. WF-HANDOFF fires webhook to n8n → Account 2 creates contact in New Leads → WF-01 fires automatically.
-- The Lead Manager has no call responsibility for email responders — Acquisition Manager owns the contact from Account 2 onward.
+- The moment a phone number is received (via email reply), Lead Manager enters the phone number, moves contact to Transferred stage. WF-HANDOFF fires webhook to n8n → New Leads creates contact in New Leads → WF-01 fires automatically.
+- The Lead Manager has no call responsibility for email responders — Acquisition Manager owns the contact from New Leads onward.
 - If no phone number is received by Day 14, move to Cold stage (same exit as no-connection limit reached).
 
 ---
@@ -73,19 +73,19 @@ The prospect replied "yes" to a cold SMS. We have their mobile number.
 
 | Event                                             | Track      | Action                                                                                      |
 | ------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------- |
-| Phone number received via email reply             | Email only | Move to Transferred → WF-HANDOFF → Account 2 New Leads                                     |
-| First phone call completes                        | SMS only   | Move to Transferred → WF-HANDOFF → Account 2 New Leads                                     |
-| First call — disqualifying info found             | SMS only   | Lead Manager moves to Dispo: DNC (if opt-out) or notes it and transfers to Account 2 anyway |
+| Phone number received via email reply             | Email only | Move to Transferred → WF-HANDOFF → New Leads                                     |
+| First phone call completes                        | SMS only   | Move to Transferred → WF-HANDOFF → New Leads                                     |
+| First call — disqualifying info found             | SMS only   | Lead Manager moves to Dispo: DNC (if opt-out) or notes it and transfers to New Leads anyway |
 | No # received / no phone connection after 14 days | Both       | Move to **Cold** stage → add tag `Drip: Cold Monthly` → enroll in Cold cadence              |
-| Any opt-out request (email or SMS)                | Both       | Move to Dispo: DNC immediately → DNC sync to Account 2                                      |
+| Any opt-out request (email or SMS)                | Both       | Move to Dispo: DNC immediately → DNC sync to New Leads                                      |
 
 ---
 
-## Sequence — Cold (Long-Term Drip — Account 1)
+## Sequence — Cold (Long-Term Drip — Warm Response)
 
 **Applies to:** Warm Response leads that timed out after 14 days with no phone connection
 **Owner:** GHL automation only — no manual call tasks unless lead re-engages
-**Templates:** Same COLD-* templates as Account 2 (can be customized later if warm-specific messaging is desired)
+**Templates:** Same COLD-* templates as New Leads (can be customized later if warm-specific messaging is desired)
 
 **Two tracks run in parallel based on tag:**
 
@@ -138,19 +138,19 @@ Continue rotating SMS/Email every 90 days indefinitely.
 | Event                                   | Action                                                                                   |
 | --------------------------------------- | ---------------------------------------------------------------------------------------- |
 | Lead re-engages (replies to drip)       | WF-11: pause drip → Lead Manager reviews, tries to connect → transfer or resume          |
-| Lead re-submitted (new external source) | n8n cleanup webhook: stop drip, move to terminal stage. n8n sends contact to Account 2.  |
-| Lead says stop / opt-out                | Kill all workflows → move to Dispo: DNC → DNC sync to Account 2                         |
+| Lead re-submitted (new external source) | n8n cleanup webhook: stop drip, move to terminal stage. n8n sends contact to New Leads.  |
+| Lead says stop / opt-out                | Kill all workflows → move to Dispo: DNC → DNC sync to New Leads                         |
 
 ---
 
 ## Re-Entry Paths
 
-### Re-Engagement (responds to our Account 1 drip)
+### Re-Engagement (responds to our Warm Response drip)
 
 A lead in Cold responds to an automated message we sent from this account.
 
 - **What happens:** WF-11 fires. `Paused` tag added — active workflows hold in place at their next send step (position preserved). Call task created for Lead Manager.
-- **Lead Manager tries to connect.** If successful → move to Transferred → WF-HANDOFF → Account 2 New Leads.
+- **Lead Manager tries to connect.** If successful → move to Transferred → WF-HANDOFF → New Leads.
 - **If not actionable:** Lead Manager removes `Paused` tag → drip resumes from exactly where it stopped.
 - **If no action after 7 days:** Auto-remove `Paused` tag → drip resumes automatically.
 
@@ -158,8 +158,8 @@ A lead in Cold responds to an automated message we sent from this account.
 
 A contact already in this account is reached by a separate marketing campaign outside GHL and responds.
 
-- **What happens:** n8n sends contact to Account 2 as a new lead (always). n8n also fires cleanup webhook to Account 1: stop all drips, move contact to a terminal stage.
-- **Account 2's WF-01 fires:** Assigns to AM, creates task. Lead is worked from scratch.
+- **What happens:** n8n sends contact to New Leads as a new lead (always). n8n also fires cleanup webhook to Warm Response: stop all drips, move contact to a terminal stage.
+- **New Leads' WF-01 fires:** Assigns to AM, creates task. Lead is worked from scratch.
 
 ---
 

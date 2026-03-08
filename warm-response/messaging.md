@@ -12,7 +12,7 @@ Use `{{first_name}}` for GHL merge tag (first name of contact).
 Use `{{agent_name}}` for the team member's name.
 Replace `[CALLBACK NUMBER]` with the agent's dedicated phone line.
 
-For the New Leads account (Account 2) templates, see [../new-leads/messaging.md](../new-leads/messaging.md).
+For the New Leads account templates, see [../new-leads/messaging.md](../new-leads/messaging.md).
 
 ---
 
@@ -28,28 +28,28 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 
 ---
 
-## Quick Reference — All Templates (Account 1)
+## Quick Reference — All Templates
 
-| ID             | Channel | Stage                | Timing            | Workflow       | Auto/Manual |
-| -------------- | ------- | -------------------- | ----------------- | -------------- | ----------- |
-| WR-EMAIL-01    | Email   | Warm Response        | Immediate         | WF-00A Step 3  | Auto        |
-| WR-EMAIL-02    | Email   | Warm Response        | Day 2             | WF-00A Step 5  | Auto        |
-| WR-EMAIL-03    | Email   | Warm Response        | Day 4             | WF-00A Step 7  | Auto        |
-| WR-EMAIL-04    | Email   | Warm Response        | Day 7             | WF-00A Step 9  | Auto        |
-| WR-EMAIL-05    | Email   | Warm Response        | Day 10            | WF-00A Step 11 | Auto        |
-| WR-SMS-01      | SMS     | Warm Response        | Day 3             | WF-00B Step 7  | Auto        |
-| WR-SMS-02      | SMS     | Warm Response        | Day 5             | WF-00B Step 10 | Auto        |
-| WR-SMS-03      | SMS     | Warm Response        | Day 8             | WF-00B Step 14 | Auto        |
-| WR-SMS-04      | SMS     | Warm Response        | Day 14            | WF-00B Step 16 | Auto        |
-| WR-COLD-SMS-01 | SMS     | Warm Response -> Cold | Day 14 (one-time) | WF-00A Step 13 | Auto        |
-| COLD-SMS-01    | SMS     | Cold Monthly         | Month 1           | WF-05 Step 2   | Auto        |
-| COLD-SMS-02    | SMS     | Cold Monthly         | Month 4           | WF-05 Step 8   | Auto        |
-| COLD-SMS-03    | SMS     | Cold Monthly         | Month 6           | WF-05 Step 12  | Auto        |
-| COLD-EMAIL-01  | Email   | Cold Monthly         | Month 2           | WF-05 Step 4   | Auto        |
-| COLD-EMAIL-02  | Email   | Cold Monthly         | Month 5           | WF-05 Step 10  | Auto        |
-| COLD-SMS-04    | SMS     | Cold Monthly         | Month 3           | WF-05 Step 6   | Auto        |
-| COLDQ-SMS-01   | SMS     | Cold Quarterly       | Every 90 days     | WF-06 Step 2   | Auto        |
-| COLDQ-EMAIL-01 | Email   | Cold Quarterly       | Every 90 days     | WF-06 Step 4   | Auto        |
+| ID             | Channel | Stage                 | Timing            | Workflow | Auto/Manual |
+| -------------- | ------- | --------------------- | ----------------- | -------- | ----------- |
+| WR-EMAIL-01    | Email   | Warm Response         | Immediate         | WF-00A   | Auto        |
+| WR-EMAIL-02    | Email   | Warm Response         | Day 2             | WF-00A   | Auto        |
+| WR-SMS-01      | SMS     | Warm Response         | Day 3             | WF-00B   | Auto        |
+| WR-EMAIL-03    | Email   | Warm Response         | Day 4             | WF-00A   | Auto        |
+| WR-SMS-02      | SMS     | Warm Response         | Day 5             | WF-00B   | Auto        |
+| WR-EMAIL-04    | Email   | Warm Response         | Day 7             | WF-00A   | Auto        |
+| WR-SMS-03      | SMS     | Warm Response         | Day 8             | WF-00B   | Auto        |
+| WR-EMAIL-05    | Email   | Warm Response         | Day 10            | WF-00A   | Auto        |
+| WR-SMS-04      | SMS     | Warm Response         | Day 14            | WF-00B   | Auto        |
+| WR-COLD-SMS-01 | SMS     | Warm Response → Cold  | Day 14 (one-time) | WF-00A   | Auto        |
+| COLD-SMS-01    | SMS     | Cold Monthly          | Month 1           | WF-05    | Auto        |
+| COLD-EMAIL-01  | Email   | Cold Monthly          | Month 2           | WF-05    | Auto        |
+| COLD-SMS-04    | SMS     | Cold Monthly          | Month 3           | WF-05    | Auto        |
+| COLD-SMS-02    | SMS     | Cold Monthly          | Month 4           | WF-05    | Auto        |
+| COLD-EMAIL-02  | Email   | Cold Monthly          | Month 5           | WF-05    | Auto        |
+| COLD-SMS-03    | SMS     | Cold Monthly          | Month 6           | WF-05    | Auto        |
+| COLDQ-SMS-01   | SMS     | Cold Quarterly        | Every 90 days     | WF-06    | Auto        |
+| COLDQ-EMAIL-01 | Email   | Cold Quarterly        | Every 90 days     | WF-06    | Auto        |
 
 ---
 
@@ -161,7 +161,7 @@ When you're ready, just reply with a good number or call me directly: [CALLBACK 
 **Stage:** Cold | **Cadence:** Monthly (every 30 days) | **Owner:** GHL auto only
 **Applies to:** Warm Response leads that timed out after 14 days
 **Entry tag:** `Drip: Cold Monthly`
-**Note:** Same templates as Account 2's Cold drip.
+**Note:** Same templates as New Leads' Cold drip.
 
 ---
 

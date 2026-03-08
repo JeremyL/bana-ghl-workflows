@@ -1,10 +1,10 @@
-# Bana Land — Warm Response Account (Account 1): GHL Setup Guide
+# Bana Land — Warm Response Account: GHL Setup Guide
 
 This guide walks through building the Warm Response GHL sub-account from scratch.
 Follow the steps in order — each section depends on the previous one being complete.
 
 This account handles cold email and cold SMS responders through either successful
-transfer to Account 2 or long-term Cold drip.
+transfer to New Leads or long-term Cold drip.
 
 Reference files:
 
@@ -12,7 +12,7 @@ Reference files:
 - [sequences.md](sequences.md) — cadence map
 - [messaging.md](messaging.md) — message templates
 - [rules.md](rules.md) — compliance rules
-- For Account 2: [../new-leads/ghl-setup.md](../new-leads/ghl-setup.md)
+- For New Leads: [../new-leads/ghl-setup.md](../new-leads/ghl-setup.md)
 
 ---
 
@@ -47,7 +47,7 @@ Reference files:
 **Flow:**
 
 1. Prospect replies "yes" to cold email or cold SMS (managed outside GHL)
-2. n8n detects the reply and pushes the contact into Account 1 via API/webhook
+2. n8n detects the reply and pushes the contact into Warm Response via API/webhook
 3. n8n sets the source tag and places the contact in the Warm Response stage
 4. GHL triggers WF-00A (email track) or WF-00B (SMS track) based on the tag
 
@@ -151,7 +151,7 @@ Go to **Settings > Tags** and create these tags:
 
 | Tag Name             | Use                                                                                                                     |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| DNC                  | Do Not Contact — blocks all outreach. Triggers DNC sync to Account 2.                                                  |
+| DNC                  | Do Not Contact — blocks all outreach. Triggers DNC sync to New Leads.                                                  |
 | Hot                  | Team-assigned tag for priority leads (manual)                                                                            |
 | Re-Engaged           | Lead responded to our Cold drip. Triggers WF-11.                                                                        |
 | Paused               | Holds all automated workflows at their next send gate. Added by WF-11 on inbound response.                             |
@@ -185,7 +185,7 @@ Add the following stages **in this exact order:**
 
 1. **Warm Response** — active 14-day window (email + SMS tracks)
 2. **Cold** — warm leads that timed out, long-term drip
-3. **Transferred** — terminal success: lead handed off to Account 2
+3. **Transferred** — terminal success: lead handed off to New Leads
 4. **Dispo: DNC** — terminal: zero contact
 
 ---
@@ -203,7 +203,7 @@ Build each workflow in **Automation > Workflows**.
 | **WF-05**    | Cold Monthly Drip                       |
 | **WF-06**    | Cold Quarterly Drip                     |
 | **WF-10**    | DNC Handler (+ DNC Sync)               |
-| **WF-HANDOFF** | Transfer to Account 2                 |
+| **WF-HANDOFF** | Transfer to New Leads                 |
 | **WF-11**    | Inbound Response Handler                   |
 
 ---
@@ -233,7 +233,7 @@ Build each workflow in **Automation > Workflows**.
     - Send Email: WR-EMAIL-05
 12. **If phone number received at any point (Lead Manager manually moves contact):**
     - Lead Manager enters phone number into contact record and moves to pipeline stage: Transferred
-    - WF-HANDOFF fires: sends webhook to n8n → Account 2 creates contact in New Leads → WF-01 fires
+    - WF-HANDOFF fires: sends webhook to n8n → New Leads creates contact in New Leads → WF-01 fires
     - Lead Manager has no further responsibility for this contact
 13. If Day 14 reached with no connection:
     - **One-time SMS blast to all skip-traced phone numbers on contact (one SMS per number, send only if field is not empty):**
@@ -251,7 +251,7 @@ Build each workflow in **Automation > Workflows**.
 **If any skip-traced number responds to the one-time SMS:**
 
 - WF-11 fires (Inbound Response Handler) — drip paused, review task created
-- If connection is made, contact moves to Transferred → WF-HANDOFF → Account 2
+- If connection is made, contact moves to Transferred → WF-HANDOFF → New Leads
 - `Cold: Email Only` tag can be removed if phone number is now confirmed
 
 **Exit conditions:** Stage changes (phone number received → moved to Transferred, or Dispo: DNC)
@@ -361,7 +361,7 @@ Build each workflow in **Automation > Workflows**.
 
 ---
 
-### WF-HANDOFF | Transfer to Account 2
+### WF-HANDOFF | Transfer to New Leads
 
 **Trigger:** Contact moved to pipeline stage "Transferred"
 **Actions:**
@@ -373,16 +373,16 @@ Build each workflow in **Automation > Workflows**.
    - All tags (source tags, Warm: Email/SMS, etc.)
    - All custom field values (Original Source, Latest Source, Latest Source Date, property data)
    - Contact notes
-2. n8n receives webhook → creates contact in Account 2 → places in New Leads stage
-3. Account 2's WF-01 fires automatically (assigns to AM, creates review task)
-4. Send internal notification to Lead Manager: "{{first_name}} transferred to Account 2 (New Leads). Acquisition Manager will take over."
+2. n8n receives webhook → creates contact in New Leads → places in New Leads stage
+3. New Leads' WF-01 fires automatically (assigns to AM, creates review task)
+4. Send internal notification to Lead Manager: "{{first_name}} transferred to New Leads. Acquisition Manager will take over."
 5. End — no further actions in this account
 
 ---
 
 ### WF-11 | Inbound Response Handler
 
-**Decision: Option A — Lead Manager reviews.** Lead Manager tries to connect. If successful → transfer to Account 2. If not actionable → drip resumes.
+**Decision: Option A — Lead Manager reviews.** Lead Manager tries to connect. If successful → transfer to New Leads. If not actionable → drip resumes.
 
 **Trigger:** Inbound SMS received OR Email reply received
 **Enrollment condition:** Lead NOT tagged DNC, Lead is in Cold stage
@@ -394,10 +394,10 @@ Build each workflow in **Automation > Workflows**.
 2. Add tag: `Paused` — all active workflows immediately hold at their next send gate
 3. Add tag: `Re-Engaged`
 4. Create Task: "CALL — {{first_name}} re-engaged (replied to Cold drip). Call them and try to connect." — Assigned to: Lead Manager — Due: Today — Priority: High
-5. Send internal notification to Lead Manager: "{{first_name}} replied to Account 1 Cold drip. Automation paused. Call them — if you connect, move to Transferred. If not actionable, remove the Paused tag. [Contact Link]"
+5. Send internal notification to Lead Manager: "{{first_name}} replied to Warm Response Cold drip. Automation paused. Call them — if you connect, move to Transferred. If not actionable, remove the Paused tag. [Contact Link]"
 6. Wait 7 days (auto-resume safety net)
 7. **Resolution — one of three outcomes:**
-   - **Lead Manager connects → moves to Transferred:** WF-HANDOFF fires, contact goes to Account 2. Remove tags: `Paused`, `Re-Engaged`.
+   - **Lead Manager connects → moves to Transferred:** WF-HANDOFF fires, contact goes to New Leads. Remove tags: `Paused`, `Re-Engaged`.
    - **Lead Manager removes `Paused` tag (not actionable):** Drip resumes from where it stopped. Remove tag: `Re-Engaged`.
    - **No action after 7 days:** Auto-remove `Paused` tag → drip resumes. Remove tag: `Re-Engaged`. Send notification: "{{first_name}} — 7-day review window expired with no action. Drip resumed automatically."
 
@@ -406,7 +406,7 @@ Build each workflow in **Automation > Workflows**.
 ### WF-CLEANUP | Re-Submission Cleanup (Triggered by n8n)
 
 **Trigger:** Webhook received from n8n (re-submission cleanup signal)
-**Purpose:** When a contact in this account gets re-submitted from a new external campaign and enters Account 2, this workflow cleans up Account 1.
+**Purpose:** When a contact in this account gets re-submitted from a new external campaign and enters New Leads, this workflow cleans up Warm Response.
 
 **Actions:**
 
@@ -414,8 +414,8 @@ Build each workflow in **Automation > Workflows**.
 2. Remove all drip tags: `Drip: Cold Monthly`, `Drip: Cold Quarterly`
 3. Remove tags: `Paused`, `Re-Engaged` (if present)
 4. Cancel all pending tasks for this contact
-5. Move to pipeline stage: Transferred (terminal — contact now lives in Account 2)
-6. Add note: "Contact re-submitted from new external campaign. Moved to Account 2 as new lead. All Account 1 workflows stopped."
+5. Move to pipeline stage: Transferred (terminal — contact now lives in New Leads)
+6. Add note: "Contact re-submitted from new external campaign. Moved to New Leads as new lead. All Warm Response workflows stopped."
 
 ---
 
@@ -447,19 +447,19 @@ Before going live, verify:
 - Unsubscribe footer included in all marketing emails
 - Task assignment mapped to Lead Manager
 - All workflow enrollments tested with a test contact before live launch
-- WF-HANDOFF webhook tested end-to-end (Account 1 → n8n → Account 2)
+- WF-HANDOFF webhook tested end-to-end (Warm Response → n8n → New Leads)
 
 ---
 
 ## Step 9 — Go-Live Checklist
 
 - All pipeline stages created and in correct order (Warm Response, Cold, Transferred, DNC)
-- All custom fields created (matching Account 2 schema)
+- All custom fields created (matching New Leads schema)
 - All tags created
 - All 7 workflows built and tested (WF-00A, WF-00B, WF-05, WF-06, WF-10, WF-HANDOFF, WF-11)
 - WF-CLEANUP webhook endpoint configured
 - Smart lists created
 - Lead Manager trained on GHL task queue and stage movement
-- n8n routing confirmed: warm responses → Account 1
+- n8n routing confirmed: warm responses → Warm Response
 - DNC sync tested bidirectionally
-- Transfer webhook tested: Account 1 → n8n → Account 2 New Leads
+- Transfer webhook tested: Warm Response → n8n → New Leads
