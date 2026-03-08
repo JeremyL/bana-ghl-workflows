@@ -1,0 +1,191 @@
+# Prospect Data — Rules
+
+Operating rules for the Prospect Data instance. Covers data uploads,
+campaign management, status transitions, and push-to-account rules.
+
+---
+
+## 1. Data Upload Rules
+
+### Property Uploads
+
+- Upload via CSV. One row per property.
+- `**reference` (Reference ID) is the master unique key.** If a `reference` already exists, update
+the existing record rather than creating a duplicate. APN is a data point, not the dedup key.
+- Set Status to `Active` on initial upload unless the record is known DNC or Removed.
+- Current CSVs include property data + skip trace data in one file. When both are
+present, set Skip Trace Date = upload date.
+- Leave Owner fields blank if property has not been skip traced yet.
+Skip Trace Date = blank.
+
+### Data Cleaning (on upload or via n8n pre-processing)
+
+- `0` in phone fields → store as blank (0 = no data from skip trace provider)
+- `0` in Age field → store as blank (0 = unknown)
+- `#N/A` in Offer Price → store as blank (no offer calculated)
+- Phone Type values stored as raw text from skip trace provider (Mobile, Residential, Landline, VoIP, etc.) — no conversion needed
+- Deceased: `Y` / `N` / blank → store as-is
+
+### Skip Trace Updates
+
+- Match to existing Property records by `reference`.
+- Populate Owner 1/2/3 fields. Fill owners in order — Owner 1 first, then 2, then 3.
+- Set Skip Trace Date = today.
+- If a phone or email slot is empty from the skip trace provider, leave it blank.
+Do not fill in "N/A" or placeholder values.
+- Phone Type fields are raw text from the skip trace provider. Store as-is.
+These inform which channels are valid for outreach when pushing to New Leads & Warm Response.
+
+### Deduplication
+
+- Before uploading, deduplicate by `reference` within the upload file.
+- On upload, check for existing `reference` in GHL. Update existing records; do not create duplicates.
+- If the same property appears in multiple upload files over time, the latest skip trace
+data overwrites the old data on that record.
+
+---
+
+## 2. Campaign Rules
+
+### Creating a Campaign
+
+1. Create a record in the Campaigns custom object with all metadata filled in
+  (name, type, status, dates).
+2. Campaign Name must be unique. Use a consistent naming convention:
+  `[Type Abbreviation]-[State]-[County]-[Date]`
+   Examples: `CE-TX-Travis-2026-03`, `DM-FL-Marion-2026-Q1`, `CC-AZ-Mohave-2026-03`
+  - CE = Cold Email, CS = Cold SMS, CC = Cold Call, DM = Direct Mail
+3. Set the **Campaign Tag** field to the exact tag that will be applied to Properties.
+  Format: `Campaign: [Campaign Name]`
+   Example: Campaign Name = `CE-TX-Travis-2026-03` → Campaign Tag = `Campaign: CE-TX-Travis-2026-03`
+   This is the single source of truth for which tag links Properties to this Campaign.
+4. Set Campaign Status to `Planning` until properties are assigned and ready to send.
+
+### Assigning Properties to a Campaign
+
+Properties can be assigned to a campaign in two ways:
+
+**Method 1: Upload with tags (most common)**
+
+- CSV is prepared externally with properties already selected for a specific campaign.
+- On upload, include the campaign tag `Campaign: [Campaign Name]` on each record.
+- Update Total Records count on the Campaign record after upload.
+
+**Method 2: Tag from within GHL**
+
+- Filter existing Properties by target criteria (state, county, acreage range,
+Status = Active, Skip Trace Date is not blank).
+- Apply the campaign tag to all matching properties: `Campaign: [Campaign Name]`
+- Update Total Records count on the Campaign record.
+
+In either case, set Campaign Status to `Active` when the campaign launches.
+
+### Campaign Completion
+
+- Set Campaign Status to `Completed` and fill in End Date.
+- Do not remove campaign tags from properties — they preserve history.
+
+---
+
+## 3. Status Management
+
+### Status Transitions
+
+```
+Active ──► Pipeline       (property pushed to New Leads or Warm Response)
+Active ──► DNC            (owner requests DNC)
+Active ──► Removed        (bad data, duplicate, sold, purchased, disqualified)
+
+Pipeline ──► Active       (deal fell through, removed from New Leads/Warm Response)
+Pipeline ──► DNC          (owner requests DNC while in pipeline)
+Pipeline ──► Removed      (bad data discovered, property sold/purchased, disqualified)
+
+DNC ──► Removed           (property sold or otherwise permanently off the table)
+Removed ──► Active        (if data was corrected or error was reversed)
+```
+
+### DNC Handling
+
+- When a DNC is triggered in New Leads or Warm Response, the DNC sync should also update
+the Property record in Prospect Data:
+  - Set DNC = checked
+  - Set DNC Date = today
+  - Set Status = DNC
+- DNC applies to the entire property record, not individual owners. If any owner on the
+property is DNC, the property is DNC.
+- DNC properties must not be included in any future campaigns.
+- When filtering properties for a new campaign, always exclude Status = DNC.
+
+### Account Push Tracking
+
+- When a property is pushed to an account, check the corresponding value in the
+Account Push multi-select (New Leads and/or Warm Response) and set Account Push Date.
+- A property can be in both accounts simultaneously (e.g., cold email running in Warm Response
+while a cold call follow-up runs in New Leads for a different owner).
+- When a property is removed from an account's pipeline (deal dead, cold drip exhausted),
+uncheck the corresponding value and set Status back to Active if no other account holds it.
+
+---
+
+## 4. Push-to-Account Rules
+
+### When to Push
+
+Properties are pushed to New Leads or Warm Response when they are assigned to a campaign and that
+campaign launches. The Campaign Type determines which account receives the data:
+
+
+| Campaign Type | Destination   |
+| ------------- | ------------- |
+| Cold Email    | Warm Response |
+| Cold SMS      | Warm Response |
+| Cold Call     | New Leads     |
+| Direct Mail   | New Leads     |
+
+
+### What Gets Pushed
+
+- Automation reads the Property record and splits it into Contact + Opportunity per the
+field mapping in data-model.md.
+- One Contact is created per owner that has at least one valid phone number or email.
+- One Opportunity is created per property, linked to the primary owner's Contact.
+- If multiple owners exist, additional Contacts are created and linked to the same Opportunity.
+
+### Pre-Push Validation
+
+Before pushing, automation should verify:
+
+- Property Status = Active (not DNC, Pipeline, or Removed)
+- Skip Trace Date is not blank (owner data exists)
+- At least one owner has at least one phone number or email
+- Property is not already in the destination account (check Account Push multi-select)
+
+### Post-Push Updates
+
+After successful push to an account:
+
+- Set Status = Pipeline
+- Check the corresponding value in Account Push (New Leads and/or Warm Response)
+- Set Account Push Date
+
+---
+
+## 5. Tag Conventions
+
+All tags follow `Category: Value` format (title case), matching New Leads & Warm Response.
+
+### Campaign Tags
+
+- `Campaign: [Campaign Name]` — one tag per campaign, stacks over time
+
+---
+
+## 6. Data Hygiene
+
+- **Quarterly review:** Properties with Status = Active that have not been included in any
+campaign for 6+ months should be flagged for re-skip-tracing or removal.
+- **Sold property scrub:** Periodically cross-reference against public records or a sold
+property list. Mark confirmed sales as Removed.
+- **DNC audit:** DNC records should never appear in campaign filters. Run a monthly check
+to verify no DNC-tagged properties leaked into active campaign lists.
+
