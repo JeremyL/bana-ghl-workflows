@@ -50,6 +50,17 @@ For the Warm Response account rules, see [../warm-response/rules.md](../warm-res
 - **Never.** Do not re-add a DNC contact to any list or campaign.
 - If a DNC contact re-engages with us voluntarily (they call us), document it and proceed cautiously
 
+### DNC vs. Wrong Number / Wrong Email:
+
+These are two different things. Do not confuse them.
+
+**DNC** — Any time a person says "don't contact me," "remove me," "stop calling," or anything to that effect: it's a DNC. Full stop. Do not try to interpret whether they mean this property, this phone number, or this campaign. DNC the contact entirely.
+
+**Wrong number / wrong email** — The person says "you have the wrong number" or "I don't know what this is about" without requesting to stop contact, OR the number/email bounces or is confirmed bad. This is a data problem, not a DNC:
+1. Delete the bad phone number or email from the contact record
+2. Add a contact note: what was removed, why, and the date (e.g., "Phone 2 deleted — wrong number per owner, 2026-03-09")
+3. Continue outreach on any remaining valid numbers/emails
+
 ---
 
 ## 3. No Response =/= Opt-Out

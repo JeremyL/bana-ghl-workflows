@@ -49,7 +49,7 @@ transfer to New Leads or long-term Cold drip. Owned by Lead Manager.
 | [sequences.md](warm-response/sequences.md) | Cadence map: Warm Response sequence + Cold drip (monthly → quarterly)                 |
 | [messaging.md](warm-response/messaging.md) | Message templates: WR-* + COLD-* + COLDQ-*                                            |
 | [rules.md](warm-response/rules.md)         | Contact rules, compliance, DNC handling + DNC sync to New Leads                       |
-| [ghl-setup.md](warm-response/ghl-setup.md) | GHL build guide: 7 workflows (WF-00A, WF-00B, WF-05, WF-06, WF-10, WF-HANDOFF, WF-11) |
+| [ghl-setup.md](warm-response/ghl-setup.md) | GHL build guide: 8 workflows (WF-00A, WF-00B, WF-05, WF-06, WF-10, WF-HANDOFF, WF-11, WF-CLEANUP) |
 
 
 ---

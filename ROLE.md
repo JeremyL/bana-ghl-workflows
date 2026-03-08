@@ -87,8 +87,8 @@ See [warm-response/pipeline.md](warm-response/pipeline.md), [new-leads/pipeline.
 | Warm Response (Email)    | Email auto only → Lead Manager manually moves to New Leads when # received | Lead Manager + GHL auto    |
 | Warm Response (SMS)      | Manual calls (4+ attempts) + auto SMS follow-up                            | Lead Manager + GHL auto    |
 | Not Contacted (Day 1–30) | Calls + SMS + Email                                                        | Acquisition Mgr + GHL auto |
-| Cold (Day 30–180)        | SMS + Email (monthly)                                                      | GHL auto only              |
-| Cold (Day 180+)          | SMS + Email (quarterly)                                                    | GHL auto only              |
+| Cold (Day 30–180)        | SMS + Email (monthly) — Warm Response `Cold: Email Only` contacts get Email only, no SMS | GHL auto only              |
+| Cold (Day 180+)          | SMS + Email (quarterly) — Warm Response `Cold: Email Only` contacts get Email only, no SMS | GHL auto only              |
 | Qualified (Active)       | Calls                                                                      | Acquisition Mgr            |
 | Nurture                  | SMS + Email (monthly × 3mo, quarterly thereafter)                          | Full GHL auto              |
 | Dispo — Terminal         | No contact                                                                 | —                          |

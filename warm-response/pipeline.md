@@ -78,7 +78,7 @@ These contacts said "yes" — they are warmer than a cold prospect. The lead man
 | Field          | Detail                                                                                                        |
 | -------------- | ------------------------------------------------------------------------------------------------------------- |
 | **Definition** | Lead was successfully connected and transferred to New Leads (New Leads account).                             |
-| **Entry**      | Lead Manager moves contact here after successful phone connection (SMS track) or phone number receipt (Email track) |
+| **Entry**      | (1) Lead Manager moves contact here after successful phone connection (SMS track) or phone number receipt (Email track). (2) Re-submission cleanup automation — contact was in Warm Response Cold drip when a new campaign pushed them directly into New Leads; cleanup stops all Warm Response workflows and moves them here automatically. |
 | **Follow-Up**  | None in Warm Response. WF-HANDOFF fires webhook to n8n → New Leads creates contact in New Leads.                 |
 | **Terminal**   | Yes — no further action in this account.                                                                       |
 

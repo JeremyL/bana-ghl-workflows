@@ -69,7 +69,7 @@ Reference files:
 
 When any new contact enters this account, create an **Opportunity** linked to that contact in the pipeline.
 
-- Populate Opportunity custom fields with available property data (Reference ID, Prop County, Prop State, Acres, APN, etc.)
+- Populate Opportunity custom fields with available property data (Reference ID, Property County, Property State, Acres, APN, etc.)
 - The Opportunity is what moves through pipeline stages — the Contact record stays static
 
 ---
@@ -123,8 +123,8 @@ Go to **Settings > Custom Fields > Opportunities** and create the following:
 | Field Name          | Type       | Purpose                                                                                                                                                                                          |
 | ------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Reference ID        | Text       | Internal reference/tracking ID for the property                                                                                                                                                  |
-| Prop County         | Text       | County where the property is located                                                                                                                                                             |
-| Prop State          | Dropdown   | State where the property is located (all US states)                                                                                                                                              |
+| Property County     | Text       | County where the property is located                                                                                                                                                             |
+| Property State      | Dropdown   | State where the property is located (all US states)                                                                                                                                              |
 | Acres               | Number     | Property acreage                                                                                                                                                                                 |
 | APN                 | Text       | Assessor's Parcel Number                                                                                                                                                                         |
 | Tier 1 Market Price | Currency   | Market price estimate — Tier 1 valuation                                                                                                                                                         |
@@ -174,6 +174,7 @@ Go to **Settings > Tags** and create these tags:
 | Medium: Raw Email     | Lead responded via direct email reply                                                                                   |
 | Bounced              | Email address bounced — do not email until corrected                                                                     |
 | Can't Find           | No valid contact info — hold for skip trace                                                                              |
+| Cleanup              | Added by WF-CLEANUP during re-submission. Prevents WF-HANDOFF from double-firing.                                       |
 
 ---
 
@@ -205,6 +206,7 @@ Build each workflow in **Automation > Workflows**.
 | **WF-10**    | DNC Handler (+ DNC Sync)               |
 | **WF-HANDOFF** | Transfer to New Leads                 |
 | **WF-11**    | Inbound Response Handler                   |
+| **WF-CLEANUP** | Re-Submission Cleanup (n8n Triggered)    |
 
 ---
 
@@ -254,6 +256,8 @@ Build each workflow in **Automation > Workflows**.
 - If connection is made, contact moves to Transferred → WF-HANDOFF → New Leads
 - `Cold: Email Only` tag can be removed if phone number is now confirmed
 
+**Pause mechanic:** Every email send step has a "Wait Until `Paused` tag is NOT present" gate before it. If `Paused` is present, the contact holds in place — position preserved, no messages sent.
+
 **Exit conditions:** Stage changes (phone number received → moved to Transferred, or Dispo: DNC)
 
 ---
@@ -285,6 +289,8 @@ Build each workflow in **Automation > Workflows**.
 17. Move to pipeline stage: Cold
 18. Add tag: `Drip: Cold Monthly` → Enroll in WF-05 (Cold Monthly Drip)
 19. Send internal notification to Lead Manager: "{{first_name}} — warm SMS responder moved to Cold after 14 days with no phone connection."
+
+**Pause mechanic:** Every SMS send step has a "Wait Until `Paused` tag is NOT present" gate before it. Call task creation is unaffected — tasks may still be created while paused.
 
 **Exit conditions:** Stage changes (phone call completed → moved to Transferred, or Dispo: DNC)
 
@@ -364,6 +370,7 @@ Build each workflow in **Automation > Workflows**.
 ### WF-HANDOFF | Transfer to New Leads
 
 **Trigger:** Contact moved to pipeline stage "Transferred"
+**Enrollment condition:** Contact NOT tagged `Cleanup` (prevents double-fire when WF-CLEANUP moves re-submitted contacts to Transferred — n8n already handled the push to New Leads)
 **Actions:**
 
 1. Fire webhook to n8n with all contact data:
@@ -382,10 +389,13 @@ Build each workflow in **Automation > Workflows**.
 
 ### WF-11 | Inbound Response Handler
 
-**Decision: Option A — Lead Manager reviews.** Lead Manager tries to connect. If successful → transfer to New Leads. If not actionable → drip resumes.
+**Decision: Option A — Lead Manager reviews.** Lead Manager tries to connect. If successful → transfer to New Leads. If not actionable → workflow resumes.
 
 **Trigger:** Inbound SMS received OR Email reply received
-**Enrollment condition:** Lead NOT tagged DNC, Lead is in Cold stage
+**Applies to:** All contacts — active LM stage (Warm Response) AND Cold drip stage
+**Enrollment condition:** Lead NOT tagged DNC
+
+**Pause mechanic:** WF-00A, WF-00B, WF-05, and WF-06 each have a "Wait Until `Paused` tag is NOT present" gate before each send step. Adding `Paused` holds all active workflows in place — position preserved, no messages sent.
 
 **Actions:**
 
@@ -393,13 +403,15 @@ Build each workflow in **Automation > Workflows**.
    - If yes → route to WF-10 (DNC Handler). End this workflow.
 2. Add tag: `Paused` — all active workflows immediately hold at their next send gate
 3. Add tag: `Re-Engaged`
-4. Create Task: "CALL — {{first_name}} re-engaged (replied to Cold drip). Call them and try to connect." — Assigned to: Lead Manager — Due: Today — Priority: High
-5. Send internal notification to Lead Manager: "{{first_name}} replied to Warm Response Cold drip. Automation paused. Call them — if you connect, move to Transferred. If not actionable, remove the Paused tag. [Contact Link]"
-6. Wait 7 days (auto-resume safety net)
-7. **Resolution — one of three outcomes:**
+4. Create Task: "CALL — {{first_name}} replied. Call them and try to connect." — Assigned to: Lead Manager — Due: Today — Priority: High
+5. Send internal notification to Lead Manager: "{{first_name}} replied. Automation paused. Call them — if you connect, move to Transferred. If not actionable, remove the Paused tag. [Contact Link]"
+6. **Branch — Cold stage only:** Wait 7 days (auto-resume safety net)
+7. **Resolution:**
    - **Lead Manager connects → moves to Transferred:** WF-HANDOFF fires, contact goes to New Leads. Remove tags: `Paused`, `Re-Engaged`.
-   - **Lead Manager removes `Paused` tag (not actionable):** Drip resumes from where it stopped. Remove tag: `Re-Engaged`.
-   - **No action after 7 days:** Auto-remove `Paused` tag → drip resumes. Remove tag: `Re-Engaged`. Send notification: "{{first_name}} — 7-day review window expired with no action. Drip resumed automatically."
+   - **Lead Manager removes `Paused` tag (not actionable):** Workflow resumes from where it stopped. Remove tag: `Re-Engaged`.
+   - **Cold stage only — No action after 7 days:** Auto-remove `Paused` tag → drip resumes. Remove tag: `Re-Engaged`. Send notification: "{{first_name}} — 7-day review window expired with no action. Drip resumed automatically."
+
+**Note for Warm Response stage contacts:** No 7-day auto-resume. Lead Manager is actively working these leads. Resolution is: LM moves to Transferred (kills workflow) or manually removes the `Paused` tag.
 
 ---
 
@@ -414,8 +426,9 @@ Build each workflow in **Automation > Workflows**.
 2. Remove all drip tags: `Drip: Cold Monthly`, `Drip: Cold Quarterly`
 3. Remove tags: `Paused`, `Re-Engaged` (if present)
 4. Cancel all pending tasks for this contact
-5. Move to pipeline stage: Transferred (terminal — contact now lives in New Leads)
-6. Add note: "Contact re-submitted from new external campaign. Moved to New Leads as new lead. All Warm Response workflows stopped."
+5. Add tag: `Cleanup` (prevents WF-HANDOFF from firing when stage moves to Transferred — n8n already pushed the contact to New Leads)
+6. Move to pipeline stage: Transferred (terminal — contact now lives in New Leads)
+7. Add note: "Contact re-submitted from new external campaign. Moved to New Leads as new lead. All Warm Response workflows stopped."
 
 ---
 
@@ -456,10 +469,12 @@ Before going live, verify:
 - All pipeline stages created and in correct order (Warm Response, Cold, Transferred, DNC)
 - All custom fields created (matching New Leads schema)
 - All tags created
-- All 7 workflows built and tested (WF-00A, WF-00B, WF-05, WF-06, WF-10, WF-HANDOFF, WF-11)
+- All 8 workflows built and tested (WF-00A, WF-00B, WF-05, WF-06, WF-10, WF-HANDOFF, WF-11, WF-CLEANUP)
 - WF-CLEANUP webhook endpoint configured
 - Smart lists created
 - Lead Manager trained on GHL task queue and stage movement
 - n8n routing confirmed: warm responses → Warm Response
-- DNC sync tested bidirectionally
+- DNC sync tested bidirectionally (Warm Response ↔ New Leads ↔ Prospect Data)
+- Prospect Data push automation tested: field mapping correct, Contact + Opportunity created per property
+- Prospect Data DNC sync tested: DNC in Warm Response → Property record updated (DNC checked, Status = DNC)
 - Transfer webhook tested: Warm Response → n8n → New Leads

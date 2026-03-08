@@ -2,7 +2,9 @@
 
 Strategic review of the follow-up system. All items are planning-only — no changes to existing files until decisions are made.
 
-Generated: 2026-03-08
+Generated: 2026-03-08 | Updated: 2026-03-09
+
+**Note:** This document was generated before the Prospect Data account was added. When implementing any item below, consider Prospect Data implications — particularly whether the improvement affects the data model, push automation, or DNC sync. Specific callouts are noted inline.
 
 ---
 
@@ -213,6 +215,7 @@ Generated: 2026-03-08
   - Tier 1 Market Price (higher value = higher priority)
   - Source (cold call > cold SMS > cold email for intent level)
   - Age (older owners more likely to sell)
+- **Prospect Data note:** Acres, Market Price, and Age are all on the Property record in Prospect Data. n8n can read these at push time and calculate the Lead Score before creating the Contact/Opportunity in New Leads — no manual entry needed.
 - Implement as a GHL custom field "Lead Score" (Number) calculated by n8n on entry
 - Create Smart List: "Priority Calls Today" sorted by Lead Score descending
 - Define criteria for "Hot" tag: Lead Score > X, or AM discretion
@@ -234,48 +237,6 @@ Generated: 2026-03-08
 - If listing expired: create high-priority task "MLS listing may have expired — contact {{first_name}}"
 - Optional: different messaging — "I noticed your property was listed for a while — sometimes the market just isn't right. We're still interested if you'd consider a direct offer."
 - **Files affected:** ghl-setup.md (add MLS Listing Date field), pipeline.md (add note to Dispo: On MLS)
-
----
-
-### 11. Post-Purchase Referral Sequence
-
-**Gap:** Dispo: Purchased is terminal with zero follow-up. The seller relationship ends at close.
-
-**Why it matters:** Referral leads close at 3-5x the rate of cold leads. Closed sellers know other landowners. A 2-3 message sequence costs nothing and can generate high-value leads.
-
-**Recommended addition:**
-
-**WF-13 | Post-Purchase Follow-Up**
-
-- **Trigger:** Contact moved to Dispo: Purchased
-- **Actions:**
-  1. Send SMS (Day 0 — closing day): "Hey {{first_name}}, glad we could get this done for you. If you ever need anything, don't hesitate to reach out. — {{agent_name}}, Bana Land"
-  2. Wait: 30 days
-  3. Send SMS: "Hey {{first_name}}, hope everything's going well since the sale. Quick question — do you know anyone else with land they might be thinking about selling? We'd love an introduction."
-  4. Wait: 30 days
-  5. Send Email: "Referral ask — longer form, explains the process, makes it easy to refer"
-  6. End
-- **Files affected:** ghl-setup.md (add WF-13), messaging.md (add post-purchase templates), pipeline.md (update Dispo: Purchased to note follow-up)
-
----
-
-### 12. Deceased Owner Protocol
-
-**Gap:** Age and Deceased custom fields exist on Contact but no documented handling when Deceased = true.
-
-**Why it matters:** Automated messages to a deceased person upset the family and damage the brand. But the property still exists — probate/heir deals are a major wholesaling niche.
-
-**Recommended approach:**
-
-- If Deceased = true on any contact:
-  - Pause all automated outreach immediately
-  - Do NOT send standard templates ("Hey {{first_name}}..." to a deceased person)
-  - AM reviews: skip trace for heirs, estate representatives, or probate attorney
-  - If heir contact found: create new Contact record for heir, link to existing Opportunity
-  - Different messaging tone: "We understand this property may be part of an estate. We work with families in these situations..."
-- Add a tag: `Deceased` (stops all workflows via enrollment condition)
-- Add a GHL enrollment condition to ALL workflows: "Contact NOT tagged Deceased"
-- **Files affected:** rules.md (add Deceased Protocol section), ghl-setup.md (add Deceased tag + enrollment conditions), pipeline.md (add note)
 
 ---
 

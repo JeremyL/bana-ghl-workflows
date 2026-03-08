@@ -110,7 +110,7 @@ There are three entry paths into this account. Every incoming lead follows exact
 
 When any new contact enters this account, create an **Opportunity** linked to that contact in the pipeline.
 
-- Populate Opportunity custom fields with available property data (Reference ID, Prop County, Prop State, Acres, APN, etc.)
+- Populate Opportunity custom fields with available property data (Reference ID, Property County, Property State, Acres, APN, etc.)
 - The Opportunity is what moves through pipeline stages — the Contact record stays static
 - A Contact will only ever have one active Opportunity at a time
 
@@ -163,8 +163,8 @@ Go to **Settings > Custom Fields > Opportunities** and create the following:
 | Field Name          | Type       | Purpose                                                                                                                                                                                          |
 | ------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Reference ID        | Text       | Internal reference/tracking ID for the property                                                                                                                                                  |
-| Prop County         | Text       | County where the property is located                                                                                                                                                             |
-| Prop State          | Dropdown   | State where the property is located (all US states)                                                                                                                                              |
+| Property County     | Text       | County where the property is located                                                                                                                                                             |
+| Property State      | Dropdown   | State where the property is located (all US states)                                                                                                                                              |
 | Acres               | Number     | Property acreage                                                                                                                                                                                 |
 | APN                 | Text       | Assessor's Parcel Number                                                                                                                                                                         |
 | Tier 1 Market Price | Currency   | Market price estimate — Tier 1 valuation                                                                                                                                                         |
@@ -607,6 +607,8 @@ Before going live, verify:
 - Smart lists created
 - Team members trained on GHL task queue and stage movement
 - n8n routing confirmed: direct leads → New Leads, Warm Response transfers → New Leads
-- DNC sync tested bidirectionally
+- DNC sync tested bidirectionally (New Leads ↔ Warm Response ↔ Prospect Data)
+- Prospect Data push automation tested: field mapping correct, Contact + Opportunity created per property
+- Prospect Data DNC sync tested: DNC in New Leads → Property record updated (DNC checked, Status = DNC)
 - First batch of leads imported and enrolled in WF-01
 - Monitoring dashboard set up (Reporting > Conversations, Tasks, Pipeline)
