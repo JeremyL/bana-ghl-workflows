@@ -36,7 +36,7 @@ Reference files:
 
 ---
 
-## Step 2B — Lead Entry Integration (n8n / Webhook)
+## Step 2B — Lead Entry Integration (automation / Webhook)
 
 There are three entry paths into this account. Every incoming lead follows exactly one of them.
 
@@ -46,9 +46,9 @@ There are three entry paths into this account. Every incoming lead follows exact
 
 **Who:** Warm Response leads that successfully connected — Lead Manager transferred them.
 **Where they land:** New Leads pipeline stage (Acquisition Manager owns from here).
-**How:** Warm Response's WF-HANDOFF fires a webhook to n8n → n8n creates contact in this account.
+**How:** Warm Response's WF-HANDOFF fires a webhook to automation → automation creates contact in this account.
 
-**What n8n must send to this account:**
+**What automation must send to this account:**
 
 | Field                            | Value                                                                 |
 | -------------------------------- | --------------------------------------------------------------------- |
@@ -68,7 +68,7 @@ There are three entry paths into this account. Every incoming lead follows exact
 
 **Who:** Prospects from cold calling, direct mail, or inbound VAPI calls — anyone who did NOT come through the cold email/SMS Warm Response path.
 **Where they land:** New Leads pipeline stage (Acquisition Manager owns from here).
-**How:** Entered via n8n flow. These leads skip Warm Response entirely.
+**How:** Entered via automation flow. These leads skip Warm Response entirely.
 
 **What must be set on entry:**
 
@@ -89,7 +89,7 @@ There are three entry paths into this account. Every incoming lead follows exact
 **Who:** A contact already in this account (any stage) who responds to a new, separate marketing campaign outside GHL.
 **Where they land:** New Leads — full restart as a new lead.
 
-**What n8n must do:**
+**What automation must do:**
 
 1. Detect the contact already exists in this account (duplicate match)
 2. Stack a new Source tag on the existing contact (e.g., `Source: Direct Mail` added on top of existing `Source: Cold Call`)
@@ -142,17 +142,18 @@ GHL contacts support multiple phone numbers natively:
 
 Go to **Settings > Custom Fields > Contacts** and create the following:
 
-| Field Name        | Type     | Purpose                                         |
-| ----------------- | -------- | ----------------------------------------------- |
-| Lead Entry Date   | Date     | Date lead was first added to the pipeline       |
-| Stage Entry Date  | Date     | Date lead entered their CURRENT stage           |
-| Days in Pipeline  | Number   | Calculated from Lead Entry Date (for reporting) |
-| DNC Date          | Date     | Date lead was added to DNC                      |
-| Last Contact Date | Date     | Date of last successful outreach attempt        |
-| Last Contact Type | Text     | Call / SMS / Email                              |
-| Age               | Number   | Owner's age (from skip trace data)              |
-| Deceased          | Checkbox | Owner is deceased (from skip trace data)        |
-| Assigned To       | Text     | Acquisition manager name                        |
+| Field Name        | Type     | Purpose                                                                                                        |
+| ----------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| Lead Entry Date   | Date     | Date lead was first added to the pipeline                                                                      |
+| Stage Entry Date  | Date     | Date lead entered their CURRENT stage                                                                          |
+| Days in Pipeline  | Number   | Calculated from Lead Entry Date (for reporting)                                                                |
+| DNC Date          | Date     | Date lead was added to DNC                                                                                     |
+| Last Contact Date | Date     | Date of last successful outreach attempt                                                                       |
+| Last Contact Type | Text     | Call / SMS / Email                                                                                             |
+| Age               | Number   | Owner's age (from skip trace data)                                                                             |
+| Deceased          | Checkbox | Owner is deceased (from skip trace data)                                                                       |
+| Assigned To       | Text     | Acquisition manager name                                                                                       |
+| Pause WFs Until   | Date     | Pause all automated sends until this date. Workflows check: field is empty OR field < today → proceed to send. Set to today+7 by WF-11. AM clears manually to resume early. |
 
 ---
 
@@ -195,13 +196,8 @@ Go to **Settings > Tags** and create these tags:
 | Hot                     | Team-assigned tag for priority leads (manual)                                                                            |
 | Re-Engaged              | Lead responded to our existing GHL follow-up/drip. Triggers WF-11 (pause + AM review).                                  |
 | Re-Submitted            | Lead came back in from a new external campaign (different source). Resets to New Leads.                                  |
-| Paused                  | Holds all automated workflows at their next send gate. Added by WF-11 on inbound response.                             |
 | Warm: Email             | Carried over from Warm Response — entered via cold email response (historical tracking)                                     |
 | Warm: SMS               | Carried over from Warm Response — entered via cold SMS response (historical tracking)                                       |
-| Drip: Cold Monthly      | Cold stage monthly cadence (WF-05). Added when contact enters Cold stage or Dispo Re-Engage.                             |
-| Drip: Cold Quarterly    | Cold stage quarterly cadence (WF-06). Swapped in from Cold Monthly at 6-month mark.                                     |
-| Drip: Nurture Monthly   | Nurture monthly cadence (WF-08 Phase 1). Added when contact enters Nurture stage.                                        |
-| Drip: Nurture Quarterly | Nurture quarterly cadence (WF-08 Phase 2). Swapped in from Nurture Monthly at Month 3.                                  |
 | Source: Cold Call        | Lead came from cold calling                                                                                              |
 | Source: Cold Email       | Lead came from cold email campaign                                                                                       |
 | Source: Cold SMS         | Lead came from SMS blast campaign                                                                                        |
@@ -210,10 +206,6 @@ Go to **Settings > Tags** and create these tags:
 | Source: Launch Control   | Lead came from Launch Control platform                                                                                   |
 | Source: Referral         | Lead came via referral                                                                                                   |
 | Source: Website          | Lead came via website inquiry                                                                                            |
-| Medium: Phone            | Lead responded or came in via phone                                                                                     |
-| Medium: Form Email       | Lead responded via email form                                                                                           |
-| Medium: Google Form      | Lead responded via Google Form                                                                                          |
-| Medium: Raw Email        | Lead responded via direct email reply                                                                                   |
 | Bounced                  | Email address bounced — do not email until corrected                                                                    |
 | Can't Find               | No valid contact info — hold for skip trace                                                                             |
 | Caller: [Agent Name]     | VAPI AI persona that handled the inbound call (auto-applied)                                                            |
@@ -271,8 +263,7 @@ Build each workflow in **Automation > Workflows**.
 | **WF-02**  | Day 1-2 Sequence                            |
 | **WF-03**  | Day 3-14 Sequence                           |
 | **WF-04**  | Day 15-30 Sequence                          |
-| **WF-05**  | Cold Monthly Drip                           |
-| **WF-06**  | Cold Quarterly Drip                         |
+| **WF-05**  | Cold Drip (Monthly → Quarterly)             |
 | **WF-07**  | Qualified Lead Check-In                     |
 | **WF-08**  | Nurture                                     |
 | **WF-09**  | Dispo Re-Engage — Long-Term Drip Enrollment |
@@ -287,8 +278,8 @@ Build each workflow in **Automation > Workflows**.
 **Actions:**
 
 1. **If contact is tagged `Re-Submitted` (re-entry from new external campaign):**
-   - Remove all drip tags: `Drip: Cold Monthly`, `Drip: Cold Quarterly`, `Drip: Nurture Monthly`, `Drip: Nurture Quarterly`
-   - Remove from all active drip workflows (WF-05, WF-06, WF-08, WF-09)
+   - Remove from all active drip workflows (WF-05, WF-08, WF-09)
+   - Clear field: `Pause WFs Until` (if set from a prior cycle)
    - Remove tag: `Re-Engaged` (if present from a prior cycle)
    - Remove tag: `Re-Submitted` (cleanup — it has served its purpose as a trigger)
 2. Assign contact to acquisition manager (specific team member)
@@ -326,7 +317,7 @@ Build each workflow in **Automation > Workflows**.
 13. Wait: until Day 3 begins
 14. If no stage change: Move to Day 3-14 → Enroll in WF-03
 
-**Pause mechanic:** "Wait Until `Paused` tag is NOT present" gate before each send step.
+**Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
 **Exit conditions:** Contact stage changes (moved to qualified or disqualified stage)
 
@@ -362,7 +353,7 @@ Build each workflow in **Automation > Workflows**.
 21. Wait: 1 day
 22. If no stage change: Move to pipeline stage: Day 15-30 → Enroll in WF-04
 
-**Pause mechanic:** "Wait Until `Paused` tag is NOT present" gate before each send step.
+**Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
 **Exit conditions:** Contact stage changes (moved to qualified or disqualified stage)
 
@@ -389,21 +380,21 @@ Build each workflow in **Automation > Workflows**.
 10. Send Email: NL-EMAIL-04 (Day 29 — Long-game)
 11. Wait: 1 day
 12. Send SMS: NL-SMS-06 (Day 30 — Final touch before cold)
-13. If no stage change: Move to pipeline stage: Cold → Add tag: `Drip: Cold Monthly` → Enroll in WF-05
+13. If no stage change: Move to pipeline stage: Cold (WF-05 fires automatically on stage entry)
 
-**Pause mechanic:** "Wait Until `Paused` tag is NOT present" gate before each send step.
+**Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
 **Exit conditions:** Contact stage changes (moved to qualified or disqualified stage)
 
 ---
 
-### WF-05 | Long-Term Drip — Monthly Phase (Day 30–180)
+### WF-05 | Cold Drip — Monthly → Quarterly (Day 30+)
 
-**Trigger:** Tag added: `Drip: Cold Monthly`
+**Trigger:** Contact moved to pipeline stage "Cold" OR Contact moved to any Dispo Re-Engage stage (via WF-09)
 **Applies to:** Cold stage leads (no response after Day 30) AND all Dispo Re-Engage leads
 **Enrollment condition:** Lead NOT tagged DNC
 
-**Actions:**
+**Phase 1 — Monthly (Day 30–180):**
 
 1. Wait: 30 days
 2. Send SMS: COLD-SMS-01
@@ -417,28 +408,18 @@ Build each workflow in **Automation > Workflows**.
 10. Send Email: COLD-EMAIL-02
 11. Wait: 30 days
 12. Send SMS: COLD-SMS-03
-13. Remove tag: `Drip: Cold Monthly` → Add tag: `Drip: Cold Quarterly` → Enroll WF-06
 
-**Pause mechanic:** "Wait Until `Paused` tag is NOT present" gate before each send step.
+**Phase 2 — Quarterly (Day 180+, indefinite):**
 
----
+13. Wait: 90 days
+14. Send SMS: COLDQ-SMS-01
+15. Wait: 1 day
+16. Send Email: COLDQ-EMAIL-01
+17. Go to Step 13 (loop)
 
-### WF-06 | Long-Term Drip — Quarterly Phase (Day 180+)
+**Note:** GHL does not natively loop workflows. Build out 2+ years of quarterly steps manually and extend as needed.
 
-**Trigger:** Tag added: `Drip: Cold Quarterly`
-**Enrollment condition:** Lead NOT tagged DNC
-
-**Actions (repeat indefinitely):**
-
-1. Wait: 90 days
-2. Send SMS: COLDQ-SMS-01
-3. Wait: 1 day
-4. Send Email: COLDQ-EMAIL-01
-5. Go to Step 1 (loop)
-
-**Note:** GHL does not natively loop workflows. Use a recurring enrollment trigger or build out 2+ years of touches manually.
-
-**Pause mechanic:** "Wait Until `Paused` tag is NOT present" gate before each send step.
+**Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
 ---
 
@@ -465,30 +446,28 @@ Apply similar logic for Make Offer, Negotiations, Contract Sent stages.
 
 **Phase 1 — Monthly (Months 0–3):**
 
-1. Add tag: `Drip: Nurture Monthly`
-2. Send SMS: NUR-SMS-01
-3. Wait: 30 days
-4. Send Email: NUR-EMAIL-01
-5. Wait: 30 days
-6. Send SMS: NUR-SMS-02
-7. Wait: 30 days
-8. Remove tag: `Drip: Nurture Monthly` → Add tag: `Drip: Nurture Quarterly`
+1. Send SMS: NUR-SMS-01
+2. Wait: 30 days
+3. Send Email: NUR-EMAIL-01
+4. Wait: 30 days
+5. Send SMS: NUR-SMS-02
+6. Wait: 30 days
 
 **Phase 2 — Quarterly (Month 3+, indefinite):**
 
-9. Send Email: NURQ-EMAIL-01
+7. Send Email: NURQ-EMAIL-01
+8. Wait: 90 days
+9. Send SMS: NURQ-SMS-01
 10. Wait: 90 days
-11. Send SMS: NURQ-SMS-01
+11. Send Email: NUR-EMAIL-01
 12. Wait: 90 days
-13. Send Email: NUR-EMAIL-01
+13. Send SMS: NURQ-SMS-02 (1-year touch)
 14. Wait: 90 days
-15. Send SMS: NURQ-SMS-02 (1-year touch)
+15. Send SMS: NUR-SMS-02
 16. Wait: 90 days
-17. Send SMS: NUR-SMS-02
-18. Wait: 90 days
-19. Go to Step 9 (loop indefinitely at quarterly cadence)
+17. Go to Step 7 (loop indefinitely at quarterly cadence)
 
-**Pause mechanic:** "Wait Until `Paused` tag is NOT present" gate before each send step.
+**Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
 ---
 
@@ -498,8 +477,7 @@ Apply similar logic for Make Offer, Negotiations, Contract Sent stages.
 **Actions:**
 
 1. Update custom field: Stage Entry Date = Today
-2. Add tag: `Drip: Cold Monthly`
-3. Enroll in WF-05 (Long-Term Drip — Monthly Phase)
+2. Enroll in WF-05 (Cold Drip — Monthly → Quarterly)
 
 That's it. All re-engage dispo leads flow into the same Long-Term Drip as Cold stage leads.
 
@@ -516,12 +494,12 @@ That's it. All re-engage dispo leads flow into the same Long-Term Drip as Cold s
 4. Update custom field: DNC Date = Today
 5. Cancel all pending tasks for this contact
 6. Send internal notification to team: "{{first_name}} has opted out — DNC applied. [Contact Link]"
-7. **DNC Sync — Warm Response:** Fire webhook to n8n with contact identifier (email + phone numbers)
-   - n8n looks up contact in Warm Response
+7. **DNC Sync — Warm Response:** Fire webhook to automation with contact identifier (email + phone numbers)
+   - automation looks up contact in Warm Response
    - If found → triggers DNC in Warm Response (moves to DNC stage, kills workflows, tags DNC)
    - If not found → no action needed
-8. **DNC Sync — Prospect Data:** Fire webhook to n8n with contact identifier (email + phone numbers)
-   - n8n looks up matching Property record in Prospect Data by phone or email
+8. **DNC Sync — Prospect Data:** Fire webhook to automation with contact identifier (email + phone numbers)
+   - automation looks up matching Property record in Prospect Data by phone or email
    - If found → set DNC = checked, DNC Date = today, Status = DNC
    - If not found → no action needed
 9. End — no further actions ever
@@ -534,35 +512,38 @@ That's it. All re-engage dispo leads flow into the same Long-Term Drip as Cold s
 **Applies to:** All contacts — drip stages (Cold, Nurture, Dispo Re-Engage) AND active AM stages (Day 1-2, Day 3-14, Day 15-30)
 **Enrollment condition:** Lead NOT tagged DNC
 
-**Pause mechanic:** Every drip/automated-send workflow (WF-02 through WF-06, WF-08) has a "Wait Until `Paused` tag is NOT present" gate before each send step.
+**Pause mechanic:** Every drip/automated-send workflow (WF-02 through WF-05, WF-08) has a "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
 **Actions:**
 
 1. **Check: Is the reply an opt-out keyword?** (STOP, QUIT, UNSUBSCRIBE, CANCEL, END)
    - If yes → route to WF-10 (DNC Handler). End this workflow.
-2. Add tag: `Paused` — all active automated workflows immediately hold at their next send gate
+2. Set custom field: `Pause WFs Until` = today + 7 days — all active automated workflows immediately hold at their next send condition
 3. Add tag: `Re-Engaged`
 4. Create Task: "REVIEW — {{first_name}} re-engaged (replied). Read their reply and decide next step." — Assigned to: Acquisition Manager — Due: Today — Priority: High
-5. Send internal notification to AM: "{{first_name}} replied. Automation paused. Review and either move stage or remove the Paused tag. [Contact Link]"
+5. Send internal notification to AM: "{{first_name}} replied. Automation paused for 7 days. Review and either move stage or clear the Pause WFs Until field to resume early. [Contact Link]"
 6. **Branch — drip stages (Cold / Nurture / Dispo Re-Engage) only:** Wait 7 days (auto-resume safety net)
 7. **Branch — check resolution:**
    **Branch A — AM moved contact to a qualified stage (Due Diligence, Make Offer, etc.):**
    - Workflow exit conditions fire, all active workflows killed automatically
-   - Remove tags: `Paused`, `Re-Engaged` (cleanup)
+   - Clear field: `Pause WFs Until` (cleanup)
+   - Remove tag: `Re-Engaged` (cleanup)
    - End workflow. Qualified stage workflows (WF-07) take over.
    **Branch B — AM moved contact to any Dispo stage:**
    - Workflow exit conditions fire, all active workflows killed automatically
-   - Remove tags: `Paused`, `Re-Engaged` (cleanup)
+   - Clear field: `Pause WFs Until` (cleanup)
+   - Remove tag: `Re-Engaged` (cleanup)
    - End workflow. Dispo workflows handle it (WF-09 for Re-Engage dispos, WF-10 for DNC).
-   **Branch C — AM manually removed `Paused` tag (reply not actionable, lead stays in stage):**
+   **Branch C — AM cleared `Pause WFs Until` field early (reply not actionable, lead stays in stage):**
    - Remove tag: `Re-Engaged` (cleanup)
    - Drip resumes from exactly where it stopped. End workflow.
    **Branch D — AM did nothing, 7 days expired (drip stages only):**
-   - Remove tag: `Paused` — drip resumes from exactly where it stopped
+   - `Pause WFs Until` date has now passed — drip send conditions evaluate to true and resume automatically
+   - Clear field: `Pause WFs Until` (cleanup)
    - Remove tag: `Re-Engaged` (cleanup)
    - Send internal notification to AM: "{{first_name}} — 7-day review window expired with no action. Drip resumed automatically."
 
-**Note for active AM stages (Day 1-2 / Day 3-14 / Day 15-30):** There is no 7-day auto-resume for these contacts. The AM is already actively working them. Resolution is: AM moves stage (kills workflow) or manually removes the `Paused` tag.
+**Note for active AM stages (Day 1-2 / Day 3-14 / Day 15-30):** There is no 7-day auto-resume for these contacts. The AM is already actively working them. Resolution is: AM moves stage (kills workflow) or clears the `Pause WFs Until` field.
 
 ---
 
@@ -588,7 +569,7 @@ Before going live, verify:
 - SMS opt-out keywords configured (STOP, QUIT, UNSUBSCRIBE, CANCEL, END)
 - Auto-reply on opt-out is set: "You've been unsubscribed. Reply START to re-subscribe."
 - WF-10 (DNC Handler) triggers on opt-out SMS reply
-- DNC sync webhook to n8n tested and confirmed working (both directions)
+- DNC sync webhook to automation tested and confirmed working (both directions)
 - All workflows have time-window restrictions (9am–7pm contact local time)
 - All SMS messages identify sender: include "Bana Land" or agent name
 - Phone number has A2P 10DLC registration completed (required for business SMS in US)
@@ -603,10 +584,10 @@ Before going live, verify:
 - All pipeline stages created and in correct order
 - All custom fields created (matching Warm Response schema)
 - All tags created
-- All 11 workflows built and tested (WF-01 through WF-11)
+- All 10 workflows built and tested (WF-01 through WF-05, WF-07 through WF-11)
 - Smart lists created
 - Team members trained on GHL task queue and stage movement
-- n8n routing confirmed: direct leads → New Leads, Warm Response transfers → New Leads
+- automation routing confirmed: direct leads → New Leads, Warm Response transfers → New Leads
 - DNC sync tested bidirectionally (New Leads ↔ Warm Response ↔ Prospect Data)
 - Prospect Data push automation tested: field mapping correct, Contact + Opportunity created per property
 - Prospect Data DNC sync tested: DNC in New Leads → Property record updated (DNC checked, Status = DNC)

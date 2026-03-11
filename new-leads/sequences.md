@@ -120,7 +120,7 @@ Qualified leads that didn't close. Fully automated. Long game.
 
 **Owner:** GHL automation — no manual call tasks unless lead responds
 **Channels:** SMS + Email (rotating).
-**Tags:** `Drip: Nurture Monthly` added on Nurture stage entry (Phase 1). At Month 3, swap to `Drip: Nurture Quarterly` (Phase 2). Tags trigger the workflow — stages add the tags, tags trigger the sequences.
+**Trigger:** WF-08 fires on Nurture stage entry and handles both phases internally — no tag triggers needed.
 
 ### Phase 1 — Months 0–3 (Monthly)
 
@@ -132,7 +132,7 @@ Qualified leads that didn't close. Fully automated. Long game.
 | 2       | 1     | Email   | Auto | NUR-EMAIL-01 |
 | 3       | 2     | SMS     | Auto | NUR-SMS-02   |
 
-At Month 3 → Remove tag `Drip: Nurture Monthly` → Add tag `Drip: Nurture Quarterly` → transition to Phase 2
+At Month 3 → Phase 2 begins (handled internally by WF-08)
 
 ### Phase 2 — Month 3+ (Quarterly, indefinite)
 
@@ -165,7 +165,7 @@ Continue rotating SMS/Email every 90 days indefinitely.
 
 **Goal:** Stay alive in their mind. Rural sellers often take months or years to decide to sell.
 **Cadence:** Monthly (roughly every 30 days)
-**Entry tag:** `Drip: Cold Monthly` — added when contact enters Cold stage (or any Dispo Re-Engage stage via WF-09). This tag triggers WF-05 enrollment.
+**Trigger:** WF-05 fires automatically when contact enters Cold stage (or any Dispo Re-Engage stage via WF-09).
 
 | Month | Channel | Type | Message Ref           |
 | ----- | ------- | ---- | --------------------- |
@@ -176,7 +176,7 @@ Continue rotating SMS/Email every 90 days indefinitely.
 | 5     | Email   | Auto | COLD-EMAIL-02         |
 | 6     | SMS     | Auto | COLD-SMS-03 (6-month) |
 
-At 6 months → Remove tag `Drip: Cold Monthly` → Add tag `Drip: Cold Quarterly` → transition to Phase 2 (WF-06)
+At 6 months → Phase 2 begins (handled internally by WF-05)
 
 ---
 
@@ -185,7 +185,6 @@ At 6 months → Remove tag `Drip: Cold Monthly` → Add tag `Drip: Cold Quarterl
 **Goal:** Extremely light touch. Keep the lead warm with almost zero cost or effort.
 **Cadence:** Quarterly (every 90 days)
 **Owner:** GHL automation only — indefinite until response or opt-out
-**Tag:** `Drip: Cold Quarterly` — swapped in from `Drip: Cold Monthly` at the 6-month mark. Triggers WF-06 enrollment.
 
 | Quarter | Channel | Type | Message Ref    |
 | ------- | ------- | ---- | -------------- |
@@ -207,7 +206,7 @@ Continue rotating SMS/Email every 90 days indefinitely.
 
 No Motivation, Wants Retail, On MLS, and Lead Declined all enroll in **Sequence — Cold** (same long-term drip as Cold stage leads).
 
-No separate sequence. Enroll by adding tag `Drip: Cold Monthly` when contact is moved to any of these Dispo Re-Engage stages.
+No separate sequence. WF-09 fires on Dispo Re-Engage stage entry and enrolls the contact in WF-05 directly.
 
 ---
 
@@ -241,7 +240,7 @@ When hitting a lead on the same day with multiple channels (Day 1-2 phase), use 
 | Lead moves to qualified stage           | Stop uncontacted sequence → start Sequence — Qualified Leads                   |
 | Lead moves to Nurture                   | Stop active sequence → start Sequence — Nurture                                |
 | Lead moves to Dispo — Terminal          | Stop all sequences permanently                                                 |
-| Lead moves to Dispo — Re-Engage         | Stop active sequence → add tag `Drip: Cold Monthly` → enroll in Sequence — Cold |
+| Lead moves to Dispo — Re-Engage         | Stop active sequence → WF-09 fires → enroll in Sequence — Cold (WF-05)          |
 
 ---
 
@@ -262,8 +261,8 @@ A lead in Cold, Nurture, or Dispo Re-Engage replies to an automated message we s
 
 A contact already in GHL is reached by a separate marketing campaign outside GHL and responds.
 
-- **What happens:** n8n detects duplicate, updates Latest Source + adds new Source tag + tags `Re-Submitted` + moves to New Leads.
+- **What happens:** automation detects duplicate, updates Latest Source + adds new Source tag + tags `Re-Submitted` + moves to New Leads.
 - **WF-01 fires:** Cleans up all active drips, assigns to AM, creates task.
 - **Lead is worked from scratch:** Full Day 1-2 → Day 3-14 → Day 15-30 → Cold sequence, identical to a brand-new lead.
 - **Original Source field preserved:** First-touch attribution never overwritten. Tags stack all sources.
-- **If contact also exists in Warm Response:** n8n fires cleanup webhook to Warm Response (stop drip, move to Transferred).
+- **If contact also exists in Warm Response:** automation fires cleanup webhook to Warm Response (stop drip, move to Transferred).

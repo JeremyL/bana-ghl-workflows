@@ -58,7 +58,7 @@ The system is split across three GHL sub-accounts:
 **Owner:** Lead Manager
 **Purpose:** Handles cold email and cold SMS responders from initial response through either successful handoff to New Leads or long-term Cold drip.
 **Stages:** Warm Response → Cold → Transferred (success) / DNC (opt-out)
-**Handoff:** When Lead Manager connects a warm lead → WF-HANDOFF fires webhook → n8n → New Leads
+**Handoff:** When Lead Manager connects a warm lead → WF-HANDOFF fires webhook → automation → New Leads
 
 ### Account: New Leads (`new-leads/`)
 
@@ -71,9 +71,9 @@ The system is split across three GHL sub-accounts:
 
 - **Prospect Data → Warm Response:** Cold Email and Cold SMS campaigns. Automation splits Property into Contact + Opportunity.
 - **Prospect Data → New Leads:** Cold Call and Direct Mail campaigns. Automation splits Property into Contact + Opportunity.
-- **Warm Response → New Leads (Handoff):** WF-HANDOFF fires webhook → n8n → New Leads (WF-01 fires).
-- **DNC Sync:** Tri-directional via n8n (New Leads ↔ Warm Response ↔ Prospect Data).
-- **Re-submission:** Always goes to New Leads. n8n fires cleanup webhook to Warm Response if contact exists there.
+- **Warm Response → New Leads (Handoff):** WF-HANDOFF fires webhook → automation → New Leads (WF-01 fires).
+- **DNC Sync:** Tri-directional via automation (New Leads ↔ Warm Response ↔ Prospect Data).
+- **Re-submission:** Always goes to New Leads. automation fires cleanup webhook to Warm Response if contact exists there.
 
 See [warm-response/pipeline.md](warm-response/pipeline.md), [new-leads/pipeline.md](new-leads/pipeline.md), and [prospect-data/data-model.md](prospect-data/data-model.md) for full details.
 
@@ -155,11 +155,9 @@ See [warm-response/pipeline.md](warm-response/pipeline.md), [new-leads/pipeline.
 
 | File                                         | Purpose                                          |
 | -------------------------------------------- | ------------------------------------------------ |
-| [table-of-contents.md](table-of-contents.md) | Full project file index                          |
+| [README.md](README.md)                       | Project overview and full file index             |
 | [todo.md](todo.md)                           | Open decisions and to-do items                   |
-| [conflicts.md](conflicts.md)                 | Tracked conflicts or discrepancies between docs  |
-| [improvements.md](improvements.md)           | Improvement ideas and enhancement notes          |
-| [lead-flow.md](lead-flow.md)                 | Original pipeline stage reference                |
+| [for-review.md](for-review.md)               | Pre-launch verifications, improvements, and decision log |
 | [prospect-data/](prospect-data/)             | Prospect Data — data warehouse account files     |
 | [warm-response/](warm-response/)             | Warm Response — Lead Manager GHL account files   |
 | [new-leads/](new-leads/)                     | New Leads — Acquisition Manager GHL account files|
