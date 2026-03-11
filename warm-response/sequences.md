@@ -148,10 +148,10 @@ Continue rotating SMS/Email every 90 days indefinitely.
 
 A lead in Cold responds to an automated message we sent from this account.
 
-- **What happens:** WF-11 fires. `Paused` tag added — active workflows hold in place at their next send step (position preserved). Call task created for Lead Manager.
+- **What happens:** WF-11 fires. `Pause WFs Until` field set to today+7 — active workflows hold in place at their next send step (position preserved). Call task created for Lead Manager.
 - **Lead Manager tries to connect.** If successful → move to Transferred → WF-HANDOFF → New Leads.
-- **If not actionable:** Lead Manager removes `Paused` tag → drip resumes from exactly where it stopped.
-- **If no action after 7 days:** Auto-remove `Paused` tag → drip resumes automatically.
+- **If not actionable:** Lead Manager clears `Pause WFs Until` field → drip resumes from exactly where it stopped.
+- **If no action after 7 days (Cold stage only):** `Pause WFs Until` date expires → drip resumes automatically. **Warm Response stage:** No auto-resume — Lead Manager must manually clear the field or move stage.
 
 ### Re-Submission (new external campaign source)
 

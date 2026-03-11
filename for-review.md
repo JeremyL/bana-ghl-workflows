@@ -30,144 +30,6 @@ Full re-run completed 2026-03-10 against all active files, file by file, compare
 
 ### Issues Found — Need Fixing
 
-**C-01: Stale drip tag references in both messaging.md files**
-
-Both NL and WR messaging.md still reference eliminated drip tags in section headers and transition notes: `Drip: Cold Monthly`, `Drip: Cold Quarterly`, `Drip: Nurture Monthly`, `Drip: Nurture Quarterly`. These tags were removed per simplify.md item D1 (done) — workflows now trigger on stage entry, no tag swaps needed. The ghl-setup.md files and tag tables are correct (no drip tags listed).
-
-- **NL messaging.md (6 references):** "Entry tag: `Drip: Cold Monthly`" (Cold Monthly section header), "At Month 6 → Remove tag `Drip: Cold Monthly` → Add tag `Drip: Cold Quarterly`" (COLD-SMS-03 note), "Entry tag: `Drip: Cold Quarterly`" (Cold Quarterly header), "Entry tag: `Drip: Nurture Monthly`" (Nurture Monthly header), "At Month 3 → Remove tag ... → Add tag ..." (NUR-SMS-02 note), "Entry tag: `Drip: Nurture Quarterly`" (Nurture Quarterly header)
-- **WR messaging.md (3 references):** "Entry tag: `Drip: Cold Monthly`" (Cold Monthly header), "At Month 6 → Remove tag ... → Add tag ..." (COLD-SMS-03 note), "Entry tag: `Drip: Cold Quarterly`" (Cold Quarterly header)
-- **Fix:** Replace all drip tag entry/transition lines with "Trigger: WF-05 fires on stage entry" (Cold) or "Trigger: WF-08 handles both phases internally" (Nurture). Remove tag swap instructions entirely.
-
----
-
-**C-02: Stale `Paused` tag references in both sequences.md Re-Entry sections**
-
-Both NL and WR sequences.md Re-Entry sections still reference the `Paused` tag mechanic that was replaced by the `Pause WFs Until` date field per simplify.md item D2 (done). The ghl-setup.md files, rules.md, and ROLE.md all correctly use `Pause WFs Until`.
-
-- **NL sequences.md Re-Entry:** "`Paused` tag added" → should be "`Pause WFs Until` set to today+7". "AM clears `Paused` tag manually" → should be "AM clears `Pause WFs Until` field". "WF-11 auto-removes `Paused` tag" → should be "`Pause WFs Until` date expires". "AM manually removes `Paused` tag" → same.
-- **WR sequences.md Re-Entry:** "`Paused` tag added" → same fix. "Lead Manager removes `Paused` tag" → same. "Auto-remove `Paused` tag" → same.
-- **Fix:** Replace all `Paused` tag references with `Pause WFs Until` date field language throughout both Re-Entry sections.
-
----
-
-**C-03: WF-06 references in messaging.md quick reference tables**
-
-WF-06 was merged into WF-05 per simplify.md item C (done). The ghl-setup.md workflow indices correctly don't list WF-06. But both messaging.md quick reference tables still assign COLDQ-SMS-01 and COLDQ-EMAIL-01 to "WF-06".
-
-- **NL messaging.md quick reference:** COLDQ-SMS-01 Workflow = WF-06, COLDQ-EMAIL-01 Workflow = WF-06
-- **WR messaging.md quick reference:** Same two rows
-- **Fix:** Change WF-06 → WF-05 for both templates in both files.
-
----
-
-**C-04: WR 7-day auto-resume scope — conflicting documentation across 5 locations**
-
-WR ghl-setup WF-11 correctly limits auto-resume to Cold stage only ("Branch — Cold stage only: Wait 7 days" + "Note for Warm Response stage contacts: No 7-day auto-resume"). This makes sense — Lead Manager is actively working Warm Response stage contacts via WF-00A/WF-00B, so auto-resume there is inappropriate. But five other locations contradict this:
-
-1. **warm-response/rules.md line 14:** "7-day auto-resume applies to all stages (no distinction between active/drip in this account)." → Should say Cold stage only.
-2. **rules.md Section 10 cheat sheet:** "Auto-resume after re-engagement: 7 days (all stages) [WR]" → Should say "7 days (Cold stage only)".
-3. **rules.md Section 6 WR Protocol:** "Auto-resume safety net: If Lead Manager does nothing after 7 days, `Pause WFs Until` date expires → drip resumes automatically." — Doesn't distinguish stages.
-4. **rules.md Section 6 Key Difference note:** "Warm Response has two paths ... — all stages use the same 7-day auto-resume." — Explicitly says "all stages."
-5. **warm-response/sequences.md Re-Entry:** "If no action after 7 days: Auto-remove Paused tag → drip resumes automatically" — doesn't distinguish stages, implies all.
-
-- **Correct behavior (per WR ghl-setup WF-11):** Cold stage = 7-day auto-resume. Warm Response stage = no auto-resume (LM moves stage or clears field manually).
-- **Fix:** Update all five locations to match the WF-11 logic.
-
----
-
-**C-05: Contact custom field count stale in previous consistency log**
-
-Previous log says "9 fields each." Actual count is **10 fields each** — the `Pause WFs Until` field was added as part of the D2 simplification (Paused tag → date field). Both NL and WR ghl-setup.md Step 3 list 10 Contact custom fields.
-
----
-
-**C-06: Opportunity custom field count stale in previous consistency log**
-
-Previous log says "17 fields each." Actual count is **18 fields each.** Both NL and WR ghl-setup.md Step 3 list: Reference ID, Property County, Property State, Acres, APN, Tier 1 Market Price, Tier 2 Market Price, Blind Offer, Offer Price %, Legal Description, Map Link, Latitude, Longitude, Offer Price, Contract Date, Original Source, Latest Source, Latest Source Date = 18.
-
----
-
-**C-07: NL messaging.md quick reference — NL-SMS-02 workflow attribution incomplete**
-
-NL-SMS-02 is listed in the quick reference as Workflow "WF-02" only, but the template is also used on Day 4 in WF-03 (confirmed in both sequences.md Phase 2 table and ghl-setup.md WF-03 Step 4).
-
-- **Fix:** Update Workflow column for NL-SMS-02 to "WF-02 / WF-03".
-
----
-
-**C-08: for-review.md improvement items #2, #3, and #7 reference WF-06**
-
-WF-06 no longer exists (merged into WF-05).
-
-- **Item #2 (Multi-Property Overlap):** "Add a workflow condition at the start of WF-02, WF-03, WF-04, WF-05, WF-06, WF-08" — WF-06 should be removed from this list.
-- **Item #3 (GHL Looping):** "WF-06 (Cold Quarterly) and WF-08 Phase 2 (Nurture Quarterly) both say 'loop'" — Should reference WF-05 Phase 2 instead of WF-06. The three options table also references WF-06 in "end of WF-06/WF-08" → should be "end of WF-05/WF-08". Decision note says "Document in ghl-setup.md WF-06 and WF-08" → should say WF-05 and WF-08. Files affected says "ghl-setup.md (WF-06, WF-08)" → should say WF-05, WF-08.
-- **Item #7 (Message Variety):** "Files affected" says "ghl-setup.md (update WF-06, WF-08 to rotate)" → should say WF-05, WF-08.
-- **Fix:** Replace all WF-06 references with WF-05 in items #2, #3, and #7.
-
----
-
-**C-09: MEMORY.md cadence table oversimplification**
-
-MEMORY.md Contact Cadence table shows "Day 11–30 | Every 2–3 days" — this incorrectly combines two distinct cadences. ROLE.md and sequences.md correctly distinguish: Day 11–14 = every 2–3 days, Day 15–30 = Tuesdays & Thursdays only.
-
-- **Fix:** Split MEMORY.md row into two: Day 11–14 (every 2–3 days) and Day 15–30 (Tue/Thu only).
-
----
-
-**C-10: ROLE.md Project Files table is missing rules.md**
-
-rules.md is a core parent-level shared file that governs all outreach across both accounts. It's listed in README.md's parent-level file table, but ROLE.md's Project Files table skips it. Since ROLE.md is loaded as AI context each session, the omission means the AI may not know to reference rules.md.
-
-- **Fix:** Add rules.md row to ROLE.md Project Files table.
-
----
-
-**C-11: ROLE.md Channel Strategy table — Qualified stage says "Calls" only**
-
-The Channel Strategy table in ROLE.md lists Qualified (Active) channels as just "Calls." But NL sequences.md Qualified section says "SMS check-ins" alongside calls, and NL ghl-setup WF-07 includes "Send SMS — check-in" after 2 days with no call logged. The correct channel mix is Calls + light SMS.
-
-- **Fix:** Update ROLE.md Channel Strategy table Qualified row to "Calls + light SMS check-ins."
-
----
-
-**C-12: simplify.md "What's Driving Complexity" section has 3 stale points**
-
-The "What's Driving Complexity" section describes root causes of system complexity, but several points are outdated due to completed simplification work:
-
-- **Point 2:** "19 total workflows — many doing the same job in both accounts (WF-05, WF-06, WF-10, WF-11 all exist twice)" — Actual count is 17 (WF-06 merged into WF-05 per item C done). WF-06 reference is stale.
-- **Point 4:** "every send step in every drip workflow needs a `Paused` tag check" — Should say `Pause WFs Until` date field check (item D2 done).
-- **Point 5:** "Rules duplication — contact hours, DNC protocol, escalation, data hygiene are ~95% identical between New Leads and Warm Response. Two files to maintain, two places to drift." — This problem was solved by creating the shared rules.md (item E done). The two account rules.md files are now redirects to the shared file.
-
-- **Fix:** Update or annotate all three points to reflect current state.
-
----
-
-**C-13: for-review.md item #4 WF-11 filter — only covers NL, same gap exists in WR**
-
-Item #4 proposes a stage enrollment filter for WF-11 but only discusses NL stages (Cold, Nurture, Dispo Re-Engage). The same filtering gap exists in WR's WF-11: the trigger has no stage filter, so a contact in the Transferred stage (already handed off to New Leads) who replies would fire WF-11, creating a spurious call task for the Lead Manager on a contact they no longer own.
-
-- **Fix:** Expand item #4 to also propose a WR WF-11 enrollment filter: "Contact is in pipeline stage: Warm Response OR Cold" + "NOT tagged DNC" + "NOT tagged Re-Engaged."
-
----
-
-**C-14: for-review.md item #4 proposed NL filter excludes active Day stages**
-
-Item #4's proposed enrollment filter lists only drip/dispo stages: "Cold, Nurture, Dispo: No Motivation, Dispo: Wants Retail, Dispo: On MLS, OR Dispo: Lead Declined." But NL ghl-setup WF-11 "Applies to" note explicitly includes active AM stages: "drip stages (Cold, Nurture, Dispo Re-Engage) AND active AM stages (Day 1-2, Day 3-14, Day 15-30)." Adopting the proposed filter as-is would break the pause behavior for active stages — a Day 3-14 contact who replies to an automated SMS would NOT trigger WF-11, meaning no pause, no task, no notification.
-
-- **Fix:** Add Day 1-2, Day 3-14, Day 15-30 to the proposed NL WF-11 enrollment filter. Keep the "no auto-resume for active stages" distinction in the workflow logic, not in the enrollment filter.
-
----
-
-**C-15: NL WF-01 re-submission cleanup may not kill active sequence workflows (WF-02/WF-03/WF-04)**
-
-WF-01 Step 1 (re-submission cleanup) removes the contact from "all active drip workflows (WF-05, WF-08, WF-09)" — but does NOT list WF-02, WF-03, or WF-04. If a lead is in Day 3-14 when re-submitted, WF-03 would still be running.
-
-The documentation relies on WF-02/WF-03/WF-04 exit conditions to catch this: "Exit conditions: Contact stage changes (moved to qualified or disqualified stage)." But re-submission moves the contact to New Leads — which is neither a qualified nor a disqualified stage. Whether GHL's exit condition fires depends on implementation: if set as "stage is no longer Day 3-14" (generic any-change), it works; if set as "moved to a specific forward stage," it won't catch a backward move to New Leads.
-
-- **Fix:** Either (a) add WF-02, WF-03, WF-04 to the WF-01 re-submission cleanup list, or (b) clarify that exit conditions must be implemented as "contact is no longer in [current stage]" (any stage change, not just forward moves). Option (a) is safer — explicit removal is more reliable than exit condition interpretation.
-
----
-
 ### Notes — Not Conflicts, But Worth Documenting
 
 **N-01: Offer Price % field — undocumented origin**
@@ -262,7 +124,7 @@ Decision Log lists item #11 (Post-Purchase Referrals) and #12 (Deceased Protocol
 
 **Recommended approach (simple):**
 
-- Add a workflow condition at the start of WF-02, WF-03, WF-04, WF-05, WF-06, WF-08:
+- Add a workflow condition at the start of WF-02, WF-03, WF-04, WF-05, WF-08:
   - "If this contact has another active opportunity in the same stage group, skip automated messages and create a manual task instead"
   - AM handles multi-property contacts personally
 - For Cold/Nurture drips: only send one message per contact regardless of opportunity count
@@ -278,7 +140,7 @@ Decision Log lists item #11 (Post-Purchase Referrals) and #12 (Deceased Protocol
 
 ### 3. GHL Looping Limitation
 
-**Gap:** WF-06 (Cold Quarterly) and WF-08 Phase 2 (Nurture Quarterly) both say "loop" but GHL does not natively support workflow loops. If built as linear workflows, they end after the last step and leads silently stop receiving messages.
+**Gap:** WF-05 Phase 2 (Cold Quarterly) and WF-08 Phase 2 (Nurture Quarterly) both say "loop" but GHL does not natively support workflow loops. If built as linear workflows, they end after the last step and leads silently stop receiving messages.
 
 **Why it matters:** Implementation blocker. Without a solution, quarterly drips expire after the last built step.
 
@@ -287,36 +149,48 @@ Decision Log lists item #11 (Post-Purchase Referrals) and #12 (Deceased Protocol
 | Option                        | How It Works                                                                                                                   | Pros                                          | Cons                                                    |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- | ------------------------------------------------------- |
 | **A. Manual build-out**       | Build 3+ years of quarterly steps (12+ steps per workflow)                                                                     | Simple, no external dependency, easy to audit | Must remember to extend. If forgotten, leads go silent. |
-| **B. automation webhook re-trigger** | At the end of WF-06/WF-08, fire a webhook to automation. automation removes the drip tag, waits, then re-adds it — re-triggering enrollment. | Truly indefinite. Set and forget.             | Adds automation dependency. If automation fails, drip stops.          |
+| **B. automation webhook re-trigger** | At the end of WF-05/WF-08, fire a webhook to automation. automation removes the drip tag, waits, then re-adds it — re-triggering enrollment. | Truly indefinite. Set and forget.             | Adds automation dependency. If automation fails, drip stops.          |
 | **C. Hybrid**                 | Build 2 years manually + automation webhook at the end as a safety net                                                                | Long runway + failsafe                        | Slightly more complex to set up                         |
 
 **Recommendation:** Start with Option A (manual build-out, 3 years). Add Option B later as a safety net. Revisit annually.
 
-**Decision needed:** Which option to use. Document in ghl-setup.md WF-06 and WF-08 notes.
+**Decision needed:** Which option to use. Document in ghl-setup.md WF-05 and WF-08 notes.
 
-- **Files affected:** ghl-setup.md (WF-06, WF-08)
+- **Files affected:** ghl-setup.md (WF-05, WF-08)
 
 ---
 
 ### 4. WF-11 Enrollment Filter & Edge Cases
 
-**Gap:** WF-11 triggers on "Inbound SMS or Email reply received" but needs precise stage filtering to avoid misfiring on Day 1-2 / Day 3-14 / Day 15-30 contacts. Also no guard against re-triggering if lead replies twice during the 7-day review window.
+**Gap:** WF-11 triggers on "Inbound SMS or Email reply received" but needs precise stage filtering to avoid misfiring. In New Leads, it would fire on Day 1-2 / Day 3-14 / Day 15-30 contacts when the AM is already actively working them. In Warm Response, it would fire on contacts in the Transferred stage (already handed off to New Leads), creating spurious call tasks for the Lead Manager on contacts they no longer own. Also no guard against re-triggering if lead replies twice during the 7-day review window.
 
-**Why it matters:** Without the filter, every inbound reply from any contact fires WF-11. Day 1-2 leads would get paused and flagged when AM is already actively working them.
+**Why it matters:** Without the filter, every inbound reply from any contact fires WF-11, derailing active workflows and creating duplicate work across accounts.
 
 **Recommended changes:**
 
+**New Leads WF-11:**
 1. **Explicit enrollment filter** — add to WF-11 trigger:
-   - Contact is in pipeline stage: Cold, Nurture, Dispo: No Motivation, Dispo: Wants Retail, Dispo: On MLS, OR Dispo: Lead Declined
+   - Contact is in pipeline stage: Day 1-2, Day 3-14, Day 15-30, Cold, Nurture, Dispo: No Motivation, Dispo: Wants Retail, Dispo: On MLS, OR Dispo: Lead Declined
    - AND contact is NOT tagged `Re-Engaged` (prevents re-trigger during 7-day window)
    - AND contact is NOT tagged `DNC`
+2. **Auto-resume distinction in workflow logic (not enrollment filter):**
+   - Active AM stages (Day 1-2, Day 3-14, Day 15-30): No 7-day auto-resume. AM manually clears `Pause WFs Until` field when ready.
+   - Drip/dispo stages (Cold, Nurture, Dispo Re-Engage): 7-day auto-resume. `Pause WFs Until` date expires after 7 days and workflows resume automatically.
+
+**Warm Response WF-11:**
+1. **Explicit enrollment filter** — add to WF-11 trigger:
+   - Contact is in pipeline stage: Warm Response OR Cold
+   - AND contact is NOT tagged `Re-Engaged` (prevents re-trigger during 7-day window)
+   - AND contact is NOT tagged `DNC`
+
+**Both accounts:**
 2. **Re-trigger guard** — if lead is already tagged `Re-Engaged`, do NOT re-enroll in WF-11.
 3. **Negative-but-not-opt-out replies** — document handling for replies like "not interested" that don't use official opt-out keywords:
    - WF-11 still fires (it's an inbound reply)
-   - AM reviews within 7 days — if clearly negative, AM manually moves to appropriate Dispo
-   - Consider adding a note in rules.md about "soft opt-outs" that AM should treat as DNC even if keywords weren't used
+   - Owner (AM or LM) reviews within 7 days — if clearly negative, moves to appropriate Dispo
+   - Consider adding a note in rules.md about "soft opt-outs" that should be treated as DNC even if keywords weren't used
 
-- **Files affected:** ghl-setup.md (WF-11 trigger section), rules.md (add soft opt-out guidance)
+- **Files affected:** ghl-setup.md (WF-11 trigger section in both NL and WR), rules.md (add soft opt-out guidance)
 
 ---
 
@@ -378,7 +252,7 @@ Decision Log lists item #11 (Post-Purchase Referrals) and #12 (Deceased Protocol
   - Year-end: "Any plans for your property heading into the new year?"
   - Market update: "We've been active buyers in {{opp.prop_county}} lately..."
   - Neighbor sold: "A property near yours sold recently — curious if you've thought about yours?"
-- **Files affected:** messaging.md (add COLDQ-SMS-02 through -06, COLDQ-EMAIL-02 through -06, NURQ variants), sequences.md (update rotation schedule), ghl-setup.md (update WF-06, WF-08 to rotate)
+- **Files affected:** messaging.md (add COLDQ-SMS-02 through -06, COLDQ-EMAIL-02 through -06, NURQ variants), sequences.md (update rotation schedule), ghl-setup.md (update WF-05, WF-08 to rotate)
 
 ---
 

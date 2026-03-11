@@ -11,6 +11,6 @@ Account-specific notes:
 - Stage movement owner: **Lead Manager**
 - Re-engagement task assigned to: **LM**
 - DNC sync direction: Warm Response → New Leads + Prospect Data (WF-10)
-- 7-day auto-resume applies to all stages (no distinction between active/drip in this account).
+- 7-day auto-resume applies to Cold stage only. Warm Response stage requires Lead Manager action (move stage or clear field).
 - No Dispo Re-Engage stages in this account — that section of rules.md is New Leads only.
 

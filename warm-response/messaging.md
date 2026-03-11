@@ -48,8 +48,8 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 | COLD-SMS-02    | SMS     | Cold Monthly          | Month 4           | WF-05    | Auto        |
 | COLD-EMAIL-02  | Email   | Cold Monthly          | Month 5           | WF-05    | Auto        |
 | COLD-SMS-03    | SMS     | Cold Monthly          | Month 6           | WF-05    | Auto        |
-| COLDQ-SMS-01   | SMS     | Cold Quarterly        | Every 90 days     | WF-06    | Auto        |
-| COLDQ-EMAIL-01 | Email   | Cold Quarterly        | Every 90 days     | WF-06    | Auto        |
+| COLDQ-SMS-01   | SMS     | Cold Quarterly        | Every 90 days     | WF-05    | Auto        |
+| COLDQ-EMAIL-01 | Email   | Cold Quarterly        | Every 90 days     | WF-05    | Auto        |
 
 ---
 
@@ -160,7 +160,7 @@ When you're ready, just reply with a good number or call me directly: [CALLBACK 
 
 **Stage:** Cold | **Cadence:** Monthly (every 30 days) | **Owner:** GHL auto only
 **Applies to:** Warm Response leads that timed out after 14 days
-**Entry tag:** `Drip: Cold Monthly`
+**Trigger:** WF-05 fires on stage entry
 **Note:** Same templates as New Leads' Cold drip.
 
 ---
@@ -215,14 +215,14 @@ If that ever lines up for you, we'd love to reconnect.
 
 > Hey {{first_name}}, it's been a few months — we're still actively buying land in your county. If you've been thinking about it, now might be a good time to connect. — Bana Land
 
-At Month 6 → Remove tag `Drip: Cold Monthly` → Add tag `Drip: Cold Quarterly` → transition to quarterly phase.
+Trigger: WF-05 transitions to quarterly phase automatically at Month 6.
 
 ---
 
 ## Cold — Quarterly Drip (Day 180+)
 
 **Stage:** Cold | **Cadence:** Every 90 days (indefinite) | **Owner:** GHL auto only
-**Entry tag:** `Drip: Cold Quarterly` (swapped in from `Drip: Cold Monthly` at Month 6)
+**Trigger:** WF-05 (Phase 2) continues automatically
 
 ---
 

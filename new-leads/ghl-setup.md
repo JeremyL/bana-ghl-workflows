@@ -278,7 +278,7 @@ Build each workflow in **Automation > Workflows**.
 **Actions:**
 
 1. **If contact is tagged `Re-Submitted` (re-entry from new external campaign):**
-   - Remove from all active drip workflows (WF-05, WF-08, WF-09)
+   - Remove from all active workflows: WF-02 (Day 1-2), WF-03 (Day 3-14), WF-04 (Day 15-30), WF-05 (Cold drip), WF-08 (Nurture), WF-09 (Dispo Re-Engage)
    - Clear field: `Pause WFs Until` (if set from a prior cycle)
    - Remove tag: `Re-Engaged` (if present from a prior cycle)
    - Remove tag: `Re-Submitted` (cleanup — it has served its purpose as a trigger)

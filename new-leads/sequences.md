@@ -250,12 +250,12 @@ When hitting a lead on the same day with multiple channels (Day 1-2 phase), use 
 
 A lead in Cold, Nurture, or Dispo Re-Engage replies to an automated message we sent.
 
-- **What happens:** WF-11 fires. `Paused` tag added — active workflows hold in place at their next send step (position preserved). AM gets a 7-day review window.
+- **What happens:** WF-11 fires. `Pause WFs Until` field set to today+7 — active workflows hold in place at their next send step (position preserved). AM gets a 7-day review window.
 - **If AM moves to qualified stage:** Workflow exit triggers fire, drip killed. Lead enters Sequence — Qualified Leads.
-- **If AM clears `Paused` tag manually:** Drip resumes from exactly where it stopped.
-- **If AM does nothing after 7 days:** WF-11 auto-removes `Paused` tag — drip resumes from where it stopped. No restart.
+- **If AM clears `Pause WFs Until` field manually:** Drip resumes from exactly where it stopped.
+- **If AM does nothing after 7 days:** `Pause WFs Until` date expires — drip resumes from where it stopped. No restart.
 - **Pipeline stage does NOT change** during re-engagement review — the lead stays in Cold / Nurture / Dispo Re-Engage unless AM explicitly moves them.
-- **Active AM stages (Day 1-2 / Day 3-14 / Day 15-30):** Same pause mechanic applies — automated sends hold. No 7-day auto-resume for these stages; AM manually removes `Paused` tag or moves stage.
+- **Active AM stages (Day 1-2 / Day 3-14 / Day 15-30):** Same pause mechanic applies — automated sends hold. No 7-day auto-resume for these stages; AM manually clears `Pause WFs Until` field or moves stage.
 
 ### Re-Submission (new external campaign source)
 
