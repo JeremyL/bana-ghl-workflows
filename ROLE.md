@@ -89,7 +89,7 @@ See [warm-response/pipeline.md](warm-response/pipeline.md), [new-leads/pipeline.
 | Not Contacted (Day 1–30) | Calls + SMS + Email                                                        | Acquisition Mgr + GHL auto |
 | Cold (Day 30–180)        | SMS + Email (monthly) — Warm Response `Cold: Email Only` contacts get Email only, no SMS | GHL auto only              |
 | Cold (Day 180+)          | SMS + Email (quarterly) — Warm Response `Cold: Email Only` contacts get Email only, no SMS | GHL auto only              |
-| Qualified (Active)       | Calls                                                                      | Acquisition Mgr            |
+| Qualified (Active)       | Calls + light SMS check-ins                                                | Acquisition Mgr            |
 | Nurture                  | SMS + Email (monthly × 3mo, quarterly thereafter)                          | Full GHL auto              |
 | Dispo — Terminal         | No contact                                                                 | —                          |
 | Dispo — Re-Engage        | SMS + Email (same Long-Term Drip as Cold)                                  | GHL auto                   |
@@ -156,6 +156,7 @@ See [warm-response/pipeline.md](warm-response/pipeline.md), [new-leads/pipeline.
 | File                                         | Purpose                                          |
 | -------------------------------------------- | ------------------------------------------------ |
 | [README.md](README.md)                       | Project overview and full file index             |
+| [rules.md](rules.md)                         | Shared contact rules & compliance (both accounts) |
 | [todo.md](todo.md)                           | Open decisions and to-do items                   |
 | [for-review.md](for-review.md)               | Pre-launch verifications, improvements, and decision log |
 | [prospect-data/](prospect-data/)             | Prospect Data — data warehouse account files     |

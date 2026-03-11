@@ -40,7 +40,7 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 | NL-SMS-01      | SMS     | New Leads — Day 1-2         | Day 1, Morning    | WF-02    | Auto        |
 | NL-SMS-07      | SMS     | New Leads — Day 1-2         | Day 1, Afternoon  | WF-02    | Auto        |
 | NL-EMAIL-01    | Email   | New Leads — Day 1-2         | Day 2, Morning    | WF-02    | Auto        |
-| NL-SMS-02      | SMS     | New Leads — Day 1-2 / 3-14  | Day 2, Day 4      | WF-02    | Auto        |
+| NL-SMS-02      | SMS     | New Leads — Day 1-2 / 3-14  | Day 2, Day 4      | WF-02 / WF-03 | Auto        |
 | NL-EMAIL-05    | Email   | New Leads — Day 3-14        | Day 5             | WF-03    | Auto        |
 | NL-EMAIL-02    | Email   | New Leads — Day 3-14        | Day 7             | WF-03    | Auto        |
 | NL-SMS-03      | SMS     | New Leads — Day 3-14        | Day 8             | WF-03    | Auto        |
@@ -57,8 +57,8 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 | COLD-SMS-02    | SMS     | Cold Monthly                | Month 4           | WF-05    | Auto        |
 | COLD-EMAIL-02  | Email   | Cold Monthly                | Month 5           | WF-05    | Auto        |
 | COLD-SMS-03    | SMS     | Cold Monthly                | Month 6           | WF-05    | Auto        |
-| COLDQ-SMS-01   | SMS     | Cold Quarterly              | Every 90 days     | WF-06    | Auto        |
-| COLDQ-EMAIL-01 | Email   | Cold Quarterly              | Every 90 days     | WF-06    | Auto        |
+| COLDQ-SMS-01   | SMS     | Cold Quarterly              | Every 90 days     | WF-05    | Auto        |
+| COLDQ-EMAIL-01 | Email   | Cold Quarterly              | Every 90 days     | WF-05    | Auto        |
 | NUR-SMS-01     | SMS     | Nurture Monthly             | Month 0           | WF-08    | Auto        |
 | NUR-EMAIL-01   | Email   | Nurture Monthly / Quarterly | Month 1, Month 9  | WF-08    | Auto        |
 | NUR-SMS-02     | SMS     | Nurture Monthly / Quarterly | Month 2, Month 15 | WF-08    | Auto        |
@@ -230,7 +230,7 @@ Bana Land | [CALLBACK NUMBER]
 
 **Stage:** Cold | **Cadence:** Monthly (every 30 days) | **Owner:** GHL auto only
 **Applies to:** Cold stage leads AND all Dispo Re-Engage leads (No Motivation, Wants Retail, On MLS, Lead Declined)
-**Entry tag:** `Drip: Cold Monthly`
+**Trigger:** WF-05 fires on stage entry
 
 ---
 
@@ -284,14 +284,14 @@ If that ever lines up for you, we'd love to reconnect.
 
 > Hey {{first_name}}, it's been a few months — we're still actively buying land in your county. If you've been thinking about it, now might be a good time to connect. — Bana Land
 
-At Month 6 → Remove tag `Drip: Cold Monthly` → Add tag `Drip: Cold Quarterly` → transition to quarterly phase.
+Trigger: WF-05 transitions to quarterly phase automatically at Month 6.
 
 ---
 
 ## Cold — Quarterly Drip (Day 180+)
 
 **Stage:** Cold | **Cadence:** Every 90 days (indefinite) | **Owner:** GHL auto only
-**Entry tag:** `Drip: Cold Quarterly` (swapped in from `Drip: Cold Monthly` at Month 6)
+**Trigger:** WF-05 (Phase 2) continues automatically
 
 ---
 
@@ -318,7 +318,7 @@ If your situation has changed or you'd like to revisit a conversation, reply to 
 ## Nurture — Monthly (Months 0-3)
 
 **Stage:** Nurture | **Cadence:** Every 30 days | **Owner:** GHL auto only
-**Entry tag:** `Drip: Nurture Monthly` (added on Nurture stage entry)
+**Trigger:** WF-08 fires on stage entry
 **Channels:** SMS + Email only
 
 ---
@@ -347,14 +347,14 @@ No pressure — just wanted to stay on your radar in case the timing ever works 
 
 > {{first_name}}, just wanted to stay on your radar. We're still actively buying land — if the timing's ever right, we're here.
 
-At Month 3 → Remove tag `Drip: Nurture Monthly` → Add tag `Drip: Nurture Quarterly` → transition to quarterly phase.
+Trigger: WF-08 transitions to quarterly phase automatically at Month 3.
 
 ---
 
 ## Nurture — Quarterly (Month 3+)
 
 **Stage:** Nurture | **Cadence:** Every 90 days (indefinite) | **Owner:** GHL auto only
-**Entry tag:** `Drip: Nurture Quarterly` (swapped in from `Drip: Nurture Monthly` at Month 3)
+**Trigger:** WF-08 (Phase 2) continues automatically
 
 Templates NUR-EMAIL-01 and NUR-SMS-02 are reused from the Monthly section above.
 

@@ -158,9 +158,11 @@ There are two distinct re-entry events. Each has its own protocol. The mechanics
 5. **Resolution — one of two outcomes:**
    - **Lead Manager connects** → move to Transferred → WF-HANDOFF → New Leads. Clear `Pause WFs Until`. Remove tag `Re-Engaged`.
    - **Not actionable** → LM clears `Pause WFs Until` field → drip resumes. Remove tag `Re-Engaged`.
-6. **Auto-resume safety net:** If Lead Manager does nothing after **7 days**, `Pause WFs Until` date expires → drip resumes automatically. WF-11 clears the field and removes `Re-Engaged`.
+6. **Auto-resume safety net (Cold stage only):** If Lead Manager does nothing after **7 days**, `Pause WFs Until` date expires → drip resumes automatically. WF-11 clears the field and removes `Re-Engaged`. **Note for Warm Response stage:** No auto-resume — Lead Manager must manually move the stage or clear the field.
+   - **Resolution on Cold:** Lead Manager either connects + transfers to New Leads, or clears field to resume Cold drip.
+   - **Resolution on Warm Response:** Lead Manager either moves to Transferred + WF-HANDOFF, or clears field to resume Warm Response drip.
 
-> **Key difference:** New Leads has three resolution paths (qualify / dispo / not actionable) and distinguishes active stages from drip stages. Warm Response has two paths (connect and transfer, or not actionable) — all stages use the same 7-day auto-resume.
+> **Key difference:** New Leads has three resolution paths (qualify / dispo / not actionable) and distinguishes active stages from drip stages with different auto-resume behavior. Warm Response has two paths (connect and transfer, or not actionable) — Cold stage uses 7-day auto-resume, Warm Response stage has no auto-resume and requires Lead Manager action.
 
 ### 6B. Re-Submission — Lead comes back from a new external campaign
 
@@ -232,5 +234,5 @@ If a lead becomes hostile, threatening, or legally threatening:
 | DNC sync                             | To Warm Response + Prospect Data        | To New Leads + Prospect Data            |
 | No response = opt-out?               | No — keep following up per cadence      | No — keep following up per cadence      |
 | Who can qualify / transfer a lead?   | AM only — no automation                 | LM only — no automation                 |
-| Auto-resume after re-engagement      | 7 days (drip stages only)               | 7 days (all stages)                     |
+| Auto-resume after re-engagement      | 7 days (drip stages only)               | 7 days (Cold stage only)                |
 | SMS opt-out keywords handled by GHL? | Yes — verify configured                 | Yes — verify configured                 |
