@@ -18,7 +18,7 @@ present, set Skip Trace Date = upload date.
 - Leave Owner fields blank if property has not been skip traced yet.
 Skip Trace Date = blank.
 
-### Data Cleaning (on upload or via n8n pre-processing)
+### Data Cleaning (on upload or via automation pre-processing)
 
 - `0` in phone fields → store as blank (0 = no data from skip trace provider)
 - `0` in Age field → store as blank (0 = unknown)

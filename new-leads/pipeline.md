@@ -145,7 +145,7 @@ Disqualified stages fall into two groups:
 | **Definition** | Lead has explicitly requested to not be contacted.                               |
 | **Entry**      | Lead says "stop calling," "remove me," "don't contact me," or similar            |
 | **Follow-Up**  | **Zero contact.** Immediately stop all workflows. Tag DNC. Log date.             |
-| **DNC Sync**   | WF-10 fires DNC sync webhook → n8n → Warm Response marks DNC if contact exists there. |
+| **DNC Sync**   | WF-10 fires DNC sync webhook → automation → Warm Response marks DNC if contact exists there. |
 | **Compliance** | TCPA — failure to honor opt-out is a legal liability. Treat as highest priority. |
 
 ---
@@ -304,6 +304,6 @@ Cold / Nurture / Dispo Re-Engage (replies to our drip)
         └─► AM moves to dispo ──────────────────────────────────► Appropriate Dispo
         └─► AM does nothing (7 days expire) ────────────────────► Drip resumes from where it stopped
 
-Any stage (new external campaign source detected by n8n)
+Any stage (new external campaign source detected by automation)
   └─► Re-Submitted ─► Move to NEW LEADS ─► Full restart (Day 1-2 → etc.)
 ```
