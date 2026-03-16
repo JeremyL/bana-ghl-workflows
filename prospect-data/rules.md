@@ -34,7 +34,7 @@ Skip Trace Date = blank.
 - If a phone or email slot is empty from the skip trace provider, leave it blank.
 Do not fill in "N/A" or placeholder values.
 - Phone Type fields are raw text from the skip trace provider. Store as-is.
-These inform which channels are valid for outreach when pushing to New Leads & Warm Response.
+These inform which channels are valid for outreach when pushing to New Leads.
 
 ### Deduplication
 
@@ -92,11 +92,11 @@ In either case, set Campaign Status to `Active` when the campaign launches.
 ### Status Transitions
 
 ```
-Active ──► Pipeline       (property pushed to New Leads or Warm Response)
+Active ──► Pipeline       (property pushed to New Leads)
 Active ──► DNC            (owner requests DNC)
 Active ──► Removed        (bad data, duplicate, sold, purchased, disqualified)
 
-Pipeline ──► Active       (deal fell through, removed from New Leads/Warm Response)
+Pipeline ──► Active       (deal fell through, removed from New Leads)
 Pipeline ──► DNC          (owner requests DNC while in pipeline)
 Pipeline ──► Removed      (bad data discovered, property sold/purchased, disqualified)
 
@@ -106,7 +106,7 @@ Removed ──► Active        (if data was corrected or error was reversed)
 
 ### DNC Handling
 
-- When a DNC is triggered in New Leads or Warm Response, the DNC sync should also update
+- When a DNC is triggered in New Leads, the DNC sync should also update
 the Property record in Prospect Data:
   - Set DNC = checked
   - Set DNC Date = today
@@ -118,23 +118,20 @@ property is DNC, the property is DNC.
 
 ### Account Push Tracking
 
-- When a property is pushed to an account, check the corresponding value in the
-Account Push multi-select (New Leads and/or Warm Response) and set Account Push Date.
-- A property can be in both accounts simultaneously (e.g., cold email running in Warm Response
-while a cold call follow-up runs in New Leads for a different owner).
-- When a property is removed from an account's pipeline (deal dead, cold drip exhausted),
-uncheck the corresponding value and set Status back to Active if no other account holds it.
+- When a property is pushed to New Leads, check `Pushed to New Leads` and set Account Push Date.
+- When a property is removed from the pipeline (deal dead, cold drip exhausted),
+uncheck `Pushed to New Leads` and set Status back to Active.
 
 ### Re-Submission Behavior
 
-When a property is re-submitted to New Leads from a new external campaign (NL WF-01 fires, WR WF-CLEANUP runs if needed), update the Property record in Prospect Data as follows:
+When a property is re-submitted to New Leads from a new external campaign (NL WF-01 fires), update the Property record in Prospect Data as follows:
 
 - **Status:** Stays `Pipeline`. No transition needed — the property is already active in a pipeline.
 - **Campaign tag:** Add the new campaign tag (`Campaign: [New Campaign Name]`). Do not remove old campaign tags — they stack as history.
-- **Account Push:** New Leads value should already be checked. If it was previously unchecked (e.g., the lead went cold and was removed), re-check it.
+- **Pushed to New Leads:** Should already be checked. If it was previously unchecked (e.g., the lead went cold and was removed), re-check it.
 - **Account Push Date:** Update to today's date to reflect the new push.
 
-These updates are currently manual. The re-submission automation (NL WF-01 + WR WF-CLEANUP) does not write back to Prospect Data. Until automated, whoever manages the re-submission should update the Property record at the same time.
+These updates are currently manual. The re-submission automation (NL WF-01) does not write back to Prospect Data. Until automated, whoever manages the re-submission should update the Property record at the same time.
 
 ---
 
@@ -142,16 +139,16 @@ These updates are currently manual. The re-submission automation (NL WF-01 + WR 
 
 ### When to Push
 
-Properties are pushed to New Leads or Warm Response when they are assigned to a campaign and that
-campaign launches. The Campaign Type determines which account receives the data:
+Properties are pushed to New Leads when they are assigned to a campaign and that
+campaign launches. All campaign types now route to New Leads:
 
 
-| Campaign Type | Destination   |
-| ------------- | ------------- |
-| Cold Email    | Warm Response |
-| Cold SMS      | Warm Response |
-| Cold Call     | New Leads     |
-| Direct Mail   | New Leads     |
+| Campaign Type | Destination |
+| ------------- | ----------- |
+| Cold Email    | New Leads   |
+| Cold SMS      | New Leads   |
+| Cold Call     | New Leads   |
+| Direct Mail   | New Leads   |
 
 
 ### What Gets Pushed
@@ -169,21 +166,21 @@ Before pushing, automation should verify:
 - Property Status = Active (not DNC, Pipeline, or Removed)
 - Skip Trace Date is not blank (owner data exists)
 - At least one owner has at least one phone number or email
-- Property is not already in the destination account (check Account Push multi-select)
+- Property is not already in the destination account (check `Pushed to New Leads` checkbox)
 
 ### Post-Push Updates
 
 After successful push to an account:
 
 - Set Status = Pipeline
-- Check the corresponding value in Account Push (New Leads and/or Warm Response)
+- Check `Pushed to New Leads`
 - Set Account Push Date
 
 ---
 
 ## 5. Tag Conventions
 
-All tags follow `Category: Value` format (title case), matching New Leads & Warm Response.
+All tags follow `Category: Value` format (title case), matching New Leads.
 
 ### Campaign Tags
 

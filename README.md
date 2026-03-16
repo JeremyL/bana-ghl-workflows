@@ -1,18 +1,20 @@
 # Bana Land — GHL Follow-Up System
 
-Documentation for Bana Land's multi-channel motivated seller follow-up system, built in Go High Level (GHL). Covers the full lead lifecycle — from first outreach response through deal close, disqualification, or long-term drip — across three GHL sub-accounts.
+Documentation for Bana Land's multi-channel motivated seller follow-up system, built in Go High Level (GHL). Covers the full lead lifecycle — from first outreach response through deal close, disqualification, or long-term drip.
 
-**CRM:** Go High Level &nbsp;|&nbsp; **Niche:** Rural land, all US states &nbsp;|&nbsp; **Lead sources:** Cold call, cold email, cold SMS, direct mail
+**CRM:** Go High Level  |  **Niche:** Rural land, all US states  |  **Lead sources:** Cold call, cold email, cold SMS, direct mail, VAPI AI call, referral, website
 
 ---
 
 ## Three-Account Architecture
 
-| Account | Owner | Role |
-| --- | --- | --- |
-| **New Leads** | Acquisition Manager | All leads from entry through close, dispo, or drip |
-| **Warm Response** | Lead Manager | Cold email/SMS responders → first call or phone number → transfer to New Leads |
-| **Prospect Data** | — | Central data warehouse. Raw property + skip trace data. No outreach. Feeds New Leads & Warm Response. |
+
+| Account           | Owner                         | Role                                                                                                  |
+| ----------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **New Leads**     | Lead Manager + Acquisition Manager | Single working account for all leads. LM owns Day 1–30 for Cold Email/SMS/Call. AM owns Day 1–30 for Direct Mail/VAPI/Referral/Website + all qualified stages through close. |
+| **Warm Response** | — (placeholder)               | Empty placeholder — no active workflows, no pipeline, no contacts. Reserved for future use.           |
+| **Prospect Data** | —                             | Central data warehouse. Raw property + skip trace data. No outreach. Feeds New Leads.                 |
+
 
 ---
 
@@ -20,45 +22,50 @@ Documentation for Bana Land's multi-channel motivated seller follow-up system, b
 
 ### Parent-Level
 
-| File                               | Purpose                                                                                |
-| ---------------------------------- | -------------------------------------------------------------------------------------- |
-| [ROLE.md](ROLE.md)                 | AI assistant context file — loaded each session to establish role, business profile    |
-| [rules.md](rules.md)               | Shared contact rules and compliance for New Leads + Warm Response                      |
-| [todo.md](todo.md)                 | Cross-account open decisions, unresolved questions, and pending build tasks            |
-| [for-review.md](for-review.md)     | Pre-launch verifications, consistency log, improvement ideas, and decision log         |
+
+| File                                 | Purpose                                                                             |
+| ------------------------------------ | ----------------------------------------------------------------------------------- |
+| [ROLE.md](ROLE.md)                   | AI assistant context file — loaded each session to establish role, business profile |
+| [rules.md](rules.md)                 | Shared contact rules and compliance                                                 |
+| [todo.md](todo.md)                   | Cross-account open decisions, unresolved questions, and pending build tasks         |
+| [for-review.md](for-review.md)       | Pre-launch verifications, consistency log, improvement ideas, and decision log      |
+| [majorchanges.md](majorchanges.md)   | Lead Manager expansion — architecture decision and implementation plan              |
 
 
 ### Account: New Leads (`new-leads/`)
 
-Handles all leads from New Leads through close, disqualification, or long-term drip. Owned by Acquisition Manager.
+Single working account for all lead sources. Handles all leads from entry through close, disqualification, or long-term drip. Workflows branch on source tag to assign tasks to Lead Manager or Acquisition Manager.
 
-| File                                   | Purpose                                                                           |
-| -------------------------------------- | --------------------------------------------------------------------------------- |
-| [pipeline.md](new-leads/pipeline.md)   | Stage definitions: New Leads → Cold, all Dispo stages, Qualified stages, Nurture  |
-| [sequences.md](new-leads/sequences.md) | Cadence map: New Leads + Cold drip + Nurture + Qualified sequences                |
-| [messaging.md](new-leads/messaging.md) | Message templates: NL-* + COLD-* + COLDQ-* + NUR-* + NURQ-* + NEPQ question bank |
-| [rules.md](new-leads/rules.md)         | Account-specific rules summary — points to shared ../rules.md                     |
-| [ghl-setup.md](new-leads/ghl-setup.md) | GHL build guide: 10 workflows (WF-01 through WF-05, WF-07 through WF-11)          |
+
+| File                                   | Purpose                                                                          |
+| -------------------------------------- | -------------------------------------------------------------------------------- |
+| [pipeline.md](new-leads/pipeline.md)   | Stage definitions: New Leads → Cold, all Dispo stages, Qualified stages, Nurture |
+| [sequences.md](new-leads/sequences.md) | Cadence map: Day 1–30 + Cold Email sub-flow + Cold drip + Nurture + Qualified    |
+| [messaging.md](new-leads/messaging.md) | Message templates: NL-* + WR-EMAIL-* + COLD-* + COLDQ-* + NUR-* + NURQ-* + NEPQ |
+| [rules.md](new-leads/rules.md)         | Account-specific rules summary — points to shared ../rules.md                    |
+| [ghl-setup.md](new-leads/ghl-setup.md) | GHL build guide: 11 workflows (WF-00A, WF-01 through WF-05, WF-07 through WF-11) |
 
 
 ### Account: Warm Response (`warm-response/`)
 
-Handles cold email and cold SMS responders from initial response through either successful transfer to New Leads or long-term Cold drip. Owned by Lead Manager.
+Empty placeholder account. All functionality has been merged into New Leads. Reserved for potential future use (backup phone numbers, sender reputation protection).
 
-| File                                       | Purpose                                                                                      |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------- |
-| [pipeline.md](warm-response/pipeline.md)   | Stage definitions: Warm Response, Cold, Transferred, DNC                                     |
-| [sequences.md](warm-response/sequences.md) | Cadence map: Warm Response sequence + Cold drip (monthly → quarterly)                        |
-| [messaging.md](warm-response/messaging.md) | Message templates: WR-* + COLD-* + COLDQ-*                                                   |
-| [rules.md](warm-response/rules.md)         | Account-specific rules summary — points to shared ../rules.md                               |
-| [ghl-setup.md](warm-response/ghl-setup.md) | GHL build guide: 7 workflows (WF-00A, WF-00B, WF-05, WF-10, WF-HANDOFF, WF-11, WF-CLEANUP)        |
+
+| File                                       | Purpose              |
+| ------------------------------------------ | -------------------- |
+| [pipeline.md](warm-response/pipeline.md)   | Placeholder          |
+| [sequences.md](warm-response/sequences.md) | Placeholder          |
+| [messaging.md](warm-response/messaging.md) | Placeholder          |
+| [rules.md](warm-response/rules.md)         | Placeholder          |
+| [ghl-setup.md](warm-response/ghl-setup.md) | Placeholder (includes what was eliminated vs. moved) |
 
 
 ### Account: Prospect Data (`prospect-data/`)
 
-Stores all raw property and skip trace data in GHL Custom Objects. No contacts, no pipeline, no outreach. Serves as the central data warehouse that feeds New Leads & Warm Response.
+Stores all raw property and skip trace data in GHL Custom Objects. No contacts, no pipeline, no outreach. Serves as the central data warehouse that feeds New Leads.
+
 
 | File                                         | Purpose                                                                                                                     |
 | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| [data-model.md](prospect-data/data-model.md) | Custom Object schemas (Properties + Campaigns), field definitions, associations, field mapping to New Leads & Warm Response |
+| [data-model.md](prospect-data/data-model.md) | Custom Object schemas (Properties + Campaigns), field definitions, associations, field mapping to New Leads                 |
 | [rules.md](prospect-data/rules.md)           | Data upload standards, campaign rules, status management, push-to-account rules                                             |

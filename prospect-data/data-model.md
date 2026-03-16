@@ -2,7 +2,7 @@
 
 Prospect Data in the Bana Land GHL system. Stores all raw property and skip trace data in a single flat Custom Object. No contacts, no opportunities, no pipeline.
 
-Automations push data from here into New Leads and Warm Response as needed for campaigns and lead follow-up.
+Automations push data from here into New Leads for campaigns and lead follow-up. Warm Response is an empty placeholder account — no data is pushed there.
 
 ---
 
@@ -85,7 +85,7 @@ Same 20 fields as Owner 1, prefixed with `Owner 3`.
 | Skip Trace Date   | Date         | Date skip trace was completed                    |
 | DNC               | Checkbox     | Any owner on this property requested DNC         |
 | DNC Date          | Date         | Date DNC was flagged                             |
-| Account Push      | Multi-Select | New Leads / Warm Response                        |
+| Pushed to New Leads | Checkbox   | Whether this property has been pushed to the New Leads account |
 | Account Push Date | Date         | Date property was last pushed to another account |
 | Date Added        | Date         | Date this property record was created            |
 | Notes             | Large Text   | Free-form notes                                  |
@@ -97,7 +97,7 @@ Same 20 fields as Owner 1, prefixed with `Owner 3`.
 | Value       | Meaning                                                           |
 | ----------- | ----------------------------------------------------------------- |
 | Active      | Available for campaigns. Default status on upload.                          |
-| Pipeline    | Currently active in New Leads or Warm Response. Do not re-send.             |
+| Pipeline    | Currently active in New Leads. Do not re-send.                              |
 | DNC         | At least one owner requested Do Not Contact. No further outreach.           |
 | Removed     | Off the table — bad data, duplicate, sold, purchased, or disqualified.      |
 
@@ -149,23 +149,21 @@ Native GHL associations between Properties and Campaigns can be created via auto
 ```
 Prospect Data
   │
-  ├──► Warm Response
-  │      Cold email / cold SMS campaigns
-  │      Automation creates Contact + Opportunity from Property fields
-  │
   └──► New Leads
-         Cold call / Direct mail / Other
+         All campaign types (Cold Email, Cold SMS, Cold Call, Direct Mail)
          Automation creates Contact + Opportunity from Property fields
 ```
 
+Warm Response is an empty placeholder account — no data flows there.
+
 ### Field Mapping: Properties → Contact + Opportunity
 
-When a property is pushed to New Leads or Warm Response, automation splits the flat row into the Contact/Opportunity model used by those instances:
+When a property is pushed to New Leads, automation splits the flat row into the Contact/Opportunity model:
 
 **Property → Contact (one per owner with valid contact info):**
 
 
-| Properties Field (Prospect Data) | Contact Field (New Leads or Warm Response) |
+| Properties Field (Prospect Data) | Contact Field (New Leads) |
 | ---------------------------- | ------------------------------ |
 | Owner N First Name           | First Name                     |
 | Owner N Last Name            | Last Name                      |
@@ -182,7 +180,7 @@ When a property is pushed to New Leads or Warm Response, automation splits the f
 **Property → Opportunity:**
 
 
-| Properties Field (Prospect Data) | Opportunity Field (New Leads or Warm Response) |
+| Properties Field (Prospect Data) | Opportunity Field (New Leads) |
 | ---------------------------- | ---------------------------------- |
 | Reference ID                 | Reference ID                       |
 | APN                          | APN                                |

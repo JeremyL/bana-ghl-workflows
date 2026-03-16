@@ -1,16 +1,7 @@
 # Bana Land — Warm Response: Contact Rules & Compliance
 
-All rules for this account are maintained in the shared rules file:
+**Status: PLACEHOLDER — No active workflows, no pipeline, no contacts.**
 
-**[../rules.md](../rules.md)**
+All rules now apply to the [New Leads](../new-leads/rules.md) account only. Shared rules are in [../rules.md](../rules.md).
 
-That file covers contact hours, DNC protocol, compliance notes, stage movement (with Warm Response–specific section), positive response protocol (with Warm Response–specific section), data hygiene, and escalation.
-
-Account-specific notes:
-
-- Stage movement owner: **Lead Manager**
-- Re-engagement task assigned to: **LM**
-- DNC sync direction: Warm Response → New Leads + Prospect Data (WF-10)
-- 7-day auto-resume applies to Cold stage only. Warm Response stage requires Lead Manager action (move stage or clear field).
-- No Dispo Re-Engage stages in this account — that section of rules.md is New Leads only.
-
+See [../majorchanges.md](../majorchanges.md) for the architecture decision and rationale.

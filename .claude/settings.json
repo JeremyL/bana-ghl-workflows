@@ -3,7 +3,11 @@
     "allow": [
       "WebFetch(domain:help.gohighlevel.com)",
       "WebFetch(domain:consultevo.com)",
-      "WebFetch(domain:ideas.gohighlevel.com)"
+      "WebFetch(domain:ideas.gohighlevel.com)",
+      "Read(//c/Users/J/.claude/projects/c--Users-J-Projects-Bana-Follow-Up/memory/**)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\J\\.claude\\projects\\c--Users-J-Projects-Bana-Follow-Up\\memory"
     ]
   }
 }

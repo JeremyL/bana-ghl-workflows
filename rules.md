@@ -1,6 +1,6 @@
 # Bana Land — Contact Rules & Compliance
 
-Operational rules that govern all outreach across **New Leads** and **Warm Response**.
+Operational rules that govern all outreach in **New Leads** (the single working account).
 Every GHL workflow, automation, and team member action must respect these rules.
 
 ---
@@ -34,12 +34,8 @@ Every GHL workflow, automation, and team member action must respect these rules.
 3. Tag the lead with **"DNC"** and log the date opted out
 4. Remove from all active workflow enrollments
 5. Zero contact from that point forward — calls, texts, email, all stopped
-6. **DNC Sync:** WF-10 fires two sync webhooks via automation:
-   - automation marks DNC in the **other GHL account** if contact exists there (moves to DNC stage, kills workflows, tags DNC)
+6. **DNC Sync:** WF-10 fires a sync webhook via automation:
    - automation updates the Property record in Prospect Data (DNC = checked, DNC Date = today, Status = DNC)
-
-   > **New Leads:** syncs to Warm Response + Prospect Data
-   > **Warm Response:** syncs to New Leads + Prospect Data
 
 ### Team responsibility:
 
@@ -91,94 +87,59 @@ Not answering calls, not replying to texts, and not opening emails does NOT cons
 
 ## 5. Stage Movement Rules
 
-Stage movement rules differ by account because the pipelines and owners are different.
-
-### New Leads
-
 **Who can change a lead's stage:**
-- **Acquisition Manager:** Can move leads through any stage manually
+- **Lead Manager (LM):** Can move LM-sourced leads (Cold Email/SMS/Call) through any stage, including dispo stages. Can also qualify and move to Due Diligence.
+- **Acquisition Manager (AM):** Can move AM-sourced leads (Direct Mail/VAPI/Referral/Website) through any stage. Owns all qualified stages regardless of source.
 - **GHL automation:** Can advance uncontacted leads based on time elapsed (Day 1-2 → Day 3-14 → etc.)
 - **Automation cannot:** Qualify a lead (move to Due Diligence or beyond) — that requires human confirmation
 
 | Trigger                        | Action                                       |
 | ------------------------------ | -------------------------------------------- |
-| Lead responds and is qualified | Human manually moves to Due Diligence        |
+| Lead responds and is qualified | Owner manually moves to Due Diligence. For LM-sourced: LM sets call appointment for AM. |
 | X days pass with no response   | GHL auto-advances to next time bucket        |
 | Lead says stop / opt-out       | GHL or human moves to Dispo: DNC immediately |
-| Disqualifying info gathered    | Human moves to appropriate Dispo stage       |
-| Offer declined, deal dead      | Human moves to Dispo: Lead Declined          |
-| Offer declined, could revisit  | Human moves to Nurture or Negotiations       |
-
-### Warm Response
-
-**Who can change a lead's stage:**
-- **Lead Manager:** Can move leads through Warm Response, Cold, Transferred, DNC
-- **GHL automation:** Can advance from Warm Response → Cold (14-day timeout)
-- **Automation cannot:** Move a lead to Transferred — that requires human confirmation (Lead Manager)
-
-| Trigger                                 | Action                                                   |
-| --------------------------------------- | -------------------------------------------------------- |
-| Phone # received (email track)          | Lead Manager moves to Transferred → WF-HANDOFF           |
-| Phone call completed (SMS track)        | Lead Manager moves to Transferred → WF-HANDOFF           |
-| 14 days pass with no connection         | GHL auto-moves to Cold → Cold drip begins                |
-| Lead says stop / opt-out                | GHL or Lead Manager moves to Dispo: DNC → DNC sync       |
-| Re-submitted from new external campaign | automation cleanup webhook → New Leads handles as new lead      |
+| Disqualifying info gathered    | Owner moves to appropriate Dispo stage       |
+| Offer declined, deal dead      | AM moves to Dispo: Lead Declined             |
+| Offer declined, could revisit  | AM moves to Nurture or Negotiations          |
+| Re-submitted from new campaign | WF-01 fires → full restart in New Leads      |
 
 ---
 
 ## 6. Positive Response Protocol
 
-There are two distinct re-entry events. Each has its own protocol. The mechanics differ slightly by account because the owner and outcomes differ.
+There are two distinct re-entry events. Each has its own protocol.
 
-**Pause mechanic (both accounts):** All drip and automated-send workflows include a **"Wait Until"** condition before each send step that checks: **`Pause WFs Until` is empty OR `Pause WFs Until` < today**. If the field is set to a future date, the contact is held in place — no messages go out, but position in the workflow is preserved. When the date passes naturally (auto-resume) or the field is cleared manually by AM/LM (early release), the contact continues from exactly where it stopped.
+**Pause mechanic:** All drip and automated-send workflows include a **"Wait Until"** condition before each send step that checks: **`Pause WFs Until` is empty OR `Pause WFs Until` < today**. If the field is set to a future date, the contact is held in place — no messages go out, but position in the workflow is preserved. When the date passes naturally (auto-resume) or the field is cleared manually by the owner (early release), the contact continues from exactly where it stopped.
 
 ### 6A. Re-Engagement — Lead responds to our existing GHL follow-up
 
 **Definition:** Lead replies to an SMS or email that *we sent* from any GHL workflow.
 
-#### New Leads — Protocol (WF-11):
+#### Protocol (WF-11):
 
 1. Set field: `Pause WFs Until` = today + 7 days — all active workflows hold at the next send condition
 2. Add tag: `Re-Engaged`
-3. Create high-priority task for **Acquisition Manager**: review the reply
-4. Send internal notification to AM with contact link
+3. Create high-priority review task assigned to **lead owner** (LM for Cold Email/SMS/Call sources, AM for Direct Mail/VAPI/Referral/Website sources)
+4. Send internal notification to owner with contact link
 5. **Resolution — one of three outcomes:**
-   - **AM moves to a qualified stage** → workflow exit triggers fire, active workflows killed. Clear `Pause WFs Until`. Remove tag `Re-Engaged`.
-   - **AM moves to a Dispo stage** → dispo workflows take over. Clear `Pause WFs Until`. Remove tag `Re-Engaged`.
-   - **AM clears `Pause WFs Until` field early** (reply not actionable, lead stays in current stage) → drip resumes from where it stopped. Remove tag `Re-Engaged`.
-6. **Auto-resume safety net (drip stages only):** If AM does nothing after **7 days**, `Pause WFs Until` date expires → drip resumes automatically. WF-11 clears the field and removes `Re-Engaged`.
-7. **Active stages (Day 1-2 / Day 3-14 / Day 15-30):** No 7-day auto-resume. AM is already working this lead — they move the stage or manually clear `Pause WFs Until` when ready.
-
-#### Warm Response — Protocol (WF-11):
-
-1. Set field: `Pause WFs Until` = today + 7 days — all active workflows hold at the next send condition
-2. Add tag: `Re-Engaged`
-3. Create call task assigned to **Lead Manager**: "Call {{first_name}} — re-engaged from Cold drip"
-4. Send internal notification with contact link
-5. **Resolution — one of two outcomes:**
-   - **Lead Manager connects** → move to Transferred → WF-HANDOFF → New Leads. Clear `Pause WFs Until`. Remove tag `Re-Engaged`.
-   - **Not actionable** → LM clears `Pause WFs Until` field → drip resumes. Remove tag `Re-Engaged`.
-6. **Auto-resume safety net (Cold stage only):** If Lead Manager does nothing after **7 days**, `Pause WFs Until` date expires → drip resumes automatically. WF-11 clears the field and removes `Re-Engaged`. **Note for Warm Response stage:** No auto-resume — Lead Manager must manually move the stage or clear the field.
-   - **Resolution on Cold:** Lead Manager either connects + transfers to New Leads, or clears field to resume Cold drip.
-   - **Resolution on Warm Response:** Lead Manager either moves to Transferred + WF-HANDOFF, or clears field to resume Warm Response drip.
-
-> **Key difference:** New Leads has three resolution paths (qualify / dispo / not actionable) and distinguishes active stages from drip stages with different auto-resume behavior. Warm Response has two paths (connect and transfer, or not actionable) — Cold stage uses 7-day auto-resume, Warm Response stage has no auto-resume and requires Lead Manager action.
+   - **Owner moves to a qualified stage** → workflow exit triggers fire, active workflows killed. Clear `Pause WFs Until`. Remove tag `Re-Engaged`.
+   - **Owner moves to a Dispo stage** → dispo workflows take over. Clear `Pause WFs Until`. Remove tag `Re-Engaged`.
+   - **Owner clears `Pause WFs Until` field early** (reply not actionable, lead stays in current stage) → drip resumes from where it stopped. Remove tag `Re-Engaged`.
+6. **Auto-resume safety net (drip stages only):** If owner does nothing after **7 days**, `Pause WFs Until` date expires → drip resumes automatically. WF-11 clears the field and removes `Re-Engaged`.
+7. **Active stages (Day 1-2 / Day 3-14 / Day 15-30):** No 7-day auto-resume. Owner is already working this lead — they move the stage or manually clear `Pause WFs Until` when ready.
 
 ### 6B. Re-Submission — Lead comes back from a new external campaign
 
 **Definition:** A contact already in GHL is reached by a *new, separate marketing campaign* outside GHL.
 
-**Protocol (both accounts):**
+**Protocol:**
 
 1. automation detects duplicate contact with a new campaign source
 2. automation adds a new Source tag (stacks on existing), updates Latest Source field + Latest Source Date
-3. automation adds tag: `Re-Submitted` and sends contact to **New Leads** (always — regardless of which account they're currently in)
-4. WF-01 fires in New Leads: cleans up all active drips, assigns to AM, creates task
+3. automation adds tag: `Re-Submitted` and moves contact to **New Leads** stage
+4. WF-01 fires: cleans up all active drips, assigns to owner based on new source tag, creates task
 5. Lead is worked from scratch — full Day 1-2 sequence, identical to a brand-new lead
 6. Original Source field is never overwritten — first-touch attribution preserved
-7. **If contact exists in Warm Response:** automation fires cleanup webhook (stop drip, move to Transferred)
-
-> **Key difference:** From New Leads' perspective this is a fresh restart. From Warm Response's perspective this is a cleanup event — WF-CLEANUP stops all workflows and moves the contact to the Transferred terminal stage.
 
 **Key distinction:** Re-engagement = responding to *our* outreach (pause and review). Re-submission = entering from a *new external source* (full reset to New Leads).
 
@@ -186,7 +147,7 @@ There are two distinct re-entry events. Each has its own protocol. The mechanics
 
 ## 7. Dispo Re-Engage — Long-Term Drip
 
-*(New Leads only — Warm Response has no Dispo Re-Engage stages)*
+*(New Leads account)*
 
 The four **Dispo — Re-Engage** stages are NOT completely dead leads:
 
@@ -226,13 +187,15 @@ If a lead becomes hostile, threatening, or legally threatening:
 
 ## 10. Rules Summary Cheat Sheet
 
-| Rule                                 | New Leads                               | Warm Response                           |
-| ------------------------------------ | --------------------------------------- | --------------------------------------- |
-| Contact hours                        | 9am–7pm local time only                 | 9am–7pm local time only                 |
-| DNC opt-out response time            | Immediate                               | Immediate                               |
-| DNC re-contact                       | Never                                   | Never                                   |
-| DNC sync                             | To Warm Response + Prospect Data        | To New Leads + Prospect Data            |
-| No response = opt-out?               | No — keep following up per cadence      | No — keep following up per cadence      |
-| Who can qualify / transfer a lead?   | AM only — no automation                 | LM only — no automation                 |
-| Auto-resume after re-engagement      | 7 days (drip stages only)               | 7 days (Cold stage only)                |
-| SMS opt-out keywords handled by GHL? | Yes — verify configured                 | Yes — verify configured                 |
+| Rule                                 | Detail                                              |
+| ------------------------------------ | --------------------------------------------------- |
+| Contact hours                        | 9am–7pm local time only                              |
+| DNC opt-out response time            | Immediate                                            |
+| DNC re-contact                       | Never                                                |
+| DNC sync                             | New Leads → Prospect Data (bi-directional)           |
+| No response = opt-out?               | No — keep following up per cadence                   |
+| Who can qualify a lead?              | LM or AM (based on source) — no automation           |
+| Who can dispo a lead?                | LM or AM — both can dispo directly                   |
+| Auto-resume after re-engagement      | 7 days (drip stages only)                            |
+| SMS opt-out keywords handled by GHL? | Yes — verify configured                              |
+| LM → AM handoff mechanism            | LM sets call appointment for AM at qualification     |
