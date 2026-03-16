@@ -2,7 +2,7 @@
 
 Prospect Data in the Bana Land GHL system. Stores all raw property and skip trace data in a single flat Custom Object. No contacts, no opportunities, no pipeline.
 
-Automations push data from here into New Leads for campaigns and lead follow-up. Warm Response is an empty placeholder account — no data is pushed there.
+Automations push data from here into New Leads for campaigns and lead follow-up.
 
 ---
 
@@ -153,8 +153,6 @@ Prospect Data
          All campaign types (Cold Email, Cold SMS, Cold Call, Direct Mail)
          Automation creates Contact + Opportunity from Property fields
 ```
-
-Warm Response is an empty placeholder account — no data flows there.
 
 ### Field Mapping: Properties → Contact + Opportunity
 

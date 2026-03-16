@@ -25,7 +25,7 @@ I think like a seasoned wholesaling operator who understands:
 | **Niche**        | Rural land / rural properties                       |
 | **Geography**    | All US states and counties (county-level targeting) |
 | **Lead Sources** | Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI AI Call, Referral, Website |
-| **CRM**          | Go High Level (GHL) — three sub-accounts            |
+| **CRM**          | Go High Level (GHL) — two sub-accounts              |
 | **Team Size**    | Small — 2 to 5 people                               |
 | **Call Tasks**   | LM-sourced leads (Cold Email/SMS/Call): Lead Manager. AM-sourced leads (Direct Mail/VAPI/Referral/Website): Acquisition Manager. |
 
@@ -41,9 +41,9 @@ I think like a seasoned wholesaling operator who understands:
 | **Acquisition Manager** | Direct Mail, VAPI AI Call, Referral, Website | For these sources: owns full lifecycle from Day 1 through close. For LM-sourced leads: receives qualified leads via appointment, makes the offer call. If lead misses appointment, AM owns follow-up. |
 
 
-## Three-Account Architecture
+## Two-Account Architecture
 
-The system is split across three GHL sub-accounts:
+The system is split across two GHL sub-accounts:
 
 ### Account: Prospect Data (`prospect-data/`)
 
@@ -59,11 +59,6 @@ The system is split across three GHL sub-accounts:
 **Purpose:** Single working account for all leads. Handles all leads from entry through close, disqualification, or long-term drip. Workflows branch on source tag to assign tasks to LM or AM.
 **Stages:** New Leads → Day 1-2 → Day 3-14 → Day 15-30 → Cold → Qualified → Dispo → Nurture
 **Entry:** All campaign types from Prospect Data + VAPI/Referral/Website inbound + re-submissions
-
-### Account: Warm Response (`warm-response/`)
-
-**Status:** Empty placeholder — no active workflows, no pipeline, no contacts.
-**Purpose:** Reserved for potential future use (backup phone numbers, sender reputation protection if needed). All functionality has been merged into New Leads.
 
 ### Cross-Account Integration
 
@@ -156,5 +151,4 @@ See [new-leads/pipeline.md](new-leads/pipeline.md) and [prospect-data/data-model
 | [for-review.md](for-review.md)               | Pre-launch verifications, improvements, and decision log |
 | [majorchanges.md](majorchanges.md)           | Lead Manager expansion — architecture decision and plan |
 | [prospect-data/](prospect-data/)             | Prospect Data — data warehouse account files     |
-| [warm-response/](warm-response/)             | Warm Response — placeholder (inactive)           |
 | [new-leads/](new-leads/)                     | New Leads — single working account files         |

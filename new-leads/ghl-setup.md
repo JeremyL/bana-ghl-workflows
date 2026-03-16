@@ -3,7 +3,7 @@
 This guide walks through building the New Leads GHL sub-account from scratch.
 Follow the steps in order — each section depends on the previous one being complete.
 
-This is the single working account for all lead sources. All leads enter here and are worked through close, disqualification, or long-term drip. Warm Response is kept as an empty placeholder account.
+This is the single working account for all lead sources. All leads enter here and are worked through close, disqualification, or long-term drip.
 
 Reference files:
 
