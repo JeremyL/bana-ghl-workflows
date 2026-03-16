@@ -2,7 +2,7 @@
 
 Catch-all for items that need attention before or after go-live: pre-launch verifications, cross-file consistency checks, improvement ideas, and open decisions.
 
-Last updated: 2026-03-10
+Last updated: 2026-03-13
 
 ---
 
@@ -10,39 +10,53 @@ Last updated: 2026-03-10
 
 Items that require hands-on GHL testing before go-live. Cannot be verified from documentation alone.
 
-| Item                           | Account       | Workflow       | What to Verify                                                                             |
-| ------------------------------ | ------------- | -------------- | ------------------------------------------------------------------------------------------ |
-| Conditional SMS by phone field | Warm Response | WF-00A Step 13 | GHL can send SMS to Phone 1–4 individually, skipping empty fields                          |
-| Conditional SMS skip by tag    | Warm Response | WF-05          | GHL can branch on `Cold: Email Only` tag to skip SMS steps                                 |
-| Workflow looping               | Both          | WF-05, WF-08   | GHL does not natively loop workflows — plan for manual re-enrollment or extended build-out |
-| DNC sync to Prospect Data      | Both          | WF-10          | Automation webhook updates Property record in Prospect Data on DNC                         |
-| Prospect Data push automation  | Prospect Data | Automation     | Field mapping from Properties to Contact + Opportunity works correctly                     |
-| WF-HANDOFF end-to-end          | Warm Response | WF-HANDOFF     | Webhook → automation → New Leads contact creation + WF-01 fires                                   |
-| WF-CLEANUP guard (C-02)        | Warm Response | WF-CLEANUP     | Re-submission cleanup does NOT double-trigger WF-HANDOFF                                   |
-
-**Note:** "Conditional SMS skip by tag — New Leads WF-05" was removed — `Cold: Email Only` is a Warm Response–only concept. NL contacts in Cold all have verified phone numbers from the Day 1–30 sequence.
+| Item                             | Account    | Workflow       | What to Verify                                                                             |
+| -------------------------------- | ---------- | -------------- | ------------------------------------------------------------------------------------------ |
+| Conditional SMS by phone field   | New Leads  | WF-00A Step 16 | GHL can send SMS to Phone 1–4 individually, skipping empty fields                          |
+| Conditional SMS skip by tag      | New Leads  | WF-05          | GHL can branch on `Cold: Email Only` tag to skip SMS steps                                 |
+| WF-00A conditional suppression   | New Leads  | WF-02/03/04    | Standard workflow steps are correctly skipped while contact is enrolled in WF-00A           |
+| Workflow looping                 | New Leads  | WF-05, WF-08   | GHL does not natively loop workflows — plan for manual re-enrollment or extended build-out |
+| DNC sync to Prospect Data        | New Leads  | WF-10          | Automation webhook updates Property record in Prospect Data on DNC                         |
+| Prospect Data push automation    | Prospect Data | Automation  | Field mapping from Properties to Contact + Opportunity works correctly                     |
+| Source-based task assignment      | New Leads  | WF-01/02/03/04 | Workflows correctly branch on source tag to assign tasks to LM vs AM                      |
 
 ---
 
 ## Cross-File Consistency Log
 
-Full re-run completed 2026-03-10 against all active files, file by file, compared against every other file. Archive and ignore folders excluded. Run again before GHL build begins or after any significant file changes.
+Last full re-run: 2026-03-13 (post-merge architecture — WR merged into NL, dual-owner model).
 
-### Issues Found — Need Fixing
+### Issues Found & Fixed (2026-03-13 Re-Run)
+
+**I-01: sequences.md conflicted with ghl-setup.md on WF-00A suppression scope** — FIXED
+
+sequences.md said standard emails still fire alongside WF-00A. ghl-setup.md said all three channels suppressed (correct per decision). Updated sequences.md to match: WF-00A is the sole communicator while active.
+
+**I-02: new-leads/rules.md had stale pre-merge content** — FIXED
+
+Referenced AM-only ownership and WR DNC sync. Updated to LM/AM dual-owner model and NL → Prospect Data sync only.
+
+**I-03: prospect-data/data-model.md still referenced Warm Response as active destination** — FIXED
+
+Data flow diagram, field mapping headers, and status description all referenced WR. Updated throughout to reflect NL-only routing. WR noted as empty placeholder.
+
+**I-04: Source: Launch Control was a duplicate of Cold SMS** — FIXED
+
+Launch Control is a platform for sending cold SMS, not a separate lead source. Removed `Source: Launch Control` tag and dropdown value entirely. Launch Control leads use `Source: Cold SMS`. Removed from all routing tables, tags, dropdown values, and lead source lists across all files.
 
 ### Notes — Not Conflicts, But Worth Documenting
 
 **N-01: Offer Price % field — undocumented origin**
 
-NL and WR Opportunity custom fields include "Offer Price %" (Number), but this field doesn't exist in Prospect Data's Properties schema and isn't in the data-model.md field mapping table. It's unclear whether automation calculates it from Offer Price / Market Price on push, or whether it's manually entered. Should be documented in data-model.md field mapping section or noted as a manually-entered field.
+NL Opportunity custom fields include "Offer Price %" (Number), but this field doesn't exist in Prospect Data's Properties schema and isn't in the data-model.md field mapping table. It's unclear whether automation calculates it from Offer Price / Market Price on push, or whether it's manually entered. Should be documented in data-model.md field mapping section or noted as a manually-entered field.
 
 **N-02: Latitude/Longitude/Map Link fields — not in current field mapping**
 
-NL and WR Opportunity custom fields include Latitude, Longitude, and Map Link. Prospect Data's Properties schema lists GPS and Map Link under "fields available if data source provides them (not in current CSV)." The data-model.md field mapping table doesn't include any of these three. Not an error today (data source doesn't provide them yet), but the mapping will need updating when the data source starts including them.
+NL Opportunity custom fields include Latitude, Longitude, and Map Link. Prospect Data's Properties schema lists GPS and Map Link under "fields available if data source provides them (not in current CSV)." The data-model.md field mapping table doesn't include any of these three. Not an error today (data source doesn't provide them yet), but the mapping will need updating when the data source starts including them.
 
-**N-03: Property State type mismatch between Prospect Data and NL/WR**
+**N-03: Property State type mismatch between Prospect Data and NL**
 
-Prospect Data stores Property State as Text. NL and WR store it as Dropdown (all US states). Automation must ensure the text value from Prospect Data matches a valid dropdown option when pushing to NL/WR. Not currently documented as a mapping consideration in data-model.md.
+Prospect Data stores Property State as Text. NL stores it as Dropdown (all US states). Automation must ensure the text value from Prospect Data matches a valid dropdown option when pushing to NL. Not currently documented as a mapping consideration in data-model.md.
 
 **N-04: WF-07 looping limitation not flagged in for-review.md item #3**
 
@@ -50,11 +64,11 @@ WF-07 (Qualified Lead Check-In) says "Repeat / loop every 1-2 days until stage c
 
 **N-05: Owner mailing city/state/zip lost on push from Prospect Data**
 
-Prospect Data Properties store full mailing address (street, city, state, zip) for each owner. The data-model.md field mapping only maps "Owner N Mailing Address → Address" (street). Mailing city, state, and zip don't map to any NL/WR Contact field. GHL Contacts have native City, State, and Postal Code fields — the mapping table should include them.
+Prospect Data Properties store full mailing address (street, city, state, zip) for each owner. The data-model.md field mapping only maps "Owner N Mailing Address → Address" (street). Mailing city, state, and zip don't map to any NL Contact field. GHL Contacts have native City, State, and Postal Code fields — the mapping table should include them.
 
-**N-06: Phone Type data from skip trace doesn't map to NL/WR**
+**N-06: Phone Type data from skip trace doesn't map to NL**
 
-Prospect Data Properties store Phone Type (Mobile, Residential, Landline, VoIP, etc.) for each of the 4 phones per owner. This data doesn't map to any NL/WR Contact field. Relevant for WR WF-00A's one-time SMS blast to Phone 1–4 — sending SMS to a landline will fail silently. Phone Type could inform which numbers to SMS vs. call.
+Prospect Data Properties store Phone Type (Mobile, Residential, Landline, VoIP, etc.) for each of the 4 phones per owner. This data doesn't map to any NL Contact field. Relevant for WF-00A's one-time SMS blast to Phone 1–4 — sending SMS to a landline will fail silently. Phone Type could inform which numbers to SMS vs. call.
 
 **N-07: for-review.md Decision Log items #11 and #12 have no improvement writeups**
 
@@ -62,31 +76,23 @@ Decision Log lists item #11 (Post-Purchase Referrals) and #12 (Deceased Protocol
 
 ---
 
-### Verified — No Issues
+### Verified — No Issues (2026-03-13, Post-Merge)
 
-- **Contact custom field schemas** — identical between New Leads and Warm Response (10 fields each, matching names/types; only "Assigned To" value differs: AM vs LM)
-- **Opportunity custom field schemas** — identical between New Leads and Warm Response (18 fields each, matching names/types/dropdown values)
-- **Tag lists** — matching between NL and WR, with appropriate account-specific differences (NL-only: `Re-Submitted`, `Caller: [Agent Name]`; WR-only: `Cold: Email Only`, `Cleanup`; all shared tags identical)
-- **COLD- and COLDQ- template content** — word-for-word identical between NL and WR messaging.md files (COLD-SMS-01 through COLD-SMS-04, COLD-EMAIL-01/02, COLDQ-SMS-01, COLDQ-EMAIL-01)
-- **Cold drip cadence** — 6-month monthly then quarterly, same in both accounts' sequences.md and ghl-setup.md (WF-05, single workflow handling both phases)
-- **Nurture sequence** — NL-only, internally consistent across pipeline.md, sequences.md, messaging.md, and ghl-setup.md (WF-08). Phase 1 monthly (3 months) → Phase 2 quarterly (indefinite). Both phases handled internally by WF-08.
-- **Warm Response 14-day exit** — consistent across WR pipeline.md, sequences.md, and ghl-setup.md (WF-00A, WF-00B). Both tracks end at Day 14 → Cold.
+- **Nurture sequence** — internally consistent across pipeline.md, sequences.md, messaging.md, and ghl-setup.md (WF-08). Phase 1 monthly (3 months) → Phase 2 quarterly (indefinite). Both phases handled internally by WF-08. Template references match.
 - **New Leads 30-day Cold entry** — consistent across NL pipeline.md, sequences.md, and ghl-setup.md (WF-04 → Cold → WF-05)
-- **Day-by-day sequence alignment** — NL sequences.md touch schedule matches NL ghl-setup.md WF-02/WF-03/WF-04 step-by-step (message refs, channel, timing all verified). WR sequences.md matches WF-00A/WF-00B. Day counts verified arithmetically against Wait steps.
-- **Messaging quick reference tables** — NL and WR messaging.md quick reference tables correctly list timing and auto/manual designations for every template (workflow attribution exceptions noted in C-03 and C-07)
-- **Re-engagement protocol (WF-11)** — `Pause WFs Until` field mechanic, Re-Engaged tag, role-appropriate task assignment (AM in NL, LM in WR) — consistent between ghl-setup.md files and rules.md §6 (auto-resume scope exception noted in C-04)
-- **Re-submission protocol** — consistent between NL and WR: always goes to New Leads (WF-01), cleanup webhook to WR (WF-CLEANUP), Original Source preserved, tags stack, `Re-Submitted` tag applied in NL only (active sequence cleanup gap noted in C-15)
-- **DNC protocol** — tri-directional, consistent across all three accounts: NL WF-10 syncs to WR + PD, WR WF-10 syncs to NL + PD, PD rules.md documents DNC receipt. Same trigger keywords (STOP/QUIT/UNSUBSCRIBE/CANCEL/END) in both accounts.
-- **Source tracking** — Original Source (immutable, set once) + Latest Source (updated on re-submission) + Latest Source Date. Same dropdown values in NL and WR (8 values: Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI AI Call, Launch Control, Referral, Website). Source tags match dropdown values.
-- **Campaign Type → destination routing** — consistent between prospect-data/rules.md §4, ROLE.md Cross-Account Integration, and NL/WR entry path documentation (Cold Email/SMS → WR, Cold Call/DM → NL)
+- **Cold drip sequence (WF-05)** — template references, timing, and `Cold: Email Only` SMS skip logic consistent across sequences.md, messaging.md, and ghl-setup.md
+- **WF-00A Cold Email Sub-Flow** — email timing (Days 1, 3, 7, 14, 21), Day 30 SMS blast, suppression of WF-02/03/04 all consistent across pipeline.md, sequences.md, messaging.md, and ghl-setup.md
+- **Day 1–30 sequence timing** — template references and day assignments in sequences.md match ghl-setup.md WF-02/03/04 step order and wait durations
+- **Source tracking** — Original Source (immutable, set once) + Latest Source (updated on re-submission) + Latest Source Date. 7 dropdown values: Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI AI Call, Referral, Website. Source tags match dropdown values. All 7 sources routed in WF-01/WF-11. (Launch Control removed — it's a platform for Cold SMS, not a separate source.)
+- **Source → owner routing** — LM owns Cold Email/SMS/Call; AM owns Direct Mail/VAPI/Referral/Website. Consistent across pipeline.md, sequences.md, ghl-setup.md (WF-01, WF-11), and ROLE.md.
+- **Campaign Type → destination routing** — all campaign types route to New Leads. Consistent between prospect-data/rules.md and data-model.md.
 - **Prospect Data Campaign rules** — internally consistent between data-model.md and rules.md (naming convention, tag format, status values, campaign types)
-- **Prospect Data field mapping** — complete and accurate for all fields that currently flow from Properties to Contact + Opportunity. Email 2–4 limitation explicitly noted. Offer Price mapping correct. (Gaps in future/unmapped fields noted in N-01 through N-06)
-- **ROLE.md alignment** — business profile, team roles, contact cadence summary, tone/voice, key rules, and three-account architecture all match the detailed account files. (Minor exceptions noted in C-10 and C-11)
-- **Contact hours** — "9 AM – 7 PM local time" consistent across ROLE.md, rules.md §1, NL rules.md, WR rules.md, and both ghl-setup.md compliance checklists
-- **README.md** — file descriptions and workflow counts accurate (NL: 10 workflows, WR: 7 workflows including WF-CLEANUP)
-- **Template voice compliance** — spot-checked all SMS (≤ 2 sentences) and email (≤ 4 sentences) templates in both messaging.md files. All within limits. All identify sender as Bana Land or agent name.
-- **WR WF-CLEANUP / WF-HANDOFF guard** — `Cleanup` tag correctly prevents WF-HANDOFF from double-firing when WF-CLEANUP moves a re-submitted contact to Transferred. WF-HANDOFF enrollment condition "NOT tagged `Cleanup`" is documented and consistent.
-- **Prospect Data DNC handling** — "DNC applies to the entire property record, not individual owners" is consistent between PD data-model.md (DNC checkbox on Property) and PD rules.md §3.
+- **Prospect Data field mapping** — complete and accurate for all fields that currently flow from Properties to Contact + Opportunity. Email 2–4 limitation explicitly noted. Offer Price mapping correct. Headers updated to NL-only. (Gaps in future/unmapped fields noted in N-01 through N-06)
+- **Contact hours** — "9 AM – 7 PM local time" consistent across ROLE.md, rules.md §1, and ghl-setup.md compliance checklist
+- **Template voice compliance** — spot-checked all SMS (≤ 2 sentences) and email (≤ 4 sentences) templates. All within limits. All identify sender as Bana Land or agent name.
+- **Prospect Data DNC handling** — "DNC applies to the entire property record, not individual owners" consistent between PD data-model.md (DNC checkbox on Property) and PD rules.md §3
+- **DNC protocol** — bi-directional (New Leads ↔ Prospect Data). WF-10 syncs to PD. Same trigger keywords (STOP/QUIT/UNSUBSCRIBE/CANCEL/END). No stale WR references.
+- **LM/AM dual-owner model** — consistent across all files: both can dispo, LM sets appointment for AM at qualification, AM owns all qualified stages regardless of source.
 
 ---
 
@@ -96,21 +102,22 @@ Decision Log lists item #11 (Post-Purchase Referrals) and #12 (Deceased Protocol
 
 ### 1. Speed to Lead
 
-**Gap:** No speed-to-lead target. WF-00B creates a call task due "Today" — no urgency beyond that.
+**Gap:** No speed-to-lead target. WF-01 creates a call task due "Today" — no urgency beyond that.
 
-**Why it matters:** Calling within 5 minutes of a positive SMS response increases contact rate by 10x+ vs. calling within an hour. These leads said "yes" — they're hot right now.
+**Why it matters:** Calling within 5 minutes of a positive response increases contact rate by 10x+ vs. calling within an hour. These leads said "yes" — they're hot right now.
 
 **Recommended changes:**
 
 - Document speed-to-lead targets:
-  - SMS responders (Warm: SMS): **Call within 5 minutes**
-  - Email responders (Warm: Email): **Reply email within 1 hour**
+  - Cold SMS responders: **Call within 5 minutes** (LM)
+  - Cold Email responders (phone # received): **Call within 5 minutes** (LM)
+  - Cold Call leads: **Call within 5 minutes** (LM)
   - Re-submitted leads: **Call within 30 minutes**
 - GHL implementation:
-  - WF-00B Step 3: Change task to "CALL NOW" with real-time push notification to Lead Manager's phone
-  - Add SMS alert to Lead Manager's personal number: "NEW WARM SMS LEAD — {{first_name}} — call now: {{phone}}"
+  - WF-01: Change LM task to "CALL NOW" with real-time push notification to Lead Manager's phone
+  - Add SMS alert to Lead Manager's personal number: "NEW LEAD — {{first_name}} — call now: {{phone}}"
   - Consider GHL auto-call bridge: system calls Lead Manager first, then auto-dials the lead
-- **Files affected:** rules.md (add Section 11: Speed to Lead), ghl-setup.md (WF-00B notification), sequences.md (add timing note)
+- **Files affected:** rules.md (add Section 11: Speed to Lead), ghl-setup.md (WF-01 notification), sequences.md (add timing note)
 
 ---
 
@@ -162,35 +169,26 @@ Decision Log lists item #11 (Post-Purchase Referrals) and #12 (Deceased Protocol
 
 ### 4. WF-11 Enrollment Filter & Edge Cases
 
-**Gap:** WF-11 triggers on "Inbound SMS or Email reply received" but needs precise stage filtering to avoid misfiring. In New Leads, it would fire on Day 1-2 / Day 3-14 / Day 15-30 contacts when the AM is already actively working them. In Warm Response, it would fire on contacts in the Transferred stage (already handed off to New Leads), creating spurious call tasks for the Lead Manager on contacts they no longer own. Also no guard against re-triggering if lead replies twice during the 7-day review window.
+**Gap:** WF-11 triggers on "Inbound SMS or Email reply received" but needs precise stage filtering to avoid misfiring on contacts in terminal stages (DNC, Purchased, etc.). Also no guard against re-triggering if lead replies twice during the 7-day review window.
 
-**Why it matters:** Without the filter, every inbound reply from any contact fires WF-11, derailing active workflows and creating duplicate work across accounts.
+**Why it matters:** Without the filter, every inbound reply from any contact fires WF-11, potentially creating duplicate work.
 
 **Recommended changes:**
 
-**New Leads WF-11:**
 1. **Explicit enrollment filter** — add to WF-11 trigger:
    - Contact is in pipeline stage: Day 1-2, Day 3-14, Day 15-30, Cold, Nurture, Dispo: No Motivation, Dispo: Wants Retail, Dispo: On MLS, OR Dispo: Lead Declined
    - AND contact is NOT tagged `Re-Engaged` (prevents re-trigger during 7-day window)
    - AND contact is NOT tagged `DNC`
 2. **Auto-resume distinction in workflow logic (not enrollment filter):**
-   - Active AM stages (Day 1-2, Day 3-14, Day 15-30): No 7-day auto-resume. AM manually clears `Pause WFs Until` field when ready.
+   - Active stages (Day 1-2, Day 3-14, Day 15-30): No 7-day auto-resume. Owner manually clears `Pause WFs Until` field when ready.
    - Drip/dispo stages (Cold, Nurture, Dispo Re-Engage): 7-day auto-resume. `Pause WFs Until` date expires after 7 days and workflows resume automatically.
-
-**Warm Response WF-11:**
-1. **Explicit enrollment filter** — add to WF-11 trigger:
-   - Contact is in pipeline stage: Warm Response OR Cold
-   - AND contact is NOT tagged `Re-Engaged` (prevents re-trigger during 7-day window)
-   - AND contact is NOT tagged `DNC`
-
-**Both accounts:**
-2. **Re-trigger guard** — if lead is already tagged `Re-Engaged`, do NOT re-enroll in WF-11.
-3. **Negative-but-not-opt-out replies** — document handling for replies like "not interested" that don't use official opt-out keywords:
+3. **Re-trigger guard** — if lead is already tagged `Re-Engaged`, do NOT re-enroll in WF-11.
+4. **Negative-but-not-opt-out replies** — document handling for replies like "not interested" that don't use official opt-out keywords:
    - WF-11 still fires (it's an inbound reply)
-   - Owner (AM or LM) reviews within 7 days — if clearly negative, moves to appropriate Dispo
+   - Owner (LM or AM based on source) reviews within 7 days — if clearly negative, moves to appropriate Dispo
    - Consider adding a note in rules.md about "soft opt-outs" that should be treated as DNC even if keywords weren't used
 
-- **Files affected:** ghl-setup.md (WF-11 trigger section in both NL and WR), rules.md (add soft opt-out guidance)
+- **Files affected:** ghl-setup.md (WF-11 trigger section), rules.md (add soft opt-out guidance)
 
 ---
 

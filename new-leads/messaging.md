@@ -12,7 +12,7 @@ Use `{{first_name}}` for GHL merge tag (first name of contact).
 Use `{{agent_name}}` for the team member's name.
 Replace `[CALLBACK NUMBER]` with the agent's dedicated phone line.
 
-For the Warm Response account templates, see [../warm-response/messaging.md](../warm-response/messaging.md).
+Warm Response templates (WR-EMAIL, WR-COLD-SMS) have been merged into this file for the Cold Email sub-flow.
 
 ---
 
@@ -21,13 +21,14 @@ For the Warm Response account templates, see [../warm-response/messaging.md](../
 All template IDs follow the pattern: `STAGE-CHANNEL-##`
 
 
-| Prefix | Stage                          |
-| ------ | ------------------------------ |
-| NL     | New Leads (Day 1-30)           |
-| COLD   | Cold Monthly Drip (Day 30-180) |
-| COLDQ  | Cold Quarterly Drip (Day 180+) |
-| NUR    | Nurture Monthly (Months 0-3)   |
-| NURQ   | Nurture Quarterly (Month 3+)   |
+| Prefix | Stage                                       |
+| ------ | ------------------------------------------- |
+| NL     | New Leads (Day 1-30)                        |
+| WR     | Cold Email Sub-Flow (get phone #)           |
+| COLD   | Cold Monthly Drip (Day 30-180)              |
+| COLDQ  | Cold Quarterly Drip (Day 180+)              |
+| NUR    | Nurture Monthly (Months 0-3)                |
+| NURQ   | Nurture Quarterly (Month 3+)                |
 
 
 ---
@@ -65,13 +66,19 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 | NURQ-EMAIL-01  | Email   | Nurture Quarterly           | Month 3           | WF-08    | Auto        |
 | NURQ-SMS-01    | SMS     | Nurture Quarterly           | Month 6           | WF-08    | Auto        |
 | NURQ-SMS-02    | SMS     | Nurture Quarterly           | Month 12 (1-Year) | WF-08    | Auto        |
+| WR-EMAIL-01    | Email   | Cold Email Sub-Flow         | Day 1             | WF-00A   | Auto        |
+| WR-EMAIL-02    | Email   | Cold Email Sub-Flow         | Day 3             | WF-00A   | Auto        |
+| WR-EMAIL-03    | Email   | Cold Email Sub-Flow         | Day 7             | WF-00A   | Auto        |
+| WR-EMAIL-04    | Email   | Cold Email Sub-Flow         | Day 14            | WF-00A   | Auto        |
+| WR-EMAIL-05    | Email   | Cold Email Sub-Flow         | Day 21            | WF-00A   | Auto        |
+| WR-COLD-SMS-01 | SMS     | Cold Email → Cold (one-time)| Day 30            | WF-00A   | Auto        |
 
 
 ---
 
 ## New Leads — Day 1-2
 
-**Stage:** Day 1-2 | **Cadence:** 2x per day | **Owner:** Acquisition Manager + GHL auto
+**Stage:** Day 1-2 | **Cadence:** 2x per day | **Owner:** LM or AM (by source) + GHL auto
 
 ---
 
@@ -112,7 +119,7 @@ Bana Land | [CALLBACK NUMBER]
 
 ## New Leads — Day 3-14
 
-**Stage:** Day 3-14 | **Cadence:** Days 3-10 daily, Days 11-14 every 2-3 days | **Owner:** Acquisition Manager + GHL auto
+**Stage:** Day 3-14 | **Cadence:** Days 3-10 daily, Days 11-14 every 2-3 days | **Owner:** LM or AM (by source) + GHL auto
 
 Template NL-SMS-02 is reused from the Day 1-2 section above.
 
@@ -176,7 +183,7 @@ Bana Land | [CALLBACK NUMBER]
 
 ## New Leads — Day 15-30
 
-**Stage:** Day 15-30 | **Cadence:** Tuesdays & Thursdays only | **Owner:** Acquisition Manager + GHL auto
+**Stage:** Day 15-30 | **Cadence:** Tuesdays & Thursdays only | **Owner:** LM or AM (by source) + GHL auto
 
 ---
 
@@ -388,5 +395,80 @@ Continue rotating NUR-SMS-02, NUR-EMAIL-01, NURQ-SMS-01, NURQ-SMS-02 every 90 da
 
 ---
 
+## Cold Email Sub-Flow — Get Phone Number
 
+**Source:** Cold Email leads with no phone number on file | **Owner:** GHL auto (emails) + Lead Manager (monitors replies)
+**Workflow:** WF-00A | **Duration:** Days 1–30 (concurrent with standard Day 1–30 stages)
 
+These templates specifically ask for a phone number. They are different from the standard NL-EMAIL templates and run as a parallel sub-flow for Cold Email leads only.
+
+---
+
+### WR-EMAIL-01 | Ask for Phone Number (Day 1)
+
+**Subject:** Re: Your property
+
+Hey {{first_name}},
+
+Thanks for getting back to me — glad to hear you're open to a conversation.
+
+What's the best number to reach you at? I'd love to connect for just a few minutes.
+
+— {{agent_name}} | Bana Land
+
+---
+
+### WR-EMAIL-02 | Follow-Up (Day 3)
+
+**Subject:** Re: Your property
+
+Hey {{first_name}}, just following up — did you get my last message?
+
+If you're still open to a quick chat, just reply with your number and I'll give you a call.
+
+— {{agent_name}} | Bana Land
+
+---
+
+### WR-EMAIL-03 | Check-In (Day 7)
+
+**Subject:** Re: Your property
+
+Hey {{first_name}}, one more check-in. Happy to work around your schedule — just need a good number to reach you.
+
+Or if it's easier, feel free to call or text me directly: [CALLBACK NUMBER]
+
+— {{agent_name}} | Bana Land
+
+---
+
+### WR-EMAIL-04 | Mid-Window (Day 14)
+
+**Subject:** Re: Your property
+
+Hey {{first_name}}, still thinking about connecting on your property.
+
+If a quick call works better than email, just reply with your number and I'll reach out at a time that works for you.
+
+— {{agent_name}} | Bana Land
+
+---
+
+### WR-EMAIL-05 | Soft Close (Day 21)
+
+**Subject:** Re: Your property
+
+Hey {{first_name}}, I know life gets busy — no rush on my end.
+
+When you're ready, just reply with a good number or call me directly: [CALLBACK NUMBER]
+
+— {{agent_name}} | Bana Land
+
+---
+
+### WR-COLD-SMS-01 | One-Time SMS Blast (Day 30)
+
+**Used by:** WF-00A — sent once to each skip-traced phone number when a Cold Email lead hits Day 30 with no confirmed phone number.
+**Goal:** Bridge the email conversation to a phone connection. Sent once per number. No further SMS in Cold drip for these contacts.
+
+> Hey {{first_name}}, we've been trying to connect over email about your land — this is {{agent_name}} with Bana Land. Is this a good number to reach you?
