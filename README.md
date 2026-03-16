@@ -6,13 +6,12 @@ Documentation for Bana Land's multi-channel motivated seller follow-up system, b
 
 ---
 
-## Three-Account Architecture
+## Two-Account Architecture
 
 
 | Account           | Owner                         | Role                                                                                                  |
 | ----------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------- |
 | **New Leads**     | Lead Manager + Acquisition Manager | Single working account for all leads. LM owns Day 1–30 for Cold Email/SMS/Call. AM owns Day 1–30 for Direct Mail/VAPI/Referral/Website + all qualified stages through close. |
-| **Warm Response** | — (placeholder)               | Empty placeholder — no active workflows, no pipeline, no contacts. Reserved for future use.           |
 | **Prospect Data** | —                             | Central data warehouse. Raw property + skip trace data. No outreach. Feeds New Leads.                 |
 
 
@@ -44,20 +43,6 @@ Single working account for all lead sources. Handles all leads from entry throug
 | [messaging.md](new-leads/messaging.md) | Message templates: NL-* + WR-EMAIL-* + COLD-* + COLDQ-* + NUR-* + NURQ-* + NEPQ |
 | [rules.md](new-leads/rules.md)         | Account-specific rules summary — points to shared ../rules.md                    |
 | [ghl-setup.md](new-leads/ghl-setup.md) | GHL build guide: 11 workflows (WF-00A, WF-01 through WF-05, WF-07 through WF-11) |
-
-
-### Account: Warm Response (`warm-response/`)
-
-Empty placeholder account. All functionality has been merged into New Leads. Reserved for potential future use (backup phone numbers, sender reputation protection).
-
-
-| File                                       | Purpose              |
-| ------------------------------------------ | -------------------- |
-| [pipeline.md](warm-response/pipeline.md)   | Placeholder          |
-| [sequences.md](warm-response/sequences.md) | Placeholder          |
-| [messaging.md](warm-response/messaging.md) | Placeholder          |
-| [rules.md](warm-response/rules.md)         | Placeholder          |
-| [ghl-setup.md](warm-response/ghl-setup.md) | Placeholder (includes what was eliminated vs. moved) |
 
 
 ### Account: Prospect Data (`prospect-data/`)

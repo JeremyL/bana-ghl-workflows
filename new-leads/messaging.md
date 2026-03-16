@@ -12,8 +12,6 @@ Use `{{first_name}}` for GHL merge tag (first name of contact).
 Use `{{agent_name}}` for the team member's name.
 Replace `[CALLBACK NUMBER]` with the agent's dedicated phone line.
 
-Warm Response templates (WR-EMAIL, WR-COLD-SMS) have been merged into this file for the Cold Email sub-flow.
-
 ---
 
 ## Template Naming Convention

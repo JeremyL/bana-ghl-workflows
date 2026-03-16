@@ -3,8 +3,6 @@
 This is the pipeline reference for **New Leads** — the single working account for all lead sources.
 All leads enter here and are worked through close, disqualification, or long-term drip.
 
-Warm Response is kept as an empty placeholder account (no active workflows, no pipeline, no contacts).
-
 ---
 
 ## Data Model
