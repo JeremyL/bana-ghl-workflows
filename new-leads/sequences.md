@@ -6,6 +6,12 @@ with which channel, and whether that touch is human-driven or automated.
 All rules (time windows, DNC handling, etc.) are governed by [rules.md](rules.md).
 All message content lives in [messaging.md](messaging.md).
 
+### Diagrams
+
+- [Lead Lifecycle Overview](diagrams/bana_land_lead_lifecycle_overview.svg)
+- [Day 1–30 Sequence Detail](diagrams/day_1_to_30_sequence_detail.svg)
+- [Cold, Nurture & Re-Entry Flows](diagrams/cold_nurture_reentry_flows.svg)
+
 ---
 
 ## Task Assignment by Source
