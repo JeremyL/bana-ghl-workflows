@@ -68,11 +68,11 @@ They have not yet been spoken to and qualified. Every lead starts here.
 
 | Field          | Detail                                                                                           |
 | -------------- | ------------------------------------------------------------------------------------------------ |
-| **Definition** | Lead assigned to LM or AM based on source tag. Holding stage — no outreach automations fire here. |
+| **Definition** | Lead assigned to LM or AM based on source tag. **Day 0 speed-to-lead touches fire here** via WF-01. |
 | **Entry**      | All sources: Cold Email, Cold SMS, Cold Call, Direct Mail, VAPI, Referral, Website, re-submission. |
-| **Exit**       | Owner reviews lead, makes one manual contact attempt, then manually moves to Day 1-2 → WF-02 kicks off. |
+| **Exit**       | Owner works Day 0 speed-to-lead (immediate SMS + call + missed-call SMS), then manually moves to Day 1-2 the same day. |
 | **Owner**      | LM (Cold Email/SMS/Call) or AM (Direct Mail/VAPI/Referral/Website) — assigned on entry via WF-01. |
-| **Actions**    | WF-01 branches on source tag: assigns to LM or AM, creates a review task for the assigned owner. |
+| **Actions**    | WF-01 branches on source tag: assigns to LM or AM, fires Day 0 speed-to-lead (NL-SMS-00 + call task + NL-SMS-07 if no call logged), sends notification to owner. |
 
 ---
 
@@ -80,11 +80,11 @@ They have not yet been spoken to and qualified. Every lead starts here.
 
 | Field          | Detail                                                                                                                            |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **Definition** | Contact has been attempted but lead has not been reached or qualified.                                                            |
-| **Entry**      | First contact attempt logged → manual move by lead owner (LM or AM).                                                             |
+| **Definition** | Contact has been attempted on Day 0. Structured follow-up across two full calendar days.                                         |
+| **Entry**      | Owner completes Day 0 speed-to-lead work → manual move by lead owner (LM or AM). WF-02 waits until next business day to start.   |
 | **Exit**       | Lead responds and qualifies → Due Diligence. No response by Day 3 → Day 3-14. Disqualifying info found → appropriate Dispo stage. |
 | **Owner**      | LM or AM based on source tag + GHL automation (SMS, Email).                                                                       |
-| **Frequency**  | 2x per day (morning + afternoon).                                                                                                 |
+| **Frequency**  | 2x per day (morning + afternoon). Day 1 = first full calendar day after Day 0.                                                    |
 | **Channels**   | Call, SMS, Email.                                                                                                                 |
 | **Actions**    | Morning call task + automated SMS. Afternoon call task + SMS or Email. Tasks assigned to LM or AM per source.                     |
 
@@ -307,7 +307,8 @@ These leads have been spoken to and are actively progressing through the deal cy
 ```
 [ALL SOURCES: Cold Email / Cold SMS / Cold Call / Direct Mail / VAPI / Referral / Website / Re-Submission]
   └─► NEW LEADS (LM for Cold Email/SMS/Call, AM for Direct Mail/VAPI/Referral/Website)
-        └─► Day 1-2 (2x daily)
+        │   Day 0: Speed to Lead — immediate SMS + call task + missed-call SMS (WF-01)
+        └─► Day 1-2 (2x daily, starts next business day)
               └─► Qualifies ──────────────────────────────────────► Due Diligence
               └─► No response by Day 3 ───────────────────────────► Day 3-14 (daily)
                     └─► Qualifies ──────────────────────────────► Due Diligence

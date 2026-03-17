@@ -36,8 +36,9 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 
 | ID             | Channel | Stage                       | Timing            | Workflow | Auto/Manual |
 | -------------- | ------- | --------------------------- | ----------------- | -------- | ----------- |
+| NL-SMS-00      | SMS     | New Leads — Day 0           | Immediate         | WF-01    | Auto        |
 | NL-SMS-01      | SMS     | New Leads — Day 1-2         | Day 1, Morning    | WF-02    | Auto        |
-| NL-SMS-07      | SMS     | New Leads — Day 1-2         | Day 1, Afternoon  | WF-02    | Auto        |
+| NL-SMS-07      | SMS     | New Leads — Day 1-2         | Day 1, Afternoon  | WF-01 / WF-02 | Auto   |
 | NL-EMAIL-01    | Email   | New Leads — Day 1-2         | Day 2, Morning    | WF-02    | Auto        |
 | NL-SMS-02      | SMS     | New Leads — Day 1-2 / 3-14  | Day 2, Day 4      | WF-02 / WF-03 | Auto        |
 | NL-EMAIL-05    | Email   | New Leads — Day 3-14        | Day 5             | WF-03    | Auto        |
@@ -55,7 +56,6 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 | COLD-SMS-04    | SMS     | Cold Monthly                | Month 3           | WF-05    | Auto        |
 | COLD-SMS-02    | SMS     | Cold Monthly                | Month 4           | WF-05    | Auto        |
 | COLD-EMAIL-02  | Email   | Cold Monthly                | Month 5           | WF-05    | Auto        |
-| COLD-SMS-03    | SMS     | Cold Monthly                | Month 6           | WF-05    | Auto        |
 | COLDQ-SMS-01   | SMS     | Cold Quarterly              | Every 90 days     | WF-05    | Auto        |
 | COLDQ-EMAIL-01 | Email   | Cold Quarterly              | Every 90 days     | WF-05    | Auto        |
 | NUR-SMS-01     | SMS     | Nurture Monthly             | Month 0           | WF-08    | Auto        |
@@ -71,6 +71,18 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 | WR-EMAIL-05    | Email   | Cold Email Sub-Flow         | Day 21            | WF-00A   | Auto        |
 | WR-COLD-SMS-01 | SMS     | Cold Email → Cold (one-time)| Day 30            | WF-00A   | Auto        |
 
+
+---
+
+## New Leads — Day 0
+
+**Stage:** New Leads | **Cadence:** Immediate (speed to lead) | **Owner:** LM or AM (by source) + GHL auto
+
+---
+
+### NL-SMS-00 | Speed to Lead (Day 0, Immediate)
+
+> Hey {{first_name}}, this is {{agent_name}} with Bana Land — just reaching out about your property in {{county}}. Would you have a quick minute to chat?
 
 ---
 
@@ -282,14 +294,6 @@ Hope things are going well. We're still buying land across the country and have 
 If that ever lines up for you, we'd love to reconnect.
 
 — Bana Land
-
----
-
-### COLD-SMS-03 | Month 6
-
-> Hey {{first_name}}, it's been a few months — we're still actively buying land in your county. If you've been thinking about it, now might be a good time to connect. — Bana Land
-
-Trigger: WF-05 transitions to quarterly phase automatically at Month 6.
 
 ---
 

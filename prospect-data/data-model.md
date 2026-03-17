@@ -22,8 +22,11 @@ One row = one property. All owner/skip trace data lives as columns on the same r
 | Property State    | Text       | `state`              | State (all US states)                            |
 | Acres             | Number     | `property_acreage`   | Property acreage                                 |
 | Offer Price       | Text       | `offer price`        | Offer amount or percentage for this property — Text type to support dollar amounts, percentages, or both (e.g., "$45,000" or "35%" or "$45k / 32%") |
+| Offer Price %     | Number     | `offer_price_pct`    | Offer as a percentage of market value (e.g., 35 for 35%). Manually entered or calculated from Offer Price / Market Price. |
 | Legal Description | Large Text | `legal_description`  | Full legal description                           |
 | FUB ID            | Text       | `fub_id`             | Follow Up Boss ID — links back to the FUB record for cross-reference |
+| Lat/Long          | Text       | `gps`                | Latitude and longitude as a single comma-separated value (e.g., `35.1234, -97.5678`). |
+| Map Link          | Text       | `map_link`           | URL to property map (Google Maps, onX, ParcelFact, etc.)             |
 
 
 **Fields available if data source provides them (not in current CSV):**
@@ -34,8 +37,6 @@ One row = one property. All owner/skip trace data lives as columns on the same r
 | Property Address    | Text     | Property situs address            |
 | Property City       | Text     | Property city                     |
 | Property Zip        | Text     | Property ZIP code                 |
-| GPS                 | Text     | GPS latitude/longitude            |
-| Map Link            | Text     | URL to property map               |
 | Tier 1 Market Price | Currency | Market price estimate — Tier 1    |
 | Tier 2 Market Price | Currency | Market price estimate — Tier 2    |
 | Blind Offer         | Currency | An offer amount used in marketing |
@@ -171,6 +172,9 @@ When a property is pushed to New Leads, automation splits the flat row into the 
 | Owner N Phone 4              | Phone 4                        |
 | Owner N Email 1              | Email                          |
 | Owner N Mailing Address      | Address                        |
+| Owner N Mailing City         | City                           |
+| Owner N Mailing State        | State                          |
+| Owner N Mailing Zip          | Postal Code                    |
 | Owner N Age                  | Age                            |
 | Owner N Deceased             | Deceased                       |
 
@@ -190,6 +194,9 @@ When a property is pushed to New Leads, automation splits the flat row into the 
 | Tier 2 Market Price          | Tier 2 Market Price                |
 | Blind Offer                  | Blind Offer                        |
 | Offer Price                  | Offer Price                        |
+| Offer Price %                | Offer Price %                      |
+| Lat/Long                     | Lat/Long                           |
+| Map Link                     | Map Link                           |
 | Campaign Type                | Original Source                    |
 | Campaign Type                | Latest Source                      |
 | (today's date)               | Latest Source Date                 |

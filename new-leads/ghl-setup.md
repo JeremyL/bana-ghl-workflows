@@ -153,7 +153,7 @@ Go to **Settings > Custom Fields > Contacts** and create the following:
 | Last Contact Date | Date     | Date of last successful outreach attempt                                                                       |
 | Last Contact Type | Text     | Call / SMS / Email                                                                                             |
 | Age               | Number   | Owner's age (from skip trace data)                                                                             |
-| Deceased          | Checkbox | Owner is deceased (from skip trace data)                                                                       |
+| Deceased          | Text     | Owner is deceased (from skip trace data). Values: Y / N / blank                                                |
 | Assigned To       | Text     | Lead Manager or Acquisition Manager name (set by WF-01 based on source tag)                                    |
 | Pause WFs Until   | Date     | Pause all automated sends until this date. Workflows check: field is empty OR field < today → proceed to send. Set to today+7 by WF-11. Owner clears manually to resume early. |
 
@@ -167,7 +167,7 @@ Go to **Settings > Custom Fields > Opportunities** and create the following:
 | ------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Reference ID        | Text       | Internal reference/tracking ID for the property                                                                                                                                                  |
 | Property County     | Text       | County where the property is located                                                                                                                                                             |
-| Property State      | Dropdown   | State where the property is located (all US states)                                                                                                                                              |
+| Property State      | Text       | State where the property is located                                                                                                                                                              |
 | Acres               | Number     | Property acreage                                                                                                                                                                                 |
 | APN                 | Text       | Assessor's Parcel Number                                                                                                                                                                         |
 | Tier 1 Market Price | Currency   | Market price estimate — Tier 1 valuation                                                                                                                                                         |
@@ -176,8 +176,7 @@ Go to **Settings > Custom Fields > Opportunities** and create the following:
 | Offer Price %       | Number     | Offer as a percentage of market value                                                                                                                                                            |
 | Legal Description   | Large Text | Full legal description of the property                                                                                                                                                           |
 | Map Link            | Text       | URL to property map (Google Maps, ParcelFact, etc.)                                                                                                                                              |
-| Latitude            | Number     | Property GPS latitude                                                                                                                                                                            |
-| Longitude           | Number     | Property GPS longitude                                                                                                                                                                           |
+| Lat/Long            | Text       | Latitude and longitude as a single comma-separated value (e.g., `35.1234, -97.5678`).                                                                                                           |
 | Offer Price         | Text       | Offer amount or percentage for this property (e.g., "$45,000" or "35%" or "$45k / 32%"). Populated from Prospect Data on push.                                                                   |
 | Contract Date       | Date       | Date contract was signed for this deal                                                                                                                                                           |
 | Original Source     | Dropdown   | First channel that brought this lead into GHL. Set once on first entry, never overwritten. Values: Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI AI Call, Referral, Website |
@@ -338,26 +337,35 @@ Build each workflow in **Automation > Workflows**.
    - **If tagged `Source: Cold Email` OR `Source: Cold SMS` OR `Source: Cold Call`:**
      - Assign contact to Lead Manager (specific team member)
      - Update custom field: Assigned To = Lead Manager name
-     - Create Task: "Review new lead — call {{first_name}}" — Assigned to: Lead Manager — Due: Today
-     - Send internal notification to LM: "New lead ready for review: {{first_name}} ({{source tag}}). Move to Day 1-2 after initial contact attempt."
    - **If tagged `Source: Direct Mail` OR `Source: VAPI AI Call` OR `Source: Referral` OR `Source: Website`:**
      - Assign contact to Acquisition Manager (specific team member)
      - Update custom field: Assigned To = Acquisition Manager name
-     - Create Task: "Review new lead — call {{first_name}}" — Assigned to: Acquisition Manager — Due: Today
-     - Send internal notification to AM: "New lead ready for review: {{first_name}} ({{source tag}}). Move to Day 1-2 after initial contact attempt."
 3. Update custom field: Lead Entry Date = Today (skip if already set — contact may be a re-submission)
 4. Update custom field: Original Source (skip if already set — only set on first-ever entry)
 5. Update custom field: Latest Source = current source value
 6. Update custom field: Latest Source Date = Today
 7. Update custom field: Stage Entry Date = Today
+8. **Day 0 — Speed to Lead:**
+   - **Branch: If tagged `Source: Cold Email` AND Phone field is empty:**
+     - Skip NL-SMS-00, skip call task, skip NL-SMS-07
+     - Send internal notification to Lead Manager: "New Cold Email lead — no phone number on file. WF-00A will run starting at Day 1-2. {{first_name}}"
+     - *(WF-00A takes over when owner moves contact to Day 1-2)*
+   - **All other cases (phone present, or non-Cold-Email source):**
+     - Send SMS: NL-SMS-00 (Speed to Lead) — fires immediately
+     - **Branch on source tag — create call task:**
+       - **If LM sources:** Create Task: "SPEED TO LEAD — call {{first_name}} NOW" — Assigned to: Lead Manager — Due: Today — Priority: High
+       - **If AM sources:** Create Task: "SPEED TO LEAD — call {{first_name}} NOW" — Assigned to: Acquisition Manager — Due: Today — Priority: High
+     - Send internal notification to assigned owner: "New lead — speed-to-lead touches firing now: {{first_name}} ({{source tag}}). Work the lead, then move to Day 1-2 when done."
+     - Wait: 1 hour
+     - **Check: Was a call logged for this contact in the last hour?** If no → Send SMS: NL-SMS-07 (Missed Call Follow-Up)
 
-**Note:** No outreach automations fire at New Leads. Owner reviews the lead, makes one manual contact attempt, then manually moves the contact to Day 1-2 — that stage move triggers WF-02 (and WF-00A for Cold Email leads with no phone).
+**Note:** Day 0 speed-to-lead touches fire automatically on entry. Owner works the lead on Day 0, then manually moves the contact to Day 1-2 the same day — that stage move triggers WF-02 (and WF-00A for Cold Email leads with no phone). WF-02 waits until the next business day to start automated touches.
 
 ---
 
 ### WF-02 | Day 1-2 Sequence
 
-**Trigger:** Contact moved to pipeline stage "Day 1-2" (owner manually moves from New Leads after initial review and contact attempt)
+**Trigger:** Contact moved to pipeline stage "Day 1-2" (owner manually moves from New Leads after Day 0 speed-to-lead work)
 **Enrollment condition:** Lead NOT tagged DNC
 
 **Conditional logic:** Each SMS, call, and email step has a condition: **"If contact is enrolled in WF-00A → skip step"**. This ensures Cold Email leads with no phone number only receive WF-00A emails (no double communication). Once WF-00A exits (phone # received), these conditions pass and standard steps fire.
@@ -365,19 +373,20 @@ Build each workflow in **Automation > Workflows**.
 **Actions:**
 
 1. Update custom field: Stage Entry Date = Today
-2. **[Conditional]** Send SMS: NL-SMS-01 (First Touch)
-3. Wait: 4 hours
-4. **[Conditional]** Create Task: "Call {{first_name}} — First Attempt" — Assigned to: **LM or AM based on source tag** — Due: Today
-5. Wait: 4 hours
-6. **[Conditional]** Send SMS: NL-SMS-07 (Missed Call Follow-Up)
-7. Wait: until next business day, 9:00 AM contact local time
-8. **[Conditional]** Send Email: NL-EMAIL-01
-9. Wait: 4 hours
-10. **[Conditional]** Create Task: "Call {{first_name}} — Day 2 Attempt" — Assigned to: **LM or AM based on source tag** — Due: Today
-11. Wait: 4 hours
-12. **[Conditional]** Send SMS: NL-SMS-02
-13. Wait: until Day 3 begins
-14. If no stage change: Move to Day 3-14 → Enroll in WF-03
+2. Wait: until next business day, 9:00 AM contact local time *(Day 0 speed-to-lead touches already fired in WF-01)*
+3. **[Conditional]** Send SMS: NL-SMS-01 (First Touch)
+4. Wait: 4 hours
+5. **[Conditional]** Create Task: "Call {{first_name}} — First Attempt" — Assigned to: **LM or AM based on source tag** — Due: Today
+6. Wait: 4 hours
+7. **[Conditional]** Send SMS: NL-SMS-07 (Missed Call Follow-Up)
+8. Wait: until next business day, 9:00 AM contact local time
+9. **[Conditional]** Send Email: NL-EMAIL-01
+10. Wait: 4 hours
+11. **[Conditional]** Create Task: "Call {{first_name}} — Day 2 Attempt" — Assigned to: **LM or AM based on source tag** — Due: Today
+12. Wait: 4 hours
+13. **[Conditional]** Send SMS: NL-SMS-02
+14. Wait: until Day 3 begins
+15. If no stage change: Move to Day 3-14 → Enroll in WF-03
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
@@ -456,7 +465,7 @@ Build each workflow in **Automation > Workflows**.
 
 ### WF-05 | Cold Drip — Monthly → Quarterly (Day 30+)
 
-**Trigger:** Contact moved to pipeline stage "Cold" OR Contact moved to any Dispo Re-Engage stage (via WF-09)
+**Trigger:** Contact moved to pipeline stage "Cold" OR enrolled directly by WF-09 (for Dispo Re-Engage leads)
 **Applies to:** Cold stage leads (no response after Day 30) AND all Dispo Re-Engage leads
 **Enrollment condition:** Lead NOT tagged DNC
 
@@ -474,18 +483,16 @@ Build each workflow in **Automation > Workflows**.
 8. **If NOT tagged `Cold: Email Only`:** Send SMS: COLD-SMS-02
 9. Wait: 30 days
 10. Send Email: COLD-EMAIL-02
-11. Wait: 30 days
-12. **If NOT tagged `Cold: Email Only`:** Send SMS: COLD-SMS-03
 
 **Phase 2 — Quarterly (Day 180+, indefinite):**
 
-13. Wait: 90 days
-14. **If NOT tagged `Cold: Email Only`:** Send SMS: COLDQ-SMS-01
-15. Wait: 1 day
-16. Send Email: COLDQ-EMAIL-01
-17. Go to Step 13 (loop)
+11. Wait: 90 days
+12. **If NOT tagged `Cold: Email Only`:** Send SMS: COLDQ-SMS-01
+13. Wait: 1 day
+14. Send Email: COLDQ-EMAIL-01
+15. Enroll in WF-05 (re-starts loop from step 1)
 
-**Note:** GHL does not natively loop workflows. Build out 2+ years of quarterly steps manually and extend as needed.
+**Note:** Uses native GHL "Add to Workflow" action to re-enroll the contact, creating an indefinite loop. If GHL blocks same-workflow re-enrollment, create WF-05A (identical steps) and alternate: WF-05 ends by enrolling in WF-05A, WF-05A ends by enrolling back in WF-05.
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
@@ -502,7 +509,9 @@ Build each workflow in **Automation > Workflows**.
 3. If still in same stage: Send SMS — check-in (use NL-SMS-02 or custom message)
 4. Wait: 1 day
 5. Create Task: "Follow up call — {{first_name}}" — Assigned to: Acquisition Manager — Due: Today
-6. Repeat / loop every 1-2 days until stage changes
+6. Enroll in WF-07 (re-starts loop from step 1)
+
+**Note:** Uses native GHL "Add to Workflow" action to re-enroll the contact, creating an indefinite loop. If GHL blocks same-workflow re-enrollment, create WF-07A (identical steps) and alternate: WF-07 ends by enrolling in WF-07A, WF-07A ends by enrolling back in WF-07.
 
 Apply similar logic for Make Offer, Negotiations, Contract Sent stages.
 
@@ -536,7 +545,9 @@ Apply similar logic for Make Offer, Negotiations, Contract Sent stages.
 14. Wait: 90 days
 15. Send SMS: NUR-SMS-02
 16. Wait: 90 days
-17. Go to Step 7 (loop indefinitely at quarterly cadence)
+17. Enroll in WF-08 (re-starts loop from step 1)
+
+**Note:** Uses native GHL "Add to Workflow" action to re-enroll the contact, creating an indefinite loop. If GHL blocks same-workflow re-enrollment, create WF-08A (identical steps) and alternate: WF-08 ends by enrolling in WF-08A, WF-08A ends by enrolling back in WF-08.
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
