@@ -70,51 +70,37 @@ They have not yet been spoken to and qualified. Every lead starts here.
 | -------------- | ------------------------------------------------------------------------------------------------ |
 | **Definition** | Lead assigned to LM or AM based on source tag. **Day 0 speed-to-lead touches fire here** via WF-01. |
 | **Entry**      | All sources: Cold Email, Cold SMS, Cold Call, Direct Mail, VAPI, Referral, Website, re-submission. |
-| **Exit**       | Owner works Day 0 speed-to-lead (immediate SMS + call + missed-call SMS), then manually moves to Day 1-2 the same day. |
+| **Exit**       | Owner works Day 0 speed-to-lead (immediate SMS + call + missed-call SMS), then manually moves to Day 1-10 the same day. |
 | **Owner**      | LM (Cold Email/SMS/Call) or AM (Direct Mail/VAPI/Referral/Website) — assigned on entry via WF-01. |
 | **Actions**    | WF-01 branches on source tag: assigns to LM or AM, fires Day 0 speed-to-lead (NL-SMS-00 + call task + NL-SMS-07 if no call logged), sends notification to owner. |
 
 ---
 
-### Day 1-2
+### Day 1-10
 
 | Field          | Detail                                                                                                                            |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **Definition** | Contact has been attempted on Day 0. Structured follow-up across two full calendar days.                                         |
+| **Definition** | Contact has been attempted on Day 0. Active daily pursuit across ten full calendar days.                                          |
 | **Entry**      | Owner completes Day 0 speed-to-lead work → manual move by lead owner (LM or AM). WF-02 waits until next business day to start.   |
-| **Exit**       | Lead responds and qualifies → Due Diligence. No response by Day 3 → Day 3-14. Disqualifying info found → appropriate Dispo stage. |
+| **Exit**       | Lead responds and qualifies → Due Diligence. No response by Day 11 → Day 11-30. Disqualifying info found → appropriate Dispo stage. |
 | **Owner**      | LM or AM based on source tag + GHL automation (SMS, Email).                                                                       |
-| **Frequency**  | 2x per day (morning + afternoon). Day 1 = first full calendar day after Day 0.                                                    |
+| **Frequency**  | Days 1–2: 2x per day (morning + afternoon). Days 3–10: 1x per day. Day 1 = first full calendar day after Day 0.                  |
 | **Channels**   | Call, SMS, Email.                                                                                                                 |
-| **Actions**    | Morning call task + automated SMS. Afternoon call task + SMS or Email. Tasks assigned to LM or AM per source.                     |
+| **Actions**    | Call tasks + rotating automated SMS/Email. Tasks assigned to LM or AM per source.                                                 |
 
 ---
 
-### Day 3-14
+### Day 11-30
 
 | Field          | Detail                                                                                              |
 | -------------- | --------------------------------------------------------------------------------------------------- |
-| **Definition** | Contact attempted for 3+ days. Lead has not responded or qualified.                                 |
-| **Entry**      | No meaningful response by end of Day 2.                                                              |
-| **Exit**       | Lead responds and qualifies → Due Diligence. Day 15 passes → Day 15-30. Disqualifying info → Dispo. |
+| **Definition** | Contact attempted for 10+ days without qualification. Winding down — reduced frequency.             |
+| **Entry**      | No meaningful response by end of Day 10. Auto-advanced from Day 1-10.                                |
+| **Exit**       | Lead responds and qualifies → Due Diligence. Day 30 passes → Cold. Disqualifying info → Dispo.      |
 | **Owner**      | LM or AM based on source tag + GHL automation.                                                       |
-| **Frequency**  | Days 3–10: 1x per day. Days 11–14: every 2–3 days.                                                  |
+| **Frequency**  | Tuesdays & Thursdays only (entire stage).                                                            |
 | **Channels**   | Call, SMS, Email.                                                                                    |
-| **Actions**    | Daily call task + rotating automated message (SMS or Email). Tasks assigned to LM or AM per source.  |
-
----
-
-### Day 15-30
-
-| Field          | Detail                                                                            |
-| -------------- | --------------------------------------------------------------------------------- |
-| **Definition** | Contact attempted for 15+ days without qualification.                             |
-| **Entry**      | No meaningful response by end of Day 14.                                           |
-| **Exit**       | Lead qualifies → Due Diligence. Day 30 passes → Cold. Disqualifying info → Dispo. |
-| **Owner**      | LM or AM based on source tag + GHL automation.                                     |
-| **Frequency**  | Tuesdays & Thursdays only.                                                         |
-| **Channels**   | Call, SMS, Email.                                                                  |
-| **Actions**    | Tuesday & Thursday call task + rotating automated message. Tasks assigned to LM or AM per source. |
+| **Actions**    | Tue/Thu call task + rotating automated message (SMS or Email). Tasks assigned to LM or AM per source. |
 
 ---
 
@@ -308,13 +294,11 @@ These leads have been spoken to and are actively progressing through the deal cy
 [ALL SOURCES: Cold Email / Cold SMS / Cold Call / Direct Mail / VAPI / Referral / Website / Re-Submission]
   └─► NEW LEADS (LM for Cold Email/SMS/Call, AM for Direct Mail/VAPI/Referral/Website)
         │   Day 0: Speed to Lead — immediate SMS + call task + missed-call SMS (WF-01)
-        └─► Day 1-2 (2x daily, starts next business day)
+        └─► Day 1-10 (2x daily Days 1-2, 1x daily Days 3-10)
               └─► Qualifies ──────────────────────────────────────► Due Diligence
-              └─► No response by Day 3 ───────────────────────────► Day 3-14 (daily)
+              └─► No response by Day 11 ──────────────────────────► Day 11-30 (Tue & Thu only)
                     └─► Qualifies ──────────────────────────────► Due Diligence
-                    └─► No response by Day 15 ──────────────────► Day 15-30 (Tue & Thu only)
-                          └─► Qualifies ──────────────────────► Due Diligence
-                          └─► No response by Day 30 ──────────► Cold (monthly → quarterly drip)
+                    └─► No response by Day 30 ──────────────────► Cold (monthly → quarterly drip)
                                 └─► Re-engages ──────────────► WF-11 → owner reviews
                                 └─► DNC request ──────────────► Dispo: DNC
 
@@ -361,5 +345,5 @@ Cold / Nurture / Dispo Re-Engage (replies to our drip)
         └─► Owner does nothing (7 days expire) ────────────────► Drip resumes from where it stopped
 
 Any stage (new external campaign source detected by automation)
-  └─► Re-Submitted → Move to NEW LEADS → Full restart (Day 1-2 → etc.)
+  └─► Re-Submitted → Move to NEW LEADS → Full restart (Day 1-10 → etc.)
 ```

@@ -37,20 +37,20 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 | ID             | Channel | Stage                       | Timing            | Workflow | Auto/Manual |
 | -------------- | ------- | --------------------------- | ----------------- | -------- | ----------- |
 | NL-SMS-00      | SMS     | New Leads — Day 0           | Immediate         | WF-01    | Auto        |
-| NL-SMS-01      | SMS     | New Leads — Day 1-2         | Day 1, Morning    | WF-02    | Auto        |
-| NL-SMS-07      | SMS     | New Leads — Day 1-2         | Day 1, Afternoon  | WF-01 / WF-02 | Auto   |
-| NL-EMAIL-01    | Email   | New Leads — Day 1-2         | Day 2, Morning    | WF-02    | Auto        |
-| NL-SMS-02      | SMS     | New Leads — Day 1-2 / 3-14  | Day 2, Day 4      | WF-02 / WF-03 | Auto        |
-| NL-EMAIL-05    | Email   | New Leads — Day 3-14        | Day 5             | WF-03    | Auto        |
-| NL-EMAIL-02    | Email   | New Leads — Day 3-14        | Day 7             | WF-03    | Auto        |
-| NL-SMS-03      | SMS     | New Leads — Day 3-14        | Day 8             | WF-03    | Auto        |
-| NL-SMS-08      | SMS     | New Leads — Day 3-14        | Day 10            | WF-03    | Auto        |
-| NL-SMS-04      | SMS     | New Leads — Day 3-14        | Day 11            | WF-03    | Auto        |
-| NL-EMAIL-03    | Email   | New Leads — Day 15-30       | Day 15            | WF-04    | Auto        |
-| NL-SMS-09      | SMS     | New Leads — Day 15-30       | Day 17            | WF-04    | Auto        |
-| NL-SMS-05      | SMS     | New Leads — Day 15-30       | Day 22            | WF-04    | Auto        |
-| NL-EMAIL-04    | Email   | New Leads — Day 15-30       | Day 29            | WF-04    | Auto        |
-| NL-SMS-06      | SMS     | New Leads — Day 15-30       | Day 30            | WF-04    | Auto        |
+| NL-SMS-01      | SMS     | New Leads — Day 1-10        | Day 1, Morning    | WF-02    | Auto        |
+| NL-SMS-07      | SMS     | New Leads — Day 1-10        | Day 1, Afternoon  | WF-01 / WF-02 | Auto   |
+| NL-EMAIL-01    | Email   | New Leads — Day 1-10        | Day 2, Morning    | WF-02    | Auto        |
+| NL-SMS-02      | SMS     | New Leads — Day 1-10        | Day 2, Day 4      | WF-02    | Auto        |
+| NL-EMAIL-05    | Email   | New Leads — Day 1-10        | Day 5             | WF-02    | Auto        |
+| NL-EMAIL-02    | Email   | New Leads — Day 1-10        | Day 7             | WF-02    | Auto        |
+| NL-SMS-03      | SMS     | New Leads — Day 1-10        | Day 8             | WF-02    | Auto        |
+| NL-SMS-08      | SMS     | New Leads — Day 1-10        | Day 10            | WF-02    | Auto        |
+| NL-SMS-04      | SMS     | New Leads — Day 11-30       | Day 11            | WF-03    | Auto        |
+| NL-EMAIL-03    | Email   | New Leads — Day 11-30       | Day 15            | WF-03    | Auto        |
+| NL-SMS-09      | SMS     | New Leads — Day 11-30       | Day 17            | WF-03    | Auto        |
+| NL-SMS-05      | SMS     | New Leads — Day 11-30       | Day 22            | WF-03    | Auto        |
+| NL-EMAIL-04    | Email   | New Leads — Day 11-30       | Day 29            | WF-03    | Auto        |
+| NL-SMS-06      | SMS     | New Leads — Day 11-30       | Day 30            | WF-03    | Auto        |
 | COLD-SMS-01    | SMS     | Cold Monthly                | Month 1           | WF-05    | Auto        |
 | COLD-EMAIL-01  | Email   | Cold Monthly                | Month 2           | WF-05    | Auto        |
 | COLD-SMS-04    | SMS     | Cold Monthly                | Month 3           | WF-05    | Auto        |
@@ -86,9 +86,9 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 
 ---
 
-## New Leads — Day 1-2
+## New Leads — Day 1-10
 
-**Stage:** Day 1-2 | **Cadence:** 2x per day | **Owner:** LM or AM (by source) + GHL auto
+**Stage:** Day 1-10 | **Cadence:** Days 1-2: 2x per day, Days 3-10: 1x per day | **Owner:** LM or AM (by source) + GHL auto
 
 ---
 
@@ -127,23 +127,15 @@ Bana Land | [CALLBACK NUMBER]
 
 ---
 
-## New Leads — Day 3-14
+### Day 3-10 Templates (continued — still Day 1-10 stage)
 
-**Stage:** Day 3-14 | **Cadence:** Days 3-10 daily, Days 11-14 every 2-3 days | **Owner:** LM or AM (by source) + GHL auto
-
-Template NL-SMS-02 is reused from the Day 1-2 section above.
+Template NL-SMS-02 is reused from above (Day 2 and Day 4).
 
 ---
 
 ### NL-SMS-03 | Day 8
 
 > {{first_name}}, still reaching out about your property. If you've got a few minutes, I'd love to hear what's going on with it. — {{agent_name}}, Bana Land
-
----
-
-### NL-SMS-04 | Re-Engage (Day 11)
-
-> Hey {{first_name}}, been trying to connect — totally understand if the timing isn't right. Is selling something you're still thinking about at some point? — {{agent_name}}, Bana Land
 
 ---
 
@@ -185,15 +177,21 @@ Bana Land | [CALLBACK NUMBER]
 
 ---
 
-### NL-SMS-09 | Mid-Range Follow-Up (Day 17)
+## New Leads — Day 11-30
 
-> {{first_name}}, just circling back one more time. We're still interested in your property — no pressure, just want to make sure you know we're here. — {{agent_name}}, Bana Land
+**Stage:** Day 11-30 | **Cadence:** Tuesdays & Thursdays only | **Owner:** LM or AM (by source) + GHL auto
 
 ---
 
-## New Leads — Day 15-30
+### NL-SMS-04 | Re-Engage (Day 11)
 
-**Stage:** Day 15-30 | **Cadence:** Tuesdays & Thursdays only | **Owner:** LM or AM (by source) + GHL auto
+> Hey {{first_name}}, been trying to connect — totally understand if the timing isn't right. Is selling something you're still thinking about at some point? — {{agent_name}}, Bana Land
+
+---
+
+### NL-SMS-09 | Mid-Range Follow-Up (Day 17)
+
+> {{first_name}}, just circling back one more time. We're still interested in your property — no pressure, just want to make sure you know we're here. — {{agent_name}}, Bana Land
 
 ---
 

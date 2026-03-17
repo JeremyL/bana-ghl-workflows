@@ -90,7 +90,7 @@ Not answering calls, not replying to texts, and not opening emails does NOT cons
 **Who can change a lead's stage:**
 - **Lead Manager (LM):** Can move LM-sourced leads (Cold Email/SMS/Call) through any stage, including dispo stages. Can also qualify and move to Due Diligence.
 - **Acquisition Manager (AM):** Can move AM-sourced leads (Direct Mail/VAPI/Referral/Website) through any stage. Owns all qualified stages regardless of source.
-- **GHL automation:** Can advance uncontacted leads based on time elapsed (Day 1-2 → Day 3-14 → etc.)
+- **GHL automation:** Can advance uncontacted leads based on time elapsed (Day 1-10 → Day 11-30 → Cold)
 - **Automation cannot:** Qualify a lead (move to Due Diligence or beyond) — that requires human confirmation
 
 | Trigger                        | Action                                       |
@@ -126,7 +126,7 @@ There are two distinct re-entry events. Each has its own protocol.
    - **Owner moves to a Dispo stage** → dispo workflows take over. Clear `Pause WFs Until`. Remove tag `Re-Engaged`.
    - **Owner clears `Pause WFs Until` field early** (reply not actionable, lead stays in current stage) → drip resumes from where it stopped. Remove tag `Re-Engaged`.
 6. **Auto-resume safety net (drip stages only):** If owner does nothing after **7 days**, `Pause WFs Until` date expires → drip resumes automatically. WF-11 clears the field and removes `Re-Engaged`.
-7. **Active stages (Day 1-2 / Day 3-14 / Day 15-30):** No 7-day auto-resume. Owner is already working this lead — they move the stage or manually clear `Pause WFs Until` when ready.
+7. **Active stages (Day 1-10 / Day 11-30):** No 7-day auto-resume. Owner is already working this lead — they move the stage or manually clear `Pause WFs Until` when ready.
 
 ### 6B. Re-Submission — Lead comes back from a new external campaign
 
@@ -138,7 +138,7 @@ There are two distinct re-entry events. Each has its own protocol.
 2. automation adds a new Source tag (stacks on existing), updates Latest Source field + Latest Source Date
 3. automation adds tag: `Re-Submitted` and moves contact to **New Leads** stage
 4. WF-01 fires: cleans up all active drips, assigns to owner based on new source tag, creates task
-5. Lead is worked from scratch — full Day 1-2 sequence, identical to a brand-new lead
+5. Lead is worked from scratch — full Day 1-10 sequence, identical to a brand-new lead
 6. Original Source field is never overwritten — first-touch attribution preserved
 
 **Key distinction:** Re-engagement = responding to *our* outreach (pause and review). Re-submission = entering from a *new external source* (full reset to New Leads).
@@ -170,7 +170,7 @@ When a lead enters any of these stages, WF-09 automatically enrolls them in **WF
 - **Emails:** Verify email addresses from skip trace data using a service before sending cold emails.
 - **Duplicate contacts:** Merge duplicates before enrolling in any sequence. GHL can trigger multiple workflows on dupes.
 - **Disconnected numbers:** If a call returns "not in service," tag the lead accordingly. Do not keep sending SMS to dead numbers.
-- **Stage date logging:** When a lead moves to a new stage, log the date. This is how GHL workflows know when to advance (Day 1-2 → Day 3-14 uses the "Date Entered Stage" field). *(Applies primarily to New Leads' time-bucket system.)*
+- **Stage date logging:** When a lead moves to a new stage, log the date. This is how GHL workflows know when to advance (Day 1-10 → Day 11-30 uses the "Date Entered Stage" field). *(Applies primarily to New Leads' time-bucket system.)*
 
 ---
 

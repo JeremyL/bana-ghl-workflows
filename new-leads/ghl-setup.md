@@ -222,33 +222,32 @@ Add the following stages **in this exact order:**
 **Group: Not Contacted / Not Qualified** *(LM or AM based on source)*
 
 1. New Leads
-2. Day 1-2
-3. Day 3-14
-4. Day 15-30
-5. Cold
+2. Day 1-10
+3. Day 11-30
+4. Cold
 
 **Group: Dispo — Terminal** *(no future contact)*
 
-6. Dispo: Not a Fit
-7. Dispo: No Longer Own
-8. Dispo: Purchased
-9. Dispo: DNC
+5. Dispo: Not a Fit
+6. Dispo: No Longer Own
+7. Dispo: Purchased
+8. Dispo: DNC
 
 **Group: Dispo — Re-Engage** *(light long-term drip)*
 
-10. Dispo: No Motivation
-11. Dispo: Wants Retail
-12. Dispo: On MLS
-13. Dispo: Lead Declined
+9. Dispo: No Motivation
+10. Dispo: Wants Retail
+11. Dispo: On MLS
+12. Dispo: Lead Declined
 
 **Group: Qualified** *(AM owns all)*
 
-14. Due Diligence
-15. Make Offer
-16. Negotiations
-17. Contract Sent
-18. Under Contract
-19. Nurture
+13. Due Diligence
+14. Make Offer
+15. Negotiations
+16. Contract Sent
+17. Under Contract
+18. Nurture
 
 ---
 
@@ -262,9 +261,8 @@ Build each workflow in **Automation > Workflows**.
 | ---------- | ------------------------------------------- |
 | **WF-00A** | Cold Email Sub-Flow (Get Phone Number)      |
 | **WF-01**  | New Lead Entry                              |
-| **WF-02**  | Day 1-2 Sequence                            |
-| **WF-03**  | Day 3-14 Sequence                           |
-| **WF-04**  | Day 15-30 Sequence                          |
+| **WF-02**  | Day 1-10 Sequence                           |
+| **WF-03**  | Day 11-30 Sequence                          |
 | **WF-05**  | Cold Drip (Monthly → Quarterly)             |
 | **WF-07**  | Qualified Lead Check-In                     |
 | **WF-08**  | Nurture                                     |
@@ -276,17 +274,17 @@ Build each workflow in **Automation > Workflows**.
 
 ### WF-00A | Cold Email Sub-Flow (Get Phone Number)
 
-**Trigger:** Contact moved to pipeline stage "Day 1-2" AND tagged `Source: Cold Email` AND Phone field is empty
+**Trigger:** Contact moved to pipeline stage "Day 1-10" AND tagged `Source: Cold Email` AND Phone field is empty
 **Owner:** Lead Manager (monitors replies)
 **Enrollment condition:** Lead NOT tagged DNC
 
-**Purpose:** Runs concurrently with WF-02/03/04. Sends automated emails asking for a phone number. When phone # is received, this workflow exits and the standard Day 1–30 workflows handle everything. While this workflow is active, WF-02/03/04 skip their SMS, call, and email steps for this contact (all three channels suppressed — WF-00A is the sole communicator).
+**Purpose:** Runs concurrently with WF-02/03. Sends automated emails asking for a phone number. When phone # is received, this workflow exits and the standard Day 1–30 workflows handle everything. While this workflow is active, WF-02/03 skip their SMS, call, and email steps for this contact (all three channels suppressed — WF-00A is the sole communicator).
 
 **Actions:**
 
 1. Send Email: WR-EMAIL-01 (ask for phone number)
 2. Wait: 2 days
-3. **Check: Phone number populated?** If yes → exit workflow (standard WF-02/03/04 steps now fire normally).
+3. **Check: Phone number populated?** If yes → exit workflow (standard WF-02/03 steps now fire normally).
 4. Send Email: WR-EMAIL-02
 5. Wait: 4 days
 6. **Check: Phone number populated?** If yes → exit workflow.
@@ -329,7 +327,7 @@ Build each workflow in **Automation > Workflows**.
 **Actions:**
 
 1. **If contact is tagged `Re-Submitted` (re-entry from new external campaign):**
-   - Remove from all active workflows: WF-00A, WF-02, WF-03, WF-04, WF-05, WF-08, WF-09
+   - Remove from all active workflows: WF-00A, WF-02, WF-03, WF-05, WF-08, WF-09
    - Clear field: `Pause WFs Until` (if set from a prior cycle)
    - Remove tag: `Re-Engaged` (if present from a prior cycle)
    - Remove tag: `Re-Submitted` (cleanup — it has served its purpose as a trigger)
@@ -348,45 +346,66 @@ Build each workflow in **Automation > Workflows**.
 8. **Day 0 — Speed to Lead:**
    - **Branch: If tagged `Source: Cold Email` AND Phone field is empty:**
      - Skip NL-SMS-00, skip call task, skip NL-SMS-07
-     - Send internal notification to Lead Manager: "New Cold Email lead — no phone number on file. WF-00A will run starting at Day 1-2. {{first_name}}"
-     - *(WF-00A takes over when owner moves contact to Day 1-2)*
+     - Send internal notification to Lead Manager: "New Cold Email lead — no phone number on file. WF-00A will run starting at Day 1-10. {{first_name}}"
+     - *(WF-00A takes over when owner moves contact to Day 1-10)*
    - **All other cases (phone present, or non-Cold-Email source):**
      - Send SMS: NL-SMS-00 (Speed to Lead) — fires immediately
      - **Branch on source tag — create call task:**
        - **If LM sources:** Create Task: "SPEED TO LEAD — call {{first_name}} NOW" — Assigned to: Lead Manager — Due: Today — Priority: High
        - **If AM sources:** Create Task: "SPEED TO LEAD — call {{first_name}} NOW" — Assigned to: Acquisition Manager — Due: Today — Priority: High
-     - Send internal notification to assigned owner: "New lead — speed-to-lead touches firing now: {{first_name}} ({{source tag}}). Work the lead, then move to Day 1-2 when done."
+     - Send internal notification to assigned owner: "New lead — speed-to-lead touches firing now: {{first_name}} ({{source tag}}). Work the lead, then move to Day 1-10 when done."
      - Wait: 1 hour
      - **Check: Was a call logged for this contact in the last hour?** If no → Send SMS: NL-SMS-07 (Missed Call Follow-Up)
 
-**Note:** Day 0 speed-to-lead touches fire automatically on entry. Owner works the lead on Day 0, then manually moves the contact to Day 1-2 the same day — that stage move triggers WF-02 (and WF-00A for Cold Email leads with no phone). WF-02 waits until the next business day to start automated touches.
+**Note:** Day 0 speed-to-lead touches fire automatically on entry. Owner works the lead on Day 0, then manually moves the contact to Day 1-10 the same day — that stage move triggers WF-02 (and WF-00A for Cold Email leads with no phone). WF-02 waits until the next business day to start automated touches.
 
 ---
 
-### WF-02 | Day 1-2 Sequence
+### WF-02 | Day 1-10 Sequence
 
-**Trigger:** Contact moved to pipeline stage "Day 1-2" (owner manually moves from New Leads after Day 0 speed-to-lead work)
+**Trigger:** Contact moved to pipeline stage "Day 1-10" (owner manually moves from New Leads after Day 0 speed-to-lead work)
 **Enrollment condition:** Lead NOT tagged DNC
 
 **Conditional logic:** Each SMS, call, and email step has a condition: **"If contact is enrolled in WF-00A → skip step"**. This ensures Cold Email leads with no phone number only receive WF-00A emails (no double communication). Once WF-00A exits (phone # received), these conditions pass and standard steps fire.
 
 **Actions:**
 
+*Days 1-2 — 2x per day:*
+
 1. Update custom field: Stage Entry Date = Today
 2. Wait: until next business day, 9:00 AM contact local time *(Day 0 speed-to-lead touches already fired in WF-01)*
 3. **[Conditional]** Send SMS: NL-SMS-01 (First Touch)
 4. Wait: 4 hours
-5. **[Conditional]** Create Task: "Call {{first_name}} — First Attempt" — Assigned to: **LM or AM based on source tag** — Due: Today
+5. **[Conditional]** Create Task: "Call {{first_name}} — Day 1" — Assigned to: **LM or AM based on source tag** — Due: Today
 6. Wait: 4 hours
 7. **[Conditional]** Send SMS: NL-SMS-07 (Missed Call Follow-Up)
 8. Wait: until next business day, 9:00 AM contact local time
 9. **[Conditional]** Send Email: NL-EMAIL-01
 10. Wait: 4 hours
-11. **[Conditional]** Create Task: "Call {{first_name}} — Day 2 Attempt" — Assigned to: **LM or AM based on source tag** — Due: Today
+11. **[Conditional]** Create Task: "Call {{first_name}} — Day 2" — Assigned to: **LM or AM based on source tag** — Due: Today
 12. Wait: 4 hours
 13. **[Conditional]** Send SMS: NL-SMS-02
-14. Wait: until Day 3 begins
-15. If no stage change: Move to Day 3-14 → Enroll in WF-03
+
+*Days 3-10 — 1x per day, rotating channels:*
+
+14. Wait: until next day, 9:00 AM contact local time
+15. **[Conditional]** Create Task: "Call {{first_name}} — Day 3" — Assigned to: **LM or AM** — Due: Today
+16. Wait: 1 day
+17. **[Conditional]** Send SMS: NL-SMS-02
+18. Wait: 1 day
+19. **[Conditional]** Send Email: NL-EMAIL-05
+20. Wait: 1 day
+21. **[Conditional]** Create Task: "Call {{first_name}} — Day 6" — Assigned to: **LM or AM** — Due: Today
+22. Wait: 1 day
+23. **[Conditional]** Send Email: NL-EMAIL-02
+24. Wait: 1 day
+25. **[Conditional]** Send SMS: NL-SMS-03
+26. Wait: 1 day
+27. **[Conditional]** Create Task: "Call {{first_name}} — Day 9" — Assigned to: **LM or AM** — Due: Today
+28. Wait: 1 day
+29. **[Conditional]** Send SMS: NL-SMS-08
+30. Wait: until Day 11 begins
+31. If no stage change: Move to Day 11-30 → Enroll in WF-03
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
@@ -394,68 +413,34 @@ Build each workflow in **Automation > Workflows**.
 
 ---
 
-### WF-03 | Day 3-14 Sequence
+### WF-03 | Day 11-30 Sequence
 
-**Trigger:** Enrolled from WF-02 or manually
+**Trigger:** Enrolled from WF-02 or manually moved to pipeline stage "Day 11-30"
 **Enrollment condition:** Lead NOT tagged DNC
 
 **Same conditional logic as WF-02:** Steps are skipped while contact is enrolled in WF-00A.
 
-**Actions:**
-
-1. Update custom field: Stage Entry Date = Today
-2. **[Conditional]** Create Task: "Call {{first_name}} — Day 3" — Assigned to: **LM or AM** — Due: Today
-3. Wait: 1 day
-4. **[Conditional]** Send SMS: NL-SMS-02
-5. Wait: 1 day
-6. **[Conditional]** Send Email: NL-EMAIL-05
-7. Wait: 1 day
-8. **[Conditional]** Create Task: "Call {{first_name}} — Day 6" — Assigned to: **LM or AM** — Due: Today
-9. Wait: 1 day
-10. **[Conditional]** Send Email: NL-EMAIL-02
-11. Wait: 1 day
-12. **[Conditional]** Send SMS: NL-SMS-03
-13. Wait: 1 day
-14. **[Conditional]** Create Task: "Call {{first_name}} — Day 9" — Assigned to: **LM or AM** — Due: Today
-15. Wait: 1 day
-16. **[Conditional]** Send SMS: NL-SMS-08
-17. Wait: 1 day
-18. **[Conditional]** Send SMS: NL-SMS-04 (Re-engage)
-19. Wait: 2 days
-20. **[Conditional]** Create Task: "Call {{first_name}} — Day 13 Final Attempt (this stage)" — Assigned to: **LM or AM** — Due: Today
-21. Wait: 1 day
-22. If no stage change: Move to pipeline stage: Day 15-30 → Enroll in WF-04
-
-**Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
-
-**Exit conditions:** Contact stage changes (moved to qualified or disqualified stage).
-
----
-
-### WF-04 | Day 15-30 Sequence
-
-**Trigger:** Enrolled from WF-03 or manually
-**Enrollment condition:** Lead NOT tagged DNC
-
-**Same conditional logic as WF-02:** Steps are skipped while contact is enrolled in WF-00A.
-
-**Important:** All touches in this workflow must be restricted to **Tuesdays and Thursdays only**, within the 9am–7pm contact local time window.
+**Important:** All touches in this workflow must be restricted to **Tuesdays and Thursdays only**, within the 9am–7pm contact local time window. This applies to the entire workflow — Days 11-30.
 
 **Actions:**
 
 1. Update custom field: Stage Entry Date = Today
-2. **[Conditional]** Send Email: NL-EMAIL-03 (Day 15)
+2. **[Conditional]** Send SMS: NL-SMS-04 (Re-engage)
 3. Wait: 2 days
-4. **[Conditional]** Send SMS: NL-SMS-09 (Day 17)
-5. Wait: 5 days
-6. **[Conditional]** Send SMS: NL-SMS-05 (Day 22)
+4. **[Conditional]** Create Task: "Call {{first_name}} — Day 13" — Assigned to: **LM or AM** — Due: Today
+5. Wait: 2 days
+6. **[Conditional]** Send Email: NL-EMAIL-03
 7. Wait: 2 days
-8. **[Conditional]** Create Task: "Call {{first_name}} — Day 24" — Assigned to: **LM or AM** — Due: Today
+8. **[Conditional]** Send SMS: NL-SMS-09
 9. Wait: 5 days
-10. **[Conditional]** Send Email: NL-EMAIL-04 (Day 29 — Long-game)
-11. Wait: 1 day
-12. **[Conditional]** Send SMS: NL-SMS-06 (Day 30 — Final touch before cold)
-13. If no stage change: Move to pipeline stage: Cold (WF-05 fires automatically on stage entry)
+10. **[Conditional]** Send SMS: NL-SMS-05
+11. Wait: 2 days
+12. **[Conditional]** Create Task: "Call {{first_name}} — Day 24" — Assigned to: **LM or AM** — Due: Today
+13. Wait: 5 days
+14. **[Conditional]** Send Email: NL-EMAIL-04 (Long-game)
+15. Wait: 1 day
+16. **[Conditional]** Send SMS: NL-SMS-06 (Final touch before cold)
+17. If no stage change: Move to pipeline stage: Cold (WF-05 fires automatically on stage entry)
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
@@ -571,7 +556,7 @@ That's it. All re-engage dispo leads flow into the same Long-Term Drip as Cold s
 **Actions:**
 
 1. Move to pipeline stage: Dispo: DNC (ensures correct stage regardless of trigger source)
-2. Remove from ALL active workflow enrollments (use "Remove from Workflow" action for each active WF: WF-00A, WF-02, WF-03, WF-04, WF-05, WF-07, WF-08, WF-09)
+2. Remove from ALL active workflow enrollments (use "Remove from Workflow" action for each active WF: WF-00A, WF-02, WF-03, WF-05, WF-07, WF-08, WF-09)
 3. Add tag: DNC
 4. Update custom field: DNC Date = Today
 5. Cancel all pending tasks for this contact
@@ -587,7 +572,7 @@ That's it. All re-engage dispo leads flow into the same Long-Term Drip as Cold s
 ### WF-11 | Inbound Response Handler (Re-Engagement)
 
 **Trigger:** Inbound SMS received OR Email reply received
-**Applies to:** All contacts — drip stages (Cold, Nurture, Dispo Re-Engage) AND active stages (Day 1-2, Day 3-14, Day 15-30)
+**Applies to:** All contacts — drip stages (Cold, Nurture, Dispo Re-Engage) AND active stages (Day 1-10, Day 11-30)
 **Enrollment condition:** Lead NOT tagged DNC
 
 **Pause mechanic:** Every drip/automated-send workflow (WF-00A, WF-02 through WF-05, WF-08) has a "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
@@ -626,7 +611,7 @@ That's it. All re-engage dispo leads flow into the same Long-Term Drip as Cold s
    - Remove tag: `Re-Engaged` (cleanup)
    - Send internal notification to owner: "{{first_name}} — 7-day review window expired with no action. Drip resumed automatically."
 
-**Note for active stages (Day 1-2 / Day 3-14 / Day 15-30):** There is no 7-day auto-resume for these contacts. The owner is already actively working them. Resolution is: owner moves stage (kills workflow) or clears the `Pause WFs Until` field.
+**Note for active stages (Day 1-10 / Day 11-30):** There is no 7-day auto-resume for these contacts. The owner is already actively working them. Resolution is: owner moves stage (kills workflow) or clears the `Pause WFs Until` field.
 
 ---
 
@@ -660,7 +645,7 @@ Before going live, verify:
 - Phone number has A2P 10DLC registration completed (required for business SMS in US)
 - Unsubscribe footer included in all marketing emails
 - Task assignment mapped to correct team member(s) — LM for Cold Email/SMS/Call, AM for DM/VAPI/Referral/Website
-- WF-00A conditional logic tested: confirms WF-02/03/04 steps are skipped while WF-00A is active
+- WF-00A conditional logic tested: confirms WF-02/03 steps are skipped while WF-00A is active
 - All workflow enrollments tested with a test contact before live launch
 
 ---
@@ -670,7 +655,7 @@ Before going live, verify:
 - All pipeline stages created and in correct order
 - All custom fields created
 - All tags created
-- All 11 workflows built and tested (WF-00A, WF-01 through WF-05, WF-07 through WF-11)
+- All 10 workflows built and tested (WF-00A, WF-01 through WF-03, WF-05, WF-07 through WF-11)
 - Smart lists created
 - Team members trained on GHL task queue and stage movement (LM and AM)
 - automation routing confirmed: all campaign types → New Leads

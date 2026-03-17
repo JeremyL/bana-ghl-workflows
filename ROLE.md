@@ -57,7 +57,7 @@ The system is split across two GHL sub-accounts:
 
 **Owner:** Lead Manager (Cold Email/SMS/Call sources) + Acquisition Manager (Direct Mail/VAPI/Referral/Website sources)
 **Purpose:** Single working account for all leads. Handles all leads from entry through close, disqualification, or long-term drip. Workflows branch on source tag to assign tasks to LM or AM.
-**Stages:** New Leads (Day 0) → Day 1-2 → Day 3-14 → Day 15-30 → Cold → Qualified → Dispo → Nurture
+**Stages:** New Leads (Day 0) → Day 1-10 → Day 11-30 → Cold → Qualified → Dispo → Nurture
 **Entry:** All campaign types from Prospect Data + VAPI/Referral/Website inbound + re-submissions
 
 ### Cross-Account Integration
@@ -93,15 +93,14 @@ See [new-leads/pipeline.md](new-leads/pipeline.md) and [prospect-data/data-model
 **Pre-Qualification (Not Contacted Leads)**
 
 
-| Window     | Frequency                 |
-| ---------- | ------------------------- |
-| Day 0      | Immediate (speed to lead) |
-| Day 1–2    | 2x per day                |
-| Day 3–10   | 1x per day                |
-| Day 11–14  | Every 2–3 days            |
-| Day 15–30  | Tuesdays & Thursdays only |
-| Day 30–180 | Monthly                   |
-| Day 180+   | Quarterly                 |
+| Window     | Frequency                 | Stage    |
+| ---------- | ------------------------- | -------- |
+| Day 0      | Immediate (speed to lead) | New Leads |
+| Day 1–2    | 2x per day                | Day 1-10 |
+| Day 3–10   | 1x per day                | Day 1-10 |
+| Day 11–30  | Tuesdays & Thursdays only | Day 11-30 |
+| Day 30–180 | Monthly                   | Cold     |
+| Day 180+   | Quarterly                 | Cold     |
 
 
 **Post-Qualification**
