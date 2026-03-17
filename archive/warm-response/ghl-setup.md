@@ -15,5 +15,3 @@ All Warm Response workflows (WF-00A, WF-00B, WF-05, WF-10, WF-HANDOFF, WF-11, WF
 - WF-05 (Cold Drip) → Already existed in New Leads as WF-05, now handles all sources
 - WF-10 (DNC) → Already existed in New Leads as WF-10, simplified to NL ↔ Prospect Data
 - WF-11 (Response Handler) → Already existed in New Leads as WF-11, updated for dual-owner model
-
-See [../majorchanges.md](../majorchanges.md) for the architecture decision and rationale.

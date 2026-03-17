@@ -25,10 +25,8 @@ Documentation for Bana Land's multi-channel motivated seller follow-up system, b
 | File                                 | Purpose                                                                             |
 | ------------------------------------ | ----------------------------------------------------------------------------------- |
 | [ROLE.md](ROLE.md)                   | AI assistant context file — loaded each session to establish role, business profile |
-| [rules.md](rules.md)                 | Shared contact rules and compliance                                                 |
 | [todo.md](todo.md)                   | Cross-account open decisions, unresolved questions, and pending build tasks         |
 | [for-review.md](for-review.md)       | Pre-launch verifications, consistency log, improvement ideas, and decision log      |
-| [majorchanges.md](majorchanges.md)   | Lead Manager expansion — architecture decision and implementation plan              |
 
 
 ### Account: New Leads (`new-leads/`)
@@ -41,7 +39,7 @@ Single working account for all lead sources. Handles all leads from entry throug
 | [pipeline.md](new-leads/pipeline.md)   | Stage definitions: New Leads → Cold, all Dispo stages, Qualified stages, Nurture |
 | [sequences.md](new-leads/sequences.md) | Cadence map: Day 1–30 + Cold Email sub-flow + Cold drip + Nurture + Qualified    |
 | [messaging.md](new-leads/messaging.md) | Message templates: NL-* + WR-EMAIL-* + COLD-* + COLDQ-* + NUR-* + NURQ-* + NEPQ |
-| [rules.md](new-leads/rules.md)         | Account-specific rules summary — points to shared ../rules.md                    |
+| [rules.md](new-leads/rules.md)         | Contact rules and compliance: hours, DNC, stage movement, response protocol, data hygiene |
 | [ghl-setup.md](new-leads/ghl-setup.md) | GHL build guide: 11 workflows (WF-00A, WF-01 through WF-05, WF-07 through WF-11) |
 
 

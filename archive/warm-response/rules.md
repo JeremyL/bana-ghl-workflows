@@ -3,5 +3,3 @@
 **Status: PLACEHOLDER — No active workflows, no pipeline, no contacts.**
 
 All rules now apply to the [New Leads](../new-leads/rules.md) account only. Shared rules are in [../rules.md](../rules.md).
-
-See [../majorchanges.md](../majorchanges.md) for the architecture decision and rationale.

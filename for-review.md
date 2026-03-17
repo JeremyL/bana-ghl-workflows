@@ -2,7 +2,7 @@
 
 Catch-all for items that need attention before or after go-live: pre-launch verifications, cross-file consistency checks, improvement ideas, and open decisions.
 
-Last updated: 2026-03-13
+Last updated: 2026-03-17
 
 ---
 
@@ -15,7 +15,7 @@ Items that require hands-on GHL testing before go-live. Cannot be verified from 
 | Conditional SMS by phone field   | New Leads  | WF-00A Step 16 | GHL can send SMS to Phone 1–4 individually, skipping empty fields                          |
 | Conditional SMS skip by tag      | New Leads  | WF-05          | GHL can branch on `Cold: Email Only` tag to skip SMS steps                                 |
 | WF-00A conditional suppression   | New Leads  | WF-02/03/04    | Standard workflow steps are correctly skipped while contact is enrolled in WF-00A           |
-| Workflow looping                 | New Leads  | WF-05, WF-08   | GHL does not natively loop workflows — plan for manual re-enrollment or extended build-out |
+| Workflow looping                 | New Leads  | WF-05, WF-07, WF-08 | Verify GHL "Add to Workflow" action can re-enroll a contact into the same workflow (enabling native loop). If blocked, implement twin-workflow fallback (see Improvement #3). |
 | DNC sync to Prospect Data        | New Leads  | WF-10          | Automation webhook updates Property record in Prospect Data on DNC                         |
 | Prospect Data push automation    | Prospect Data | Automation  | Field mapping from Properties to Contact + Opportunity works correctly                     |
 | Source-based task assignment      | New Leads  | WF-01/02/03/04 | Workflows correctly branch on source tag to assign tasks to LM vs AM                      |
@@ -26,73 +26,35 @@ Items that require hands-on GHL testing before go-live. Cannot be verified from 
 
 Last full re-run: 2026-03-13 (post-merge architecture — WR merged into NL, dual-owner model).
 
-### Issues Found & Fixed (2026-03-13 Re-Run)
+### Open Notes
 
-**I-01: sequences.md conflicted with ghl-setup.md on WF-00A suppression scope** — FIXED
+**N-12: County reference style inconsistent across templates**
 
-sequences.md said standard emails still fire alongside WF-00A. ghl-setup.md said all three channels suppressed (correct per decision). Updated sequences.md to match: WF-00A is the sole communicator while active.
-
-**I-02: new-leads/rules.md had stale pre-merge content** — FIXED
-
-Referenced AM-only ownership and WR DNC sync. Updated to LM/AM dual-owner model and NL → Prospect Data sync only.
-
-**I-03: prospect-data/data-model.md still referenced Warm Response as active destination** — FIXED
-
-Data flow diagram, field mapping headers, and status description all referenced WR. Updated throughout to reflect NL-only routing. WR noted as empty placeholder.
-
-**I-04: Source: Launch Control was a duplicate of Cold SMS** — FIXED
-
-Launch Control is a platform for sending cold SMS, not a separate lead source. Removed `Source: Launch Control` tag and dropdown value entirely. Launch Control leads use `Source: Cold SMS`. Removed from all routing tables, tags, dropdown values, and lead source lists across all files.
-
-### Notes — Not Conflicts, But Worth Documenting
-
-**N-01: Offer Price % field — undocumented origin**
-
-NL Opportunity custom fields include "Offer Price %" (Number), but this field doesn't exist in Prospect Data's Properties schema and isn't in the data-model.md field mapping table. It's unclear whether automation calculates it from Offer Price / Market Price on push, or whether it's manually entered. Should be documented in data-model.md field mapping section or noted as a manually-entered field.
-
-**N-02: Latitude/Longitude/Map Link fields — not in current field mapping**
-
-NL Opportunity custom fields include Latitude, Longitude, and Map Link. Prospect Data's Properties schema lists GPS and Map Link under "fields available if data source provides them (not in current CSV)." The data-model.md field mapping table doesn't include any of these three. Not an error today (data source doesn't provide them yet), but the mapping will need updating when the data source starts including them.
-
-**N-03: Property State type mismatch between Prospect Data and NL**
-
-Prospect Data stores Property State as Text. NL stores it as Dropdown (all US states). Automation must ensure the text value from Prospect Data matches a valid dropdown option when pushing to NL. Not currently documented as a mapping consideration in data-model.md.
-
-**N-04: WF-07 looping limitation not flagged in for-review.md item #3**
-
-WF-07 (Qualified Lead Check-In) says "Repeat / loop every 1-2 days until stage changes" — same GHL looping limitation as WF-05/WF-08. for-review.md item #3 only flags WF-05/WF-08. Lower severity since WF-07 loops are short-duration (active deals, days/weeks not years), but still worth noting.
-
-**N-05: Owner mailing city/state/zip lost on push from Prospect Data**
-
-Prospect Data Properties store full mailing address (street, city, state, zip) for each owner. The data-model.md field mapping only maps "Owner N Mailing Address → Address" (street). Mailing city, state, and zip don't map to any NL Contact field. GHL Contacts have native City, State, and Postal Code fields — the mapping table should include them.
-
-**N-06: Phone Type data from skip trace doesn't map to NL**
-
-Prospect Data Properties store Phone Type (Mobile, Residential, Landline, VoIP, etc.) for each of the 4 phones per owner. This data doesn't map to any NL Contact field. Relevant for WF-00A's one-time SMS blast to Phone 1–4 — sending SMS to a landline will fail silently. Phone Type could inform which numbers to SMS vs. call.
-
-**N-07: for-review.md Decision Log items #11 and #12 have no improvement writeups**
-
-Decision Log lists item #11 (Post-Purchase Referrals) and #12 (Deceased Protocol) as Pending, but neither has a corresponding improvement section with details, recommendations, or files affected. The writeups were either never created or were removed. Consider adding them or removing from the decision log.
+NL-SMS-00 uses `{{county}}` (GHL merge field syntax) while NL-EMAIL-01 and NL-EMAIL-02 use `[County Name]` (manual placeholder). Should be standardized. If using merge fields, verify correct GHL syntax for Opportunity custom fields (may need `{{opportunity.property_county}}` rather than `{{county}}`).
 
 ---
 
-### Verified — No Issues (2026-03-13, Post-Merge)
+### Verified — No Issues (2026-03-17)
 
 - **Nurture sequence** — internally consistent across pipeline.md, sequences.md, messaging.md, and ghl-setup.md (WF-08). Phase 1 monthly (3 months) → Phase 2 quarterly (indefinite). Both phases handled internally by WF-08. Template references match.
 - **New Leads 30-day Cold entry** — consistent across NL pipeline.md, sequences.md, and ghl-setup.md (WF-04 → Cold → WF-05)
 - **Cold drip sequence (WF-05)** — template references, timing, and `Cold: Email Only` SMS skip logic consistent across sequences.md, messaging.md, and ghl-setup.md
 - **WF-00A Cold Email Sub-Flow** — email timing (Days 1, 3, 7, 14, 21), Day 30 SMS blast, suppression of WF-02/03/04 all consistent across pipeline.md, sequences.md, messaging.md, and ghl-setup.md
 - **Day 1–30 sequence timing** — template references and day assignments in sequences.md match ghl-setup.md WF-02/03/04 step order and wait durations
-- **Source tracking** — Original Source (immutable, set once) + Latest Source (updated on re-submission) + Latest Source Date. 7 dropdown values: Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI AI Call, Referral, Website. Source tags match dropdown values. All 7 sources routed in WF-01/WF-11. (Launch Control removed — it's a platform for Cold SMS, not a separate source.)
+- **Source tracking** — Original Source (immutable, set once) + Latest Source (updated on re-submission) + Latest Source Date. 7 dropdown values: Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI AI Call, Referral, Website. Source tags match dropdown values. All 7 sources routed in WF-01/WF-11.
 - **Source → owner routing** — LM owns Cold Email/SMS/Call; AM owns Direct Mail/VAPI/Referral/Website. Consistent across pipeline.md, sequences.md, ghl-setup.md (WF-01, WF-11), and ROLE.md.
 - **Campaign Type → destination routing** — all campaign types route to New Leads. Consistent between prospect-data/rules.md and data-model.md.
 - **Prospect Data Campaign rules** — internally consistent between data-model.md and rules.md (naming convention, tag format, status values, campaign types)
-- **Prospect Data field mapping** — complete and accurate for all fields that currently flow from Properties to Contact + Opportunity. Email 2–4 limitation explicitly noted. Offer Price mapping correct. Headers updated to NL-only. (Gaps in future/unmapped fields noted in N-01 through N-06)
+- **Prospect Data field mapping** — complete and accurate for all fields that currently flow from Properties to Contact + Opportunity. Email 2–4 limitation explicitly noted.
 - **Contact hours** — "9 AM – 7 PM local time" consistent across ROLE.md, rules.md §1, and ghl-setup.md compliance checklist
 - **Template voice compliance** — spot-checked all SMS (≤ 2 sentences) and email (≤ 4 sentences) templates. All within limits. All identify sender as Bana Land or agent name.
 - **Prospect Data DNC handling** — "DNC applies to the entire property record, not individual owners" consistent between PD data-model.md (DNC checkbox on Property) and PD rules.md §3
 - **DNC protocol** — bi-directional (New Leads ↔ Prospect Data). WF-10 syncs to PD. Same trigger keywords (STOP/QUIT/UNSUBSCRIBE/CANCEL/END). No stale WR references.
 - **LM/AM dual-owner model** — consistent across all files: both can dispo, LM sets appointment for AM at qualification, AM owns all qualified stages regardless of source.
+- **Quick reference template-to-workflow mapping** — all 34 template IDs in messaging.md quick reference match their workflow assignments in ghl-setup.md.
+- **WF-09 Dispo Re-Engage stage list** — "No Motivation, Wants Retail, On MLS, Lead Declined" consistent across ghl-setup.md (WF-09), sequences.md, messaging.md Cold drip header, and pipeline.md Dispo Re-Engage definitions.
+- **Nurture Phase 1/2 timing accuracy** — unlike Cold (see N-08), Nurture phase labels are accurate: Phase 1 "Months 0–3" has 3 monthly sends (Month 0, 1, 2), Phase 2 starts at Month 3. Consistent across sequences.md, messaging.md, and ghl-setup.md (WF-08).
+- **Age and Deceased fields** — present in both accounts. Both Text type, consistent values (Y / N / blank for Deceased).
 
 ---
 
@@ -125,7 +87,7 @@ Decision Log lists item #11 (Post-Purchase Referrals) and #12 (Deceased Protocol
 
 **Gap:** Flagged in ghl-setup.md Step 3 but no solution. If one owner has multiple properties in the same stage, they receive duplicate automated messages for each opportunity.
 
-**Why it matters:** 3 properties in Day 1-2 = 6 automated SMS in one day + 3 call tasks. Fast track to DNC.
+**Why it matters:** 3 properties entering on the same day = Day 0 speed-to-lead fires 3× (up to 6 SMS + 3 call tasks), then Day 1-2 adds more. Fast track to DNC.
 
 **How common:** Rare but possible. Rural land owners sometimes have multiple parcels.
 
@@ -147,23 +109,19 @@ Decision Log lists item #11 (Post-Purchase Referrals) and #12 (Deceased Protocol
 
 ### 3. GHL Looping Limitation
 
-**Gap:** WF-05 Phase 2 (Cold Quarterly) and WF-08 Phase 2 (Nurture Quarterly) both say "loop" but GHL does not natively support workflow loops. If built as linear workflows, they end after the last step and leads silently stop receiving messages.
+**Gap:** WF-05 Phase 2 (Cold Quarterly), WF-07 (Qualified Check-In), and WF-08 Phase 2 (Nurture Quarterly) all require looping behavior. GHL does not support native "go to step" loops, so without a solution these workflows end silently after the last built step.
 
-**Why it matters:** Implementation blocker. Without a solution, quarterly drips expire after the last built step.
+**Why it matters:** Implementation blocker. Leads silently stop receiving messages when the workflow ends.
 
-**Three options:**
+**Recommended approach — native re-enrollment:**
 
-| Option                        | How It Works                                                                                                                   | Pros                                          | Cons                                                    |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- | ------------------------------------------------------- |
-| **A. Manual build-out**       | Build 3+ years of quarterly steps (12+ steps per workflow)                                                                     | Simple, no external dependency, easy to audit | Must remember to extend. If forgotten, leads go silent. |
-| **B. automation webhook re-trigger** | At the end of WF-05/WF-08, fire a webhook to automation. automation removes the drip tag, waits, then re-adds it — re-triggering enrollment. | Truly indefinite. Set and forget.             | Adds automation dependency. If automation fails, drip stops.          |
-| **C. Hybrid**                 | Build 2 years manually + automation webhook at the end as a safety net                                                                | Long runway + failsafe                        | Slightly more complex to set up                         |
+At the last step of each looping workflow, add an "Enroll in [this workflow]" action. The contact re-starts from step 1 indefinitely — no external tools needed.
 
-**Recommendation:** Start with Option A (manual build-out, 3 years). Add Option B later as a safety net. Revisit annually.
+**Fallback (if GHL blocks same-workflow re-enrollment):** Create a twin workflow (e.g. WF-07A with identical steps). WF-07 ends by enrolling in WF-07A; WF-07A ends by enrolling back in WF-07. Alternating between two identical workflows sidesteps any duplicate enrollment guard.
 
-**Decision needed:** Which option to use. Document in ghl-setup.md WF-05 and WF-08 notes.
+**Applies to:** WF-05 (Phase 2 last step), WF-07 (last step), WF-08 (Phase 2 last step)
 
-- **Files affected:** ghl-setup.md (WF-05, WF-08)
+- **Files affected:** ghl-setup.md (WF-05, WF-07, WF-08)
 
 ---
 
@@ -216,7 +174,7 @@ Decision Log lists item #11 (Post-Purchase Referrals) and #12 (Deceased Protocol
 
 ### 6. Property-Specific Merge Fields in Templates
 
-**Gap:** Templates only use {{first_name}} and {{agent_name}}. No messages reference the actual property (county, acres).
+**Gap:** NL-SMS-00 already uses {{county}}, but most other templates only use {{first_name}} and {{agent_name}}. Cold, Nurture, and Dispo Re-Engage templates do not reference any property details (county, acres).
 
 **Why it matters:** "Checking in about your 40 acres in Garfield County" feels personal. "Checking in about your property" feels generic.
 
@@ -311,7 +269,7 @@ Decision Log lists item #11 (Post-Purchase Referrals) and #12 (Deceased Protocol
 
 ---
 
-### 13. Disposition Review / Quality Check
+### 11. Disposition Review / Quality Check
 
 **Gap:** No process to verify AM disposition decisions. Once a lead is dispo'd, it's final.
 
@@ -333,7 +291,7 @@ Decision Log lists item #11 (Post-Purchase Referrals) and #12 (Deceased Protocol
 | --- | ----------------------- | ------------------------------------------------- | ---- |
 | 1   | Speed to Lead           | Pending                                           | —    |
 | 2   | Multi-Property Overlap  | Simple workaround (skip auto, create manual task) | —    |
-| 3   | GHL Looping             | Pending (3 options documented)                    | —    |
+| 3   | GHL Looping             | Native re-enrollment (Enroll in same WF at last step) | 2026-03-17 |
 | 4   | WF-11 Filter            | Pending                                           | —    |
 | 5   | Missed Call Text-Back   | Pending                                           | —    |
 | 6   | Property Merge Fields   | Pending                                           | —    |
@@ -341,6 +299,4 @@ Decision Log lists item #11 (Post-Purchase Referrals) and #12 (Deceased Protocol
 | 8   | Voicemail Strategy      | Pending                                           | —    |
 | 9   | Lead Scoring            | Pending                                           | —    |
 | 10  | Expired MLS Trigger     | Pending                                           | —    |
-| 11  | Post-Purchase Referrals | Pending                                           | —    |
-| 12  | Deceased Protocol       | Pending                                           | —    |
-| 13  | Dispo Review            | Pending                                           | —    |
+| 11  | Dispo Review            | Pending                                           | —    |
