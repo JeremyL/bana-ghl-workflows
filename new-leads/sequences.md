@@ -48,11 +48,11 @@ disqualify themselves, or land in the long-term Cold drip.
 **Stage:** New Leads (fires via WF-01)
 
 
-| Touch # | Timing              | Channel | Type   | Message Ref                |
-| ------- | ------------------- | ------- | ------ | -------------------------- |
-| 1       | Immediate           | SMS     | Auto   | NL-SMS-00 (Speed to Lead)  |
-| 2       | Immediate           | Call    | Manual | Call (NEPQ)                |
-| 3       | ~1hr post-call      | SMS     | Auto   | NL-SMS-07 (Missed Call)    |
+| Touch # | Timing         | Channel | Type   | Message Ref               |
+| ------- | -------------- | ------- | ------ | ------------------------- |
+| 1       | Immediate      | SMS     | Auto   | NL-SMS-00 (Speed to Lead) |
+| 2       | Immediate      | Call    | Manual | Call               |
+| 3       | ~1hr post-call | SMS     | Auto   | NL-SMS-07 (Missed Call)   |
 
 
 **Notes:**
@@ -60,95 +60,84 @@ disqualify themselves, or land in the long-term Cold drip.
 - Fires automatically via WF-01 the moment a lead enters the New Leads stage
 - NL-SMS-00 sends before the call task — warms the number and signals we're reaching out
 - Missed-call SMS (NL-SMS-07) fires ~1 hour later only if no call was logged
-- Owner works the lead on Day 0 (calls, reviews any reply), then moves stage to Day 1-2 the same day
-- After moving to Day 1-2, WF-02 fires but waits until the next business day to start automated touches
+- Owner works the lead on Day 0 (calls, reviews any reply), then moves stage to Day 1-10 the same day
+- After moving to Day 1-10, WF-02 fires but waits until the next business day to start automated touches
 - If lead responds to any Day 0 touch, WF-11 fires (pause + owner review)
 
 ---
 
-### Phase 1 — Day 1-2 Stage (Aggressive Early)
+### Phase 1 — Day 1-10 Stage (Active Daily Pursuit)
 
-**Goal:** Structured follow-up across two full calendar days after Day 0's speed-to-lead touches.
-**Cadence:** 2x per day
+**Goal:** Aggressive, structured daily follow-up for 10 calendar days after Day 0.
+**Stage:** Day 1-10
+**Workflow:** WF-02
 **Note:** WF-02 waits until the next business day 9:00 AM (contact local time) to start. Day 0 speed-to-lead actions have already fired in the New Leads stage.
+
+#### Days 1-2 (2x per day)
 
 
 | Touch # | Timing           | Channel | Type   | Message Ref             |
 | ------- | ---------------- | ------- | ------ | ----------------------- |
 | 1       | Day 1, Morning   | SMS     | Auto   | NL-SMS-01 (First Touch) |
-| 2       | Day 1, Afternoon | Call    | Manual | Call (NEPQ)             |
+| 2       | Day 1, Afternoon | Call    | Manual | Call             |
 | 3       | Day 1, Afternoon | SMS     | Auto   | NL-SMS-07 (Missed Call) |
 | 4       | Day 2, Morning   | Email   | Auto   | NL-EMAIL-01             |
-| 5       | Day 2, Afternoon | Call    | Manual | Call (NEPQ)             |
+| 5       | Day 2, Afternoon | Call    | Manual | Call             |
 | 6       | Day 2, Afternoon | SMS     | Auto   | NL-SMS-02 (Follow-Up)   |
+
+
+#### Days 3-10 (1x per day, rotating channels)
+
+
+| Day | Channel | Type   | Message Ref |
+| --- | ------- | ------ | ----------- |
+| 3   | Call    | Manual | Call |
+| 4   | SMS     | Auto   | NL-SMS-02   |
+| 5   | Email   | Auto   | NL-EMAIL-05 |
+| 6   | Call    | Manual | Call |
+| 7   | Email   | Auto   | NL-EMAIL-02 |
+| 8   | SMS     | Auto   | NL-SMS-03   |
+| 9   | Call    | Manual | Call |
+| 10  | SMS     | Auto   | NL-SMS-08   |
 
 
 **Notes:**
 
 - Day 1 = first full calendar day after Day 0. Day 2 = second full calendar day.
 - NL-SMS-01 fires first on Day 1 morning — before any call — to continue the outreach rhythm from Day 0
-- If lead responds to any touch before the next one, pause the sequence and notify team
+- Days 3-10 rotate channels so the lead isn't getting the same medium daily
+- If lead responds to any touch, WF-11 fires (pause + owner review)
 - Manual call tasks appear in LM or AM's GHL task queue based on source tag
+- After Day 10 with no response: auto-advance to Day 11-30, enroll in WF-03
 
 ---
 
-### Phase 2 — Day 3-10 (Steady Daily)
-
-**Goal:** Stay top of mind. Rotate channels to avoid fatigue. Don't blow up one channel.
-**Cadence:** 1x per day, rotating channels
-
-
-| Day | Channel | Type   | Message Ref |
-| --- | ------- | ------ | ----------- |
-| 3   | Call    | Manual | Call (NEPQ) |
-| 4   | SMS     | Auto   | NL-SMS-02   |
-| 5   | Email   | Auto   | NL-EMAIL-05 |
-| 6   | Call    | Manual | Call (NEPQ) |
-| 7   | Email   | Auto   | NL-EMAIL-02 |
-| 8   | SMS     | Auto   | NL-SMS-03   |
-| 9   | Call    | Manual | Call (NEPQ) |
-| 10  | SMS     | Auto   | NL-SMS-08   |
-
-
-**Notes:**
-
-- Rotate channels so the lead isn't getting the same medium daily
-- Call tasks go to LM or AM based on source tag
-- Email and SMS are fully automated in GHL
-
----
-
-### Phase 3 — Day 11-30 (Tapering Off)
+### Phase 2 — Day 11-30 Stage (Winding Down — Tue/Thu Only)
 
 **Goal:** Maintain presence without overwhelming. Accept lower response rate. Keep the door open.
-
-**Days 11-14 (still in Day 3-14 stage): Every 2-3 days**
-
-
-| Touch # | Day | Channel | Type   | Message Ref           |
-| ------- | --- | ------- | ------ | --------------------- |
-| 1       | 11  | SMS     | Auto   | NL-SMS-04 (Re-engage) |
-| 2       | 13  | Call    | Manual | Call (NEPQ)           |
+**Stage:** Day 11-30
+**Workflow:** WF-03
+**Cadence:** Tuesdays & Thursdays only — uniform across the entire stage. GHL send windows enforce this.
 
 
-**Days 15-30 (Day 15-30 stage): Tuesdays & Thursdays only**
-
-
-| Touch # | Day    | Channel | Type   | Message Ref             |
-| ------- | ------ | ------- | ------ | ----------------------- |
-| 3       | 15     | Email   | Auto   | NL-EMAIL-03             |
-| 4       | 17     | SMS     | Auto   | NL-SMS-09               |
-| 5       | 22     | SMS     | Auto   | NL-SMS-05               |
-| 6       | 24     | Call    | Manual | Call (NEPQ)             |
-| 7       | 29     | Email   | Auto   | NL-EMAIL-04 (Long-game) |
-| 8       | Day 30 | SMS     | Auto   | NL-SMS-06 (30-day)      |
+| Touch # | Day (approx) | Channel | Type   | Message Ref             |
+| ------- | ------------ | ------- | ------ | ----------------------- |
+| 1       | 11           | SMS     | Auto   | NL-SMS-04 (Re-engage)   |
+| 2       | 13           | Call    | Manual | Call             |
+| 3       | 15           | Email   | Auto   | NL-EMAIL-03             |
+| 4       | 17           | SMS     | Auto   | NL-SMS-09               |
+| 5       | 22           | SMS     | Auto   | NL-SMS-05               |
+| 6       | 24           | Call    | Manual | Call             |
+| 7       | 29           | Email   | Auto   | NL-EMAIL-04 (Long-game) |
+| 8       | 30           | SMS     | Auto   | NL-SMS-06 (30-day)      |
 
 
 **Notes:**
 
-- Day 15-30 touches fire on Tuesdays and Thursdays only — GHL send windows should enforce this
+- All touches fire on Tuesdays and Thursdays only — GHL send windows enforce this for the entire workflow
+- Exact days depend on which day of week the lead enters the stage; the workflow uses wait steps and the send window holds until the next Tue/Thu
 - After Day 30 with no response, lead moves to Cold stage → enters Sequence — Cold
-- GHL automation handles stage advancement via date-elapsed trigger
+- GHL automation handles stage advancement via WF-03 final step
 
 ---
 
@@ -276,13 +265,13 @@ Continue rotating SMS/Email every 90 days indefinitely.
 **Trigger:** WF-05 fires automatically when contact enters Cold stage (or any Dispo Re-Engage stage via WF-09).
 
 
-| Month | Channel | Type | Message Ref           |
-| ----- | ------- | ---- | --------------------- |
-| 1     | SMS     | Auto | COLD-SMS-01           |
-| 2     | Email   | Auto | COLD-EMAIL-01         |
-| 3     | SMS     | Auto | COLD-SMS-04           |
-| 4     | SMS     | Auto | COLD-SMS-02           |
-| 5     | Email   | Auto | COLD-EMAIL-02         |
+| Month | Channel | Type | Message Ref   |
+| ----- | ------- | ---- | ------------- |
+| 1     | SMS     | Auto | COLD-SMS-01   |
+| 2     | Email   | Auto | COLD-EMAIL-01 |
+| 3     | SMS     | Auto | COLD-SMS-04   |
+| 4     | SMS     | Auto | COLD-SMS-02   |
+| 5     | Email   | Auto | COLD-EMAIL-02 |
 
 
 At 5 months → Phase 2 begins (handled internally by WF-05)
@@ -325,7 +314,7 @@ No separate sequence. WF-09 fires on Dispo Re-Engage stage entry and enrolls the
 
 ## Channel Order Logic
 
-When hitting a lead on the same day with multiple channels (Day 1-2 phase), use this order:
+When hitting a lead on the same day with multiple channels (Days 1-2 of Day 1-10 stage), use this order:
 
 1. **SMS first** — lowest friction, seen quickly, doesn't require them to answer
 2. **Call second** — personal touch while SMS is fresh in their mind
@@ -372,7 +361,7 @@ A lead in Cold, Nurture, or Dispo Re-Engage replies to an automated message we s
 - **If owner clears `Pause WFs Until` field manually:** Drip resumes from exactly where it stopped.
 - **If owner does nothing after 7 days:** `Pause WFs Until` date expires — drip resumes from where it stopped. No restart.
 - **Pipeline stage does NOT change** during re-engagement review — the lead stays in Cold / Nurture / Dispo Re-Engage unless owner explicitly moves them.
-- **Active stages (Day 1-2 / Day 3-14 / Day 15-30):** Same pause mechanic applies — automated sends hold. No 7-day auto-resume for these stages; owner manually clears `Pause WFs Until` field or moves stage.
+- **Active stages (Day 1-10 / Day 11-30):** Same pause mechanic applies — automated sends hold. No 7-day auto-resume for these stages; owner manually clears `Pause WFs Until` field or moves stage.
 - **Owner assignment for re-engagement review:** WF-11 assigns the review task to the original owner based on source tag (LM for Cold Email/SMS/Call sources, AM for Direct Mail/VAPI/Referral/Website sources).
 
 ### Re-Submission (new external campaign source)
@@ -381,6 +370,6 @@ A contact already in GHL is reached by a separate marketing campaign outside GHL
 
 - **What happens:** automation detects duplicate, updates Latest Source + adds new Source tag + tags `Re-Submitted` + moves to New Leads.
 - **WF-01 fires:** Cleans up all active drips, assigns to owner based on new source tag, creates task.
-- **Lead is worked from scratch:** Full Day 1-2 → Day 3-14 → Day 15-30 → Cold sequence, identical to a brand-new lead.
+- **Lead is worked from scratch:** Full Day 1-10 → Day 11-30 → Cold sequence, identical to a brand-new lead.
 - **Original Source field preserved:** First-touch attribution never overwritten. Tags stack all sources.
 
