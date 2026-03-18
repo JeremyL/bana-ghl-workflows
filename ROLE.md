@@ -1,5 +1,5 @@
 # AI Role & Project Context — Bana Land Follow-Up System
-*Last edited: 2026-03-18 · Last reviewed: —*
+*Last edited: 2026-03-19 · Last reviewed: —*
 
 ## Who I Am in This Project
 
@@ -65,7 +65,7 @@ The system is split across two GHL sub-accounts:
 
 - **Prospect Data → New Leads:** All campaign types (Cold Email, Cold SMS, Cold Call, Direct Mail). Automation splits Property into Contact + Opportunity.
 - **DNC Sync:** Bi-directional via automation (New Leads ↔ Prospect Data).
-- **Re-submission:** Always goes to New Leads. WF-01 fires cleanup and restarts the lead.
+- **Re-submission:** Always goes to New Leads. WF-New-Lead-Entry fires cleanup and restarts the lead.
 
 See [new-leads/pipeline.md](new-leads/pipeline.md) and [prospect-data/data-model.md](prospect-data/data-model.md) for full details.
 

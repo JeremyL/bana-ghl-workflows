@@ -54,60 +54,60 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 
 | ID             | Channel | Stage                       | Timing            | Workflow | Auto/Manual |
 | -------------- | ------- | --------------------------- | ----------------- | -------- | ----------- |
-| NL-SMS-00      | SMS     | New Leads — Day 0           | Immediate         | WF-01    | Auto        |
-| NL-SMS-00A     | SMS     | New Leads — Day 0           | ~1hr post-call    | WF-01    | Auto        |
-| NL-SMS-01      | SMS     | New Leads — Day 1-10        | Day 1, Morning    | WF-02    | Auto        |
-| NL-SMS-07      | SMS     | New Leads — Day 1-10        | Day 1, Afternoon  | WF-02    | Auto        |
-| NL-EMAIL-01    | Email   | New Leads — Day 1-10        | Day 2, Morning    | WF-02    | Auto        |
-| NL-SMS-02      | SMS     | New Leads — Day 1-10        | Day 2, Day 4      | WF-02    | Auto        |
-| NL-EMAIL-05    | Email   | New Leads — Day 1-10        | Day 5             | WF-02    | Auto        |
-| NL-EMAIL-02    | Email   | New Leads — Day 1-10        | Day 7             | WF-02    | Auto        |
-| NL-SMS-03      | SMS     | New Leads — Day 1-10        | Day 8             | WF-02    | Auto        |
-| NL-SMS-08      | SMS     | New Leads — Day 1-10        | Day 10            | WF-02    | Auto        |
-| NL-SMS-04      | SMS     | New Leads — Day 11-30       | Day 11            | WF-03    | Auto        |
-| NL-EMAIL-03    | Email   | New Leads — Day 11-30       | Day 15            | WF-03    | Auto        |
-| NL-SMS-09      | SMS     | New Leads — Day 11-30       | Day 17            | WF-03    | Auto        |
-| NL-SMS-05      | SMS     | New Leads — Day 11-30       | Day 22            | WF-03    | Auto        |
-| NL-EMAIL-04    | Email   | New Leads — Day 11-30       | Day 29            | WF-03    | Auto        |
-| NL-SMS-06      | SMS     | New Leads — Day 11-30       | Day 30            | WF-03    | Auto        |
-| COLD-SMS-01    | SMS     | Cold Monthly                | Day 30             | WF-05    | Auto        |
-| COLD-EMAIL-01  | Email   | Cold Monthly                | Day 44             | WF-05    | Auto        |
-| COLD-SMS-02    | SMS     | Cold Monthly                | Day 58             | WF-05    | Auto        |
-| COLD-EMAIL-02  | Email   | Cold Monthly                | Day 72             | WF-05    | Auto        |
-| COLD-SMS-03    | SMS     | Cold Monthly                | Day 86             | WF-05    | Auto        |
-| COLD-EMAIL-03  | Email   | Cold Monthly                | Day 100            | WF-05    | Auto        |
-| COLDQ-SMS-01   | SMS     | Cold Quarterly              | Q1                | WF-05Q   | Auto        |
-| COLDQ-EMAIL-01 | Email   | Cold Quarterly              | Q1                | WF-05Q   | Auto        |
-| COLDQ-SMS-02   | SMS     | Cold Quarterly              | Q2                | WF-05Q   | Auto        |
-| COLDQ-EMAIL-02 | Email   | Cold Quarterly              | Q2                | WF-05Q   | Auto        |
-| COLDQ-SMS-03   | SMS     | Cold Quarterly              | Q3                | WF-05Q   | Auto        |
-| COLDQ-EMAIL-03 | Email   | Cold Quarterly              | Q3                | WF-05Q   | Auto        |
-| COLDQ-SMS-04   | SMS     | Cold Quarterly              | Q4                | WF-05Q   | Auto        |
-| COLDQ-EMAIL-04 | Email   | Cold Quarterly              | Q4                | WF-05Q   | Auto        |
-| NUR-SMS-01     | SMS     | Nurture Monthly             | Month 1           | WF-08    | Auto        |
-| NUR-EMAIL-01   | Email   | Nurture Monthly             | Month 2           | WF-08    | Auto        |
-| NUR-SMS-02     | SMS     | Nurture Monthly             | Month 3           | WF-08    | Auto        |
-| NURQ-SMS-01    | SMS     | Nurture Quarterly           | Q1                | WF-08Q   | Auto        |
-| NURQ-EMAIL-01  | Email   | Nurture Quarterly           | Q1                | WF-08Q   | Auto        |
-| NURQ-SMS-02    | SMS     | Nurture Quarterly           | Q2                | WF-08Q   | Auto        |
-| NURQ-EMAIL-02  | Email   | Nurture Quarterly           | Q2                | WF-08Q   | Auto        |
-| NURQ-SMS-03    | SMS     | Nurture Quarterly           | Q3                | WF-08Q   | Auto        |
-| NURQ-EMAIL-03  | Email   | Nurture Quarterly           | Q3                | WF-08Q   | Auto        |
-| NURQ-SMS-04    | SMS     | Nurture Quarterly           | Q4                | WF-08Q   | Auto        |
-| NURQ-EMAIL-04  | Email   | Nurture Quarterly           | Q4                | WF-08Q   | Auto        |
-| WR-EMAIL-01    | Email   | Cold Email Sub-Flow         | Day 1             | WF-00A   | Auto        |
-| WR-EMAIL-02    | Email   | Cold Email Sub-Flow         | Day 3             | WF-00A   | Auto        |
-| WR-EMAIL-03    | Email   | Cold Email Sub-Flow         | Day 7             | WF-00A   | Auto        |
-| WR-EMAIL-04    | Email   | Cold Email Sub-Flow         | Day 14            | WF-00A   | Auto        |
-| WR-EMAIL-05    | Email   | Cold Email Sub-Flow         | Day 21            | WF-00A   | Auto        |
-| WR-COLD-SMS-01 | SMS     | Cold Email → Cold (one-time)| Day 30            | WF-00A   | Auto        |
-| NL-VM-01       | VM      | New Leads — Day 1-10        | With manual calls | WF-02    | Manual      |
-| NL-VM-02       | VM      | New Leads — Day 11-30       | With manual calls | WF-03    | Manual      |
-| NL-VMSMS-01    | SMS     | New Leads — Day 1-10 / 11-30| After voicemail   | WF-02/03 | Manual      |
-| NL-RVM-01      | RVM     | New Leads — Day 11-30       | ~Day 14           | WF-03    | Auto        |
-| NL-RVM-02      | RVM     | New Leads — Day 11-30       | ~Day 20           | WF-03    | Auto        |
-| NL-RVM-03      | RVM     | New Leads — Day 11-30       | ~Day 27           | WF-03    | Auto        |
-| MC-SMS-01      | SMS     | Missed Call Text-Back       | 2 min after miss  | WF-12    | Auto        |
+| NL-SMS-00      | SMS     | New Leads — Day 0           | 120s wait         | WF-New-Lead-Entry    | Auto        |
+| NL-SMS-00A     | SMS     | New Leads — Day 0           | ~1hr post-call    | WF-New-Lead-Entry    | Auto        |
+| NL-SMS-01      | SMS     | New Leads — Day 1-10        | Day 1, Morning    | WF-Day-1-10    | Auto        |
+| NL-SMS-07      | SMS     | New Leads — Day 1-10        | Day 1, Afternoon  | WF-Day-1-10    | Auto        |
+| NL-EMAIL-01    | Email   | New Leads — Day 1-10        | Day 2, Morning    | WF-Day-1-10    | Auto        |
+| NL-SMS-02      | SMS     | New Leads — Day 1-10        | Day 2, Day 4      | WF-Day-1-10    | Auto        |
+| NL-EMAIL-05    | Email   | New Leads — Day 1-10        | Day 5             | WF-Day-1-10    | Auto        |
+| NL-EMAIL-02    | Email   | New Leads — Day 1-10        | Day 7             | WF-Day-1-10    | Auto        |
+| NL-SMS-03      | SMS     | New Leads — Day 1-10        | Day 8             | WF-Day-1-10    | Auto        |
+| NL-SMS-08      | SMS     | New Leads — Day 1-10        | Day 10            | WF-Day-1-10    | Auto        |
+| NL-SMS-04      | SMS     | New Leads — Day 11-30       | Day 11            | WF-Day-11-30    | Auto        |
+| NL-EMAIL-03    | Email   | New Leads — Day 11-30       | Day 15            | WF-Day-11-30    | Auto        |
+| NL-SMS-09      | SMS     | New Leads — Day 11-30       | Day 17            | WF-Day-11-30    | Auto        |
+| NL-SMS-05      | SMS     | New Leads — Day 11-30       | Day 22            | WF-Day-11-30    | Auto        |
+| NL-EMAIL-04    | Email   | New Leads — Day 11-30       | Day 29            | WF-Day-11-30    | Auto        |
+| NL-SMS-06      | SMS     | New Leads — Day 11-30       | Day 30            | WF-Day-11-30    | Auto        |
+| COLD-SMS-01    | SMS     | Cold Monthly                | Day 30             | WF-Cold-Drip-Monthly    | Auto        |
+| COLD-EMAIL-01  | Email   | Cold Monthly                | Day 44             | WF-Cold-Drip-Monthly    | Auto        |
+| COLD-SMS-02    | SMS     | Cold Monthly                | Day 58             | WF-Cold-Drip-Monthly    | Auto        |
+| COLD-EMAIL-02  | Email   | Cold Monthly                | Day 72             | WF-Cold-Drip-Monthly    | Auto        |
+| COLD-SMS-03    | SMS     | Cold Monthly                | Day 86             | WF-Cold-Drip-Monthly    | Auto        |
+| COLD-EMAIL-03  | Email   | Cold Monthly                | Day 100            | WF-Cold-Drip-Monthly    | Auto        |
+| COLDQ-SMS-01   | SMS     | Cold Quarterly              | Q1                | WF-Cold-Drip-Quarterly   | Auto        |
+| COLDQ-EMAIL-01 | Email   | Cold Quarterly              | Q1                | WF-Cold-Drip-Quarterly   | Auto        |
+| COLDQ-SMS-02   | SMS     | Cold Quarterly              | Q2                | WF-Cold-Drip-Quarterly   | Auto        |
+| COLDQ-EMAIL-02 | Email   | Cold Quarterly              | Q2                | WF-Cold-Drip-Quarterly   | Auto        |
+| COLDQ-SMS-03   | SMS     | Cold Quarterly              | Q3                | WF-Cold-Drip-Quarterly   | Auto        |
+| COLDQ-EMAIL-03 | Email   | Cold Quarterly              | Q3                | WF-Cold-Drip-Quarterly   | Auto        |
+| COLDQ-SMS-04   | SMS     | Cold Quarterly              | Q4                | WF-Cold-Drip-Quarterly   | Auto        |
+| COLDQ-EMAIL-04 | Email   | Cold Quarterly              | Q4                | WF-Cold-Drip-Quarterly   | Auto        |
+| NUR-SMS-01     | SMS     | Nurture Monthly             | Month 1           | WF-Nurture-Monthly    | Auto        |
+| NUR-EMAIL-01   | Email   | Nurture Monthly             | Month 2           | WF-Nurture-Monthly    | Auto        |
+| NUR-SMS-02     | SMS     | Nurture Monthly             | Month 3           | WF-Nurture-Monthly    | Auto        |
+| NURQ-SMS-01    | SMS     | Nurture Quarterly           | Q1                | WF-Nurture-Quarterly   | Auto        |
+| NURQ-EMAIL-01  | Email   | Nurture Quarterly           | Q1                | WF-Nurture-Quarterly   | Auto        |
+| NURQ-SMS-02    | SMS     | Nurture Quarterly           | Q2                | WF-Nurture-Quarterly   | Auto        |
+| NURQ-EMAIL-02  | Email   | Nurture Quarterly           | Q2                | WF-Nurture-Quarterly   | Auto        |
+| NURQ-SMS-03    | SMS     | Nurture Quarterly           | Q3                | WF-Nurture-Quarterly   | Auto        |
+| NURQ-EMAIL-03  | Email   | Nurture Quarterly           | Q3                | WF-Nurture-Quarterly   | Auto        |
+| NURQ-SMS-04    | SMS     | Nurture Quarterly           | Q4                | WF-Nurture-Quarterly   | Auto        |
+| NURQ-EMAIL-04  | Email   | Nurture Quarterly           | Q4                | WF-Nurture-Quarterly   | Auto        |
+| WR-EMAIL-01    | Email   | Cold Email Sub-Flow         | Day 1             | WF-Cold-Email-Subflow   | Auto        |
+| WR-EMAIL-02    | Email   | Cold Email Sub-Flow         | Day 3             | WF-Cold-Email-Subflow   | Auto        |
+| WR-EMAIL-03    | Email   | Cold Email Sub-Flow         | Day 7             | WF-Cold-Email-Subflow   | Auto        |
+| WR-EMAIL-04    | Email   | Cold Email Sub-Flow         | Day 14            | WF-Cold-Email-Subflow   | Auto        |
+| WR-EMAIL-05    | Email   | Cold Email Sub-Flow         | Day 21            | WF-Cold-Email-Subflow   | Auto        |
+| WR-COLD-SMS-01 | SMS     | Cold Email → Cold (one-time)| Day 30            | WF-Cold-Email-Subflow   | Auto        |
+| NL-VM-01       | VM      | New Leads — Day 1-10        | With manual calls | WF-Day-1-10    | Manual      |
+| NL-VM-02       | VM      | New Leads — Day 11-30       | With manual calls | WF-Day-11-30    | Manual      |
+| NL-VMSMS-01    | SMS     | New Leads — Day 1-10 / 11-30| After voicemail   | WF-Day-1-10/03 | Manual      |
+| NL-RVM-01      | RVM     | New Leads — Day 11-30       | ~Day 14           | WF-Day-11-30    | Auto        |
+| NL-RVM-02      | RVM     | New Leads — Day 11-30       | ~Day 20           | WF-Day-11-30    | Auto        |
+| NL-RVM-03      | RVM     | New Leads — Day 11-30       | ~Day 27           | WF-Day-11-30    | Auto        |
+| MC-SMS-01      | SMS     | Missed Call Text-Back       | 2 min after miss  | WF-Missed-Call-Textback    | Auto        |
 
 
 ---
@@ -118,7 +118,7 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 
 ---
 
-#### NL-SMS-00 | Speed to Lead (Day 0, Immediate)
+#### NL-SMS-00 | Speed to Lead (Day 0, 120s wait)
 
 > Hey {{first_name}}, it's {{agent_name}} with Bana Land — had a quick question about your property in {{opportunity.property_county}}. Mind if I give you a call?
 
@@ -281,7 +281,7 @@ Bana Land | [CALLBACK NUMBER]
 
 **Stage:** Cold | **Cadence:** 30-day wait on entry, then SMS + Email each month, ~2 weeks apart | **Owner:** GHL auto only
 **Applies to:** Cold stage leads AND all Dispo Re-Engage leads (No Motivation, Wants Retail, On MLS, Lead Declined)
-**Trigger:** WF-05 fires on Cold stage entry
+**Trigger:** WF-Cold-Drip-Monthly fires on Cold stage entry
 
 ---
 
@@ -348,7 +348,7 @@ Either way is fine. Just want to know where we stand.
 ## Cold — Quarterly Drip (Month 4+)
 
 **Stage:** Cold | **Cadence:** SMS + Email same day, every 90 days | **Owner:** GHL auto only
-**Trigger:** WF-05Q fires after monthly phase completes (or directly to skip monthly)
+**Trigger:** WF-Cold-Drip-Quarterly fires after monthly phase completes (or directly to skip monthly)
 **Rotation:** 4 unique quarters (Q1–Q4), then loops indefinitely.
 
 ---
@@ -436,7 +436,7 @@ Either way is totally fine.
 ## Nurture — Monthly (Months 1–3)
 
 **Stage:** Nurture | **Cadence:** Every 30 days (first touch immediate on entry) | **Owner:** GHL auto only
-**Trigger:** WF-08 fires on Nurture stage entry
+**Trigger:** WF-Nurture-Monthly fires on Nurture stage entry
 **Channels:** SMS + Email only
 
 ---
@@ -465,14 +465,14 @@ I'm curious — has anything changed, or are you still in the same spot?
 
 > {{first_name}}, just circling back — where do things stand with your property these days? Would love to reconnect if it makes sense. — {{agent_name}}, Bana Land
 
-Trigger: WF-08 enrolls contact in WF-08Q at Month 3.
+Trigger: WF-Nurture-Monthly enrolls contact in WF-Nurture-Quarterly at Month 3.
 
 ---
 
 ## Nurture — Quarterly (Month 4+)
 
 **Stage:** Nurture | **Cadence:** SMS + Email same day, every 90 days | **Owner:** GHL auto only
-**Trigger:** WF-08Q fires after monthly phase completes (or directly to skip monthly)
+**Trigger:** WF-Nurture-Quarterly fires after monthly phase completes (or directly to skip monthly)
 **Rotation:** 4 unique quarters (Q1–Q4), then loops indefinitely.
 
 ---
@@ -560,7 +560,7 @@ If you ever want to pick things back up, you know where to find me.
 ## Cold Email Sub-Flow — Get Phone Number
 
 **Source:** Cold Email leads with no phone number on file | **Owner:** GHL auto (emails) + Lead Manager (monitors replies)
-**Workflow:** WF-00A | **Duration:** Days 1–30 (concurrent with standard Day 1–30 stages)
+**Workflow:** WF-Cold-Email-Subflow | **Duration:** Days 1–30 (concurrent with standard Day 1–30 stages)
 
 These templates specifically ask for a phone number. They are different from the standard NL-EMAIL templates and run as a parallel sub-flow for Cold Email leads only.
 
@@ -638,7 +638,7 @@ Either way works — just let me know: [CALLBACK NUMBER]
 
 #### WR-COLD-SMS-01 | One-Time SMS Blast (Day 30)
 
-**Used by:** WF-00A — sent once to each skip-traced phone number when a Cold Email lead hits Day 30 with no confirmed phone number.
+**Used by:** WF-Cold-Email-Subflow — sent once to each skip-traced phone number when a Cold Email lead hits Day 30 with no confirmed phone number.
 **Goal:** Bridge the email conversation to a phone connection. Sent once per number. No further SMS in Cold drip for these contacts.
 
 > Hey {{first_name}}, it's {{agent_name}} from Bana Land — we've been emailing about your property. Is this a good number to reach you?
@@ -647,13 +647,13 @@ Either way works — just let me know: [CALLBACK NUMBER]
 
 ## Missed Call Text-Back
 
-**Workflow:** WF-12 | **Owner:** Auto (SMS) — reply visible in conversation + notification
+**Workflow:** WF-Missed-Call-Textback | **Owner:** Auto (SMS) — reply visible in conversation + notification
 
 ---
 
 #### MC-SMS-01 | Missed Call Auto-Reply (2 min delay)
 
-**Used by:** WF-12 — sent 2 minutes after a missed inbound call from a known contact.
+**Used by:** WF-Missed-Call-Textback — sent 2 minutes after a missed inbound call from a known contact.
 
 > Hey, this is {{agent_name}} with Bana Land — saw you just called. I'll try you right back, or feel free to text me here.
 
@@ -669,7 +669,7 @@ Either way works — just let me know: [CALLBACK NUMBER]
 
 #### NL-VM-01 | Day 1-10 Voicemail Script (~15 sec)
 
-**Used by:** LM or AM during manual call tasks in WF-02. Leave this voicemail, then send NL-VMSMS-01.
+**Used by:** LM or AM during manual call tasks in WF-Day-1-10. Leave this voicemail, then send NL-VMSMS-01.
 
 > Hey {{first_name}}, it's {{agent_name}} with Bana Land. I was looking into your property in {{opportunity.property_county}} and something came up I wanted to ask you about. Give me a call when you get this: [CALLBACK NUMBER].
 
@@ -677,7 +677,7 @@ Either way works — just let me know: [CALLBACK NUMBER]
 
 #### NL-VM-02 | Day 11-30 Voicemail Script (~15 sec)
 
-**Used by:** LM or AM during manual call tasks in WF-03. Leave this voicemail, then send NL-VMSMS-01.
+**Used by:** LM or AM during manual call tasks in WF-Day-11-30. Leave this voicemail, then send NL-VMSMS-01.
 
 > Hey {{first_name}}, it's {{agent_name}} from Bana Land. I've got a quick update on your property — call me back when you get a chance: [CALLBACK NUMBER].
 
@@ -694,7 +694,7 @@ Either way works — just let me know: [CALLBACK NUMBER]
 ## Ringless Voicemail Drops (RVM) — Day 11-30
 
 **Stage:** Day 11-30 | **Cadence:** Automated drops filling gaps between existing touches | **Owner:** GHL auto
-**Workflow:** WF-03 | **Send window:** 9am–7pm contact local time
+**Workflow:** WF-Day-11-30 | **Send window:** 9am–7pm contact local time
 
 These are automated RVM drops delivered directly to voicemail without ringing the phone. They maintain presence during the wind-down phase without adding more SMS or email.
 

@@ -9,7 +9,11 @@
       "Read(//c/Users/J/Projects/**)",
       "Bash(grep -n \"Day 11-30\\\\|Day 11 to 30\\\\|Day 11-30 stage\" \"/c/Users/J/Projects/Bana Follow Up/new-leads/\"*.md)",
       "Read(//c/Users/J/.claude/plans/**)",
-      "Bash(grep -E \"\\\\.\\(svg|pdf|png|jpg|md\\)$\")"
+      "Bash(grep -E \"\\\\.\\(svg|pdf|png|jpg|md\\)$\")",
+      "Bash(for f:*)",
+      "Bash(do)",
+      "Bash(sed -i -e 's/WF-00A/WF-Cold-Email-Subflow/g' -e 's/WF-05Q/WF-Cold-Drip-Quarterly/g' -e 's/WF-08Q/WF-Nurture-Quarterly/g' -e 's/WF-12/WF-Missed-Call-Textback/g' -e 's/WF-11/WF-Response-Handler/g' -e 's/WF-10/WF-DNC-Handler/g' -e 's/WF-09/WF-Dispo-Re-Engage/g' -e 's/WF-08/WF-Nurture-Monthly/g' -e 's/WF-05/WF-Cold-Drip-Monthly/g' -e 's/WF-03/WF-Day-11-30/g' -e 's/WF-02/WF-Day-1-10/g' -e 's/WF-01/WF-New-Lead-Entry/g' \"$f\")",
+      "Bash(done)"
     ],
     "additionalDirectories": [
       "c:\\Users\\J\\.claude\\projects\\c--Users-J-Projects-Bana-Follow-Up\\memory",
