@@ -1,5 +1,5 @@
 # Prospect Data — Rules
-*Last edited: 2026-03-18 · Last reviewed: —*
+*Last edited: 2026-03-19 · Last reviewed: —*
 
 Operating rules for the Prospect Data instance. Covers data uploads,
 campaign management, status transitions, and push-to-account rules.
@@ -125,14 +125,14 @@ uncheck `Pushed to New Leads` and set Status back to Active.
 
 ### Re-Submission Behavior
 
-When a property is re-submitted to New Leads from a new external campaign (NL WF-01 fires), update the Property record in Prospect Data as follows:
+When a property is re-submitted to New Leads from a new external campaign (NL WF-New-Lead-Entry fires), update the Property record in Prospect Data as follows:
 
 - **Status:** Stays `Pipeline`. No transition needed — the property is already active in a pipeline.
 - **Campaign tag:** Add the new campaign tag (`Campaign: [New Campaign Name]`). Do not remove old campaign tags — they stack as history.
 - **Pushed to New Leads:** Should already be checked. If it was previously unchecked (e.g., the lead went cold and was removed), re-check it.
 - **Account Push Date:** Update to today's date to reflect the new push.
 
-These updates are currently manual. The re-submission automation (NL WF-01) does not write back to Prospect Data. Until automated, whoever manages the re-submission should update the Property record at the same time.
+These updates are currently manual. The re-submission automation (NL WF-New-Lead-Entry) does not write back to Prospect Data. Until automated, whoever manages the re-submission should update the Property record at the same time.
 
 ---
 

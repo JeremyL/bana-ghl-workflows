@@ -1,5 +1,5 @@
 #  file.Bana Land — For Review
-*Last edited: 2026-03-18 · Last reviewed: —*
+*Last edited: 2026-03-19 · Last reviewed: —*
 
 Catch-all for items that need attention before or after go-live: pre-launch verifications, cross-file consistency checks, improvement ideas, and open decisions.
 
@@ -12,13 +12,13 @@ Items that require hands-on GHL testing before go-live. Cannot be verified from 
 
 | Item                           | Account       | Workflow            | What to Verify                                                                                                                                                                |
 | ------------------------------ | ------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Conditional SMS by phone field | New Leads     | WF-00A Step 16      | GHL can send SMS to Phone 1–4 individually, skipping empty fields                                                                                                             |
-| Conditional SMS skip by tag    | New Leads     | WF-05, WF-05Q       | GHL can branch on `Cold: Email Only` tag to skip SMS steps                                                                                                                    |
-| WF-00A conditional suppression | New Leads     | WF-02/03            | Standard workflow steps are correctly skipped while contact is enrolled in WF-00A                                                                                             |
-| Workflow looping               | New Leads     | WF-05Q, WF-08Q      | Verify GHL "Add to Workflow" action can re-enroll a contact into the same workflow (enabling native loop). If blocked, implement twin-workflow fallback (see Improvement #2). |
-| DNC sync to Prospect Data      | New Leads     | WF-10               | Automation webhook updates Property record in Prospect Data on DNC                                                                                                            |
+| Conditional SMS by phone field | New Leads     | WF-Cold-Email-Subflow Step 16      | GHL can send SMS to Phone 1–4 individually, skipping empty fields                                                                                                             |
+| Conditional SMS skip by tag    | New Leads     | WF-Cold-Drip-Monthly, WF-Cold-Drip-Quarterly       | GHL can branch on `Cold: Email Only` tag to skip SMS steps                                                                                                                    |
+| WF-Cold-Email-Subflow conditional suppression | New Leads     | WF-Day-1-10/03            | Standard workflow steps are correctly skipped while contact is enrolled in WF-Cold-Email-Subflow                                                                                             |
+| Workflow looping               | New Leads     | WF-Cold-Drip-Quarterly, WF-Nurture-Quarterly      | Verify GHL "Add to Workflow" action can re-enroll a contact into the same workflow (enabling native loop). If blocked, implement twin-workflow fallback (see Improvement #2). |
+| DNC sync to Prospect Data      | New Leads     | WF-DNC-Handler               | Automation webhook updates Property record in Prospect Data on DNC                                                                                                            |
 | Prospect Data push automation  | Prospect Data | Automation          | Field mapping from Properties to Contact + Opportunity works correctly                                                                                                        |
-| Source-based task assignment   | New Leads     | WF-01/02/03         | Workflows correctly branch on source tag to assign tasks to LM vs AM                                                                                                          |
+| Source-based task assignment   | New Leads     | WF-New-Lead-Entry/02/03         | Workflows correctly branch on source tag to assign tasks to LM vs AM                                                                                                          |
 
 
 ---
@@ -40,50 +40,50 @@ No open notes.
 - **N-12:** Standardized all county references to `{{opportunity.property_county}}` merge field syntax across all templates in messaging.md. Verify correct GHL Opportunity custom field syntax at build time.
 
 - **N-13:** Removed "+ NEPQ" from README.md messaging.md description.
-- **N-14:** Split WF-05/WF-08 into monthly + quarterly workflows (WF-05Q, WF-08Q). See Decision Log #13.
+- **N-14:** Split WF-Cold-Drip-Monthly/WF-Nurture-Monthly into monthly + quarterly workflows (WF-Cold-Drip-Quarterly, WF-Nurture-Quarterly). See Decision Log #13.
 - **N-15:** Removed Improvement #2 (Multi-Property Cadence Overlap) entirely. See Decision Log #2.
 - **N-16:** Renamed COLD-SMS templates to sequential order (01/02/03) across messaging.md, sequences.md, ghl-setup.md.
 - **N-17:** Changed "Bana Land Company" → "Bana Land" in ROLE.md.
 - **N-18:** Added RVM to pipeline.md Day 11-30 Channels and Actions fields.
 - **N-19:** Added "+ RVM (Day 11-30 only)" to ROLE.md Channel Strategy table.
-- **N-20:** Changed WF-05 initial wait from 14d → 30d, added 30d initial wait to WF-08. Updated timing labels across sequences.md, messaging.md, and ghl-setup.md. Both Cold and Nurture now have a 30-day breather before first touch.
-- **N-21:** Decision Log #4 updated from "Pending" to resolved (WF-11 Filter — stage filter, `Pause WFs Until`, soft opt-out guidance).
-- **N-22:** Workflow count verified note updated from "11" to "12" (WF-12 was added after prior verification).
+- **N-20:** Changed WF-Cold-Drip-Monthly initial wait from 14d → 30d, added 30d initial wait to WF-Nurture-Monthly. Updated timing labels across sequences.md, messaging.md, and ghl-setup.md. Both Cold and Nurture now have a 30-day breather before first touch.
+- **N-21:** Decision Log #4 updated from "Pending" to resolved (WF-Response-Handler Filter — stage filter, `Pause WFs Until`, soft opt-out guidance).
+- **N-22:** Workflow count verified note updated from "11" to "12" (WF-Missed-Call-Textback was added after prior verification).
 - **N-23:** Template count verified notes updated from "34" to "53" (quarterly, voicemail, and MC-SMS-01 templates added after prior verification).
 - **N-24:** Changed NL prefix from "New Leads (Day 1-30)" to "New Leads (Day 0-30)" in messaging.md.
 - **N-25:** Updated NL-SMS-07 stage to "New Leads / Day 1-10" and timing to "Day 0-1, Afternoon" in messaging.md.
-- **N-26:** Clarified pipeline.md Cold Email sub-flow — standard steps suppressed while WF-00A is active.
-- **N-27:** Aligned Nurture quarterly transition to match Cold — removed trailing 30-day wait from WF-08, added leading 90-day wait to WF-08Q. Both now: last monthly touch → enroll quarterly → 90-day wait → first quarterly touch.
+- **N-26:** Clarified pipeline.md Cold Email sub-flow — standard steps suppressed while WF-Cold-Email-Subflow is active.
+- **N-27:** Aligned Nurture quarterly transition to match Cold — removed trailing 30-day wait from WF-Nurture-Monthly, added leading 90-day wait to WF-Nurture-Quarterly. Both now: last monthly touch → enroll quarterly → 90-day wait → first quarterly touch.
 
 ---
 
 ### Verified — No Issues (2026-03-18)
 
-- **Nurture sequence** — internally consistent across pipeline.md, sequences.md, messaging.md, and ghl-setup.md. Phase 1 monthly (WF-08: 30-day initial wait + 3 monthly sends) → Phase 2 quarterly (WF-08Q: 90-day leading wait, indefinite self-loop). Template references match.
-- **New Leads 30-day Cold entry** — consistent across NL pipeline.md, sequences.md, and ghl-setup.md (WF-03 → Cold → WF-05)
-- **Cold drip sequence (WF-05 monthly + WF-05Q quarterly)** — template references, timing (30-day initial wait + 14-day spacing), and `Cold: Email Only` SMS skip logic consistent across sequences.md, messaging.md, and ghl-setup.md
-- **WF-00A Cold Email Sub-Flow** — email timing (Days 1, 3, 7, 14, 21), Day 30 SMS blast, suppression of WF-02/03 all consistent across pipeline.md, sequences.md, messaging.md, and ghl-setup.md
-- **Day 1–30 sequence timing** — template references and day assignments in sequences.md match ghl-setup.md WF-02/03 step order and wait durations
-- **Source tracking** — Original Source (immutable, set once) + Latest Source (updated on re-submission) + Latest Source Date. 7 dropdown values: Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI AI Call, Referral, Website. Source tags match dropdown values. All 7 sources routed in WF-01/WF-11.
-- **Source → owner routing** — LM owns Cold Email/SMS/Call; AM owns Direct Mail/VAPI/Referral/Website. Consistent across pipeline.md, sequences.md, ghl-setup.md (WF-01, WF-11), and ROLE.md.
+- **Nurture sequence** — internally consistent across pipeline.md, sequences.md, messaging.md, and ghl-setup.md. Phase 1 monthly (WF-Nurture-Monthly: 30-day initial wait + 3 monthly sends) → Phase 2 quarterly (WF-Nurture-Quarterly: 90-day leading wait, indefinite self-loop). Template references match.
+- **New Leads 30-day Cold entry** — consistent across NL pipeline.md, sequences.md, and ghl-setup.md (WF-Day-11-30 → Cold → WF-Cold-Drip-Monthly)
+- **Cold drip sequence (WF-Cold-Drip-Monthly monthly + WF-Cold-Drip-Quarterly quarterly)** — template references, timing (30-day initial wait + 14-day spacing), and `Cold: Email Only` SMS skip logic consistent across sequences.md, messaging.md, and ghl-setup.md
+- **WF-Cold-Email-Subflow Cold Email Sub-Flow** — email timing (Days 1, 3, 7, 14, 21), Day 30 SMS blast, suppression of WF-Day-1-10/03 all consistent across pipeline.md, sequences.md, messaging.md, and ghl-setup.md
+- **Day 1–30 sequence timing** — template references and day assignments in sequences.md match ghl-setup.md WF-Day-1-10/03 step order and wait durations
+- **Source tracking** — Original Source (immutable, set once) + Latest Source (updated on re-submission) + Latest Source Date. 7 dropdown values: Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI AI Call, Referral, Website. Source tags match dropdown values. All 7 sources routed in WF-New-Lead-Entry/WF-Response-Handler.
+- **Source → owner routing** — LM owns Cold Email/SMS/Call; AM owns Direct Mail/VAPI/Referral/Website. Consistent across pipeline.md, sequences.md, ghl-setup.md (WF-New-Lead-Entry, WF-Response-Handler), and ROLE.md.
 - **Campaign Type → destination routing** — all campaign types route to New Leads. Consistent between prospect-data/rules.md and data-model.md.
 - **Prospect Data Campaign rules** — internally consistent between data-model.md and rules.md (naming convention, tag format, status values, campaign types)
 - **Prospect Data field mapping** — complete and accurate for all fields that currently flow from Properties to Contact + Opportunity. Email 2–4 limitation explicitly noted.
 - **Contact hours** — "9 AM – 7 PM local time" consistent across ROLE.md, rules.md §1, and ghl-setup.md compliance checklist
 - **Template voice compliance** — spot-checked all SMS (≤ 2 sentences) and email (≤ 4 sentences) templates. All within limits. All identify sender as Bana Land or agent name.
 - **Prospect Data DNC handling** — "DNC applies to the entire property record, not individual owners" consistent between PD data-model.md (DNC checkbox on Property) and PD rules.md §3
-- **DNC protocol** — bi-directional (New Leads ↔ Prospect Data). WF-10 syncs to PD. Same trigger keywords (STOP/QUIT/UNSUBSCRIBE/CANCEL/END). No stale WR references.
+- **DNC protocol** — bi-directional (New Leads ↔ Prospect Data). WF-DNC-Handler syncs to PD. Same trigger keywords (STOP/QUIT/UNSUBSCRIBE/CANCEL/END). No stale WR references.
 - **LM/AM dual-owner model** — consistent across all files: both can dispo, LM sets appointment for AM at qualification, AM owns all qualified stages regardless of source.
 - **Quick reference template-to-workflow mapping** — all 53 template IDs in messaging.md quick reference match their workflow assignments in ghl-setup.md.
-- **WF-09 Dispo Re-Engage stage list** — "No Motivation, Wants Retail, On MLS, Lead Declined" consistent across ghl-setup.md (WF-09), sequences.md, messaging.md Cold drip header, and pipeline.md Dispo Re-Engage definitions.
-- **Nurture Phase 1/2 timing accuracy** — Phase 1 "Months 1–3" has 30-day initial wait + 3 monthly sends, Phase 2 starts with 90-day wait. Consistent across sequences.md, messaging.md, and ghl-setup.md (WF-08 + WF-08Q). Both Cold and Nurture use same transition pattern: last monthly touch → enroll quarterly → 90-day wait → first quarterly touch.
+- **WF-Dispo-Re-Engage Dispo Re-Engage stage list** — "No Motivation, Wants Retail, On MLS, Lead Declined" consistent across ghl-setup.md (WF-Dispo-Re-Engage), sequences.md, messaging.md Cold drip header, and pipeline.md Dispo Re-Engage definitions.
+- **Nurture Phase 1/2 timing accuracy** — Phase 1 "Months 1–3" has 30-day initial wait + 3 monthly sends, Phase 2 starts with 90-day wait. Consistent across sequences.md, messaging.md, and ghl-setup.md (WF-Nurture-Monthly + WF-Nurture-Quarterly). Both Cold and Nurture use same transition pattern: last monthly touch → enroll quarterly → 90-day wait → first quarterly touch.
 - **Age and Deceased fields** — present in both accounts. Age is Number type, Deceased is Text type. Consistent values for Deceased (Y / N / blank).
 - **Stage consolidation (Day 1-10 / Day 11-30)** — stage names, definitions, and cadence descriptions consistent across all 5 New Leads files (pipeline.md, sequences.md, messaging.md, ghl-setup.md, rules.md) + ROLE.md + MEMORY.md. Zero references to old stage names (Day 1-2, Day 3-14, Day 15-30) in active files.
 - **WF-04 elimination** — zero active-file references except Decision Log entry #12. Archive files retain old references (expected).
-- **Workflow count** — 12 workflows confirmed across ghl-setup.md, MEMORY.md, and README.md (was 10 before monthly+quarterly split → 12 → 11 after WF-07 removal → 12 after WF-12 addition).
-- **Template-to-workflow mapping post-consolidation** — all 53 template IDs in messaging.md quick reference re-verified against WF-02 (Day 1-10) and WF-03 (Day 11-30) assignments in ghl-setup.md. All match.
-- **Day 11-30 cadence uniformity** — "Every 2–3 days (11 touches)" consistently described in pipeline.md, sequences.md, and ghl-setup.md WF-03. Wait-step spacing, no day-of-week restriction.
-- **Voicemail strategy** — 6 new template IDs (NL-VM-01, NL-VM-02, NL-VMSMS-01, NL-RVM-01/02/03) consistent across messaging.md quick reference, sequences.md Day 11-30 table, ghl-setup.md WF-03 steps, and rules.md §12. Voicemail scripts comply with voice guidelines (short, casual, identifies Bana Land). RVM drops respect 9am–7pm send window and WF-00A conditional logic.
+- **Workflow count** — 12 workflows confirmed across ghl-setup.md, MEMORY.md, and README.md (was 10 before monthly+quarterly split → 12 → 11 after WF-07 removal → 12 after WF-Missed-Call-Textback addition).
+- **Template-to-workflow mapping post-consolidation** — all 53 template IDs in messaging.md quick reference re-verified against WF-Day-1-10 (Day 1-10) and WF-Day-11-30 (Day 11-30) assignments in ghl-setup.md. All match.
+- **Day 11-30 cadence uniformity** — "Every 2–3 days (11 touches)" consistently described in pipeline.md, sequences.md, and ghl-setup.md WF-Day-11-30. Wait-step spacing, no day-of-week restriction.
+- **Voicemail strategy** — 6 new template IDs (NL-VM-01, NL-VM-02, NL-VMSMS-01, NL-RVM-01/02/03) consistent across messaging.md quick reference, sequences.md Day 11-30 table, ghl-setup.md WF-Day-11-30 steps, and rules.md §12. Voicemail scripts comply with voice guidelines (short, casual, identifies Bana Land). RVM drops respect 9am–7pm send window and WF-Cold-Email-Subflow conditional logic.
 
 ---
 
@@ -93,41 +93,41 @@ No open notes.
 
 ### 1. Speed to Lead — RESOLVED
 
-**Resolution:** Speed-to-lead targets (5 min / 30 min) documented in rules.md §11, sequences.md, and ghl-setup.md WF-01. WF-01 fires push notification + internal SMS alert to owner — no task creation (notifications are the urgency mechanism, not tasks).
+**Resolution:** Speed-to-lead targets (5 min / 30 min) documented in rules.md §11, sequences.md, and ghl-setup.md WF-New-Lead-Entry. WF-New-Lead-Entry fires push notification + internal SMS alert to owner — no task creation (notifications are the urgency mechanism, not tasks).
 
 ---
 
 ### 2. GHL Looping Limitation — RESOLVED
 
-**Gap:** WF-05Q (Cold Quarterly) and WF-08Q (Nurture Quarterly) require looping behavior. GHL does not support native "go to step" loops.
+**Gap:** WF-Cold-Drip-Quarterly (Cold Quarterly) and WF-Nurture-Quarterly (Nurture Quarterly) require looping behavior. GHL does not support native "go to step" loops.
 
 **Resolution (2026-03-18):** Both workflows now re-enroll in themselves at the last step via native GHL "Add to Workflow" action. WF-07 (Qualified Check-In) was removed — qualified stages are human-led by AM with no automated workflow.
 
-**Fallback (if GHL blocks same-workflow re-enrollment):** Create twin workflows (e.g. WF-05QA) and alternate enrollment between them.
+**Fallback (if GHL blocks same-workflow re-enrollment):** Create twin workflows (e.g. WF-Cold-Drip-QuarterlyA) and alternate enrollment between them.
 
-**Applies to:** WF-05Q (last step), WF-08Q (last step)
+**Applies to:** WF-Cold-Drip-Quarterly (last step), WF-Nurture-Quarterly (last step)
 
 ---
 
-### 3. WF-11 Enrollment Filter & Edge Cases — RESOLVED
+### 3. WF-Response-Handler Enrollment Filter & Edge Cases — RESOLVED
 
 **Resolution (2026-03-18):**
 
-1. **Stage filter added** to WF-11 trigger — only fires for Day 1-10, Day 11-30, Cold, Nurture, and Dispo Re-Engage stages. Terminal stages (DNC, Purchased, etc.) and qualified stages excluded.
-2. **Re-trigger guard** uses `Pause WFs Until` field — if field is set, WF-11 won't fire again. `Re-Engaged` tag eliminated entirely (redundant with `Pause WFs Until` field).
-3. **Soft opt-out guidance** added to rules.md §6A and ghl-setup.md WF-11 — owner reviews case-by-case, decides DNC or appropriate Dispo.
+1. **Stage filter added** to WF-Response-Handler trigger — only fires for Day 1-10, Day 11-30, Cold, Nurture, and Dispo Re-Engage stages. Terminal stages (DNC, Purchased, etc.) and qualified stages excluded.
+2. **Re-trigger guard** uses `Pause WFs Until` field — if field is set, WF-Response-Handler won't fire again. `Re-Engaged` tag eliminated entirely (redundant with `Pause WFs Until` field).
+3. **Soft opt-out guidance** added to rules.md §6A and ghl-setup.md WF-Response-Handler — owner reviews case-by-case, decides DNC or appropriate Dispo.
 
 ---
 
 ### 11. Source-Specific Day 0 First Touch
 
-**Gap:** WF-01 sends the same NL-SMS-00 ("had a quick question about your property") for all 7 sources. Inbound leads (Website, VAPI, Referral) expect acknowledgment of their inquiry, not cold outreach language. Direct Mail leads received a physical letter with a dollar amount — referencing that letter creates instant recognition and continuity.
+**Gap:** WF-New-Lead-Entry sends the same NL-SMS-00 ("had a quick question about your property") for all 7 sources. Inbound leads (Website, VAPI, Referral) expect acknowledgment of their inquiry, not cold outreach language. Direct Mail leads received a physical letter with a dollar amount — referencing that letter creates instant recognition and continuity.
 
 **Why it matters:** Inbound leads are the rarest and highest-intent in land wholesaling — these people came to us. Direct Mail is the highest-cost outbound channel. First impression on both deserves a tailored touch, not a generic cold opener. A website inquiry that gets "had a quick question about your property" instead of "thanks for reaching out" feels like cold outreach, not a response to their action.
 
 **Recommended approach:**
 
-1. Add a source branch to WF-01 Day 0 step (after source tag is applied, before SMS fires)
+1. Add a source branch to WF-New-Lead-Entry Day 0 step (after source tag is applied, before SMS fires)
 2. Create 2 new template pairs:
    - **IN-SMS-00 / IN-SMS-00A** — Inbound acknowledgment (Website, VAPI, Referral): "Hey {{first_name}}, just saw your info come through about your property in {{opportunity.property_county}} — I'd love to chat about it. Mind if I give you a call?"
    - **DM-SMS-00 / DM-SMS-00A** — Direct Mail reference: "Hey {{first_name}}, it's {{agent_name}} with Bana Land — following up on the letter we sent about your property in {{opportunity.property_county}}. Would it be worth a quick call?"
@@ -136,7 +136,7 @@ No open notes.
 
 **4 new templates, 1 workflow branch.**
 
-- **Files affected:** messaging.md (add IN-SMS-00, IN-SMS-00A, DM-SMS-00, DM-SMS-00A), ghl-setup.md (WF-01 source branch), sequences.md (note Day 0 variants)
+- **Files affected:** messaging.md (add IN-SMS-00, IN-SMS-00A, DM-SMS-00, DM-SMS-00A), ghl-setup.md (WF-New-Lead-Entry source branch), sequences.md (note Day 0 variants)
 
 ---
 
@@ -144,9 +144,9 @@ No open notes.
 
 ---
 
-### 4. Missed Call Text-Back (WF-12) — RESOLVED
+### 4. Missed Call Text-Back (WF-Missed-Call-Textback) — RESOLVED
 
-**Resolution:** WF-12 added to ghl-setup.md and MC-SMS-01 template added to messaging.md. Trigger: missed inbound call from known contact (not DNC). 2-minute delay before SMS fires. Internal notification to assigned owner. No task — reply shows in conversation + triggers notification. Workflow count updated to 12 across all files.
+**Resolution:** WF-Missed-Call-Textback added to ghl-setup.md and MC-SMS-01 template added to messaging.md. Trigger: missed inbound call from known contact (not DNC). 2-minute delay before SMS fires. Internal notification to assigned owner. No task — reply shows in conversation + triggers notification. Workflow count updated to 12 across all files.
 
 ---
 
@@ -177,7 +177,7 @@ No open notes.
 - **Cold Quarterly:** COLDQ-SMS-01 through -04, COLDQ-EMAIL-01 through -04 (8 templates)
 - **Nurture Quarterly:** NURQ-SMS-01 through -04, NURQ-EMAIL-01 through -04 (8 templates)
 
-Each lead sees a different message every 90 days for a full year before any repeat. WF-05Q and WF-08Q rotate through all 4 quarters then loop. Consistent across messaging.md, sequences.md, and ghl-setup.md.
+Each lead sees a different message every 90 days for a full year before any repeat. WF-Cold-Drip-Quarterly and WF-Nurture-Quarterly rotate through all 4 quarters then loop. Consistent across messaging.md, sequences.md, and ghl-setup.md.
 
 ---
 
@@ -225,7 +225,7 @@ Each lead sees a different message every 90 days for a full year before any repe
 
 ### 15. Email 2-4 Fallback from Prospect Data
 
-**Gap:** Only Email 1 maps from Prospect Data to New Leads (GHL Contacts natively support 1 email). If Email 1 bounces, Emails 2-4 sit unused in Prospect Data. This is critical for Cold Email source leads where email is the only channel until a phone number is obtained via WF-00A.
+**Gap:** Only Email 1 maps from Prospect Data to New Leads (GHL Contacts natively support 1 email). If Email 1 bounces, Emails 2-4 sit unused in Prospect Data. This is critical for Cold Email source leads where email is the only channel until a phone number is obtained via WF-Cold-Email-Subflow.
 
 **Why it matters:** A Cold Email lead with a bounced Email 1 is completely unreachable — but Email 2, 3, or 4 might work. These backup emails exist in Prospect Data and can rescue the lead.
 
@@ -251,7 +251,7 @@ Each lead sees a different message every 90 days for a full year before any repe
 
 1. **Pre-push validation in Prospect Data:** When pushing to New Leads, if Phone 1 Type = Landline and a Mobile number exists in Phone 2/3/4, swap so the Mobile number is Phone 1 (primary). This ensures SMS reaches a mobile number.
 2. Map Phone Type fields to Contact custom fields in New Leads for visibility (Phone 1 Type, Phone 2 Type, etc.)
-3. Add Phone Type awareness to WF-00A's Day 30 SMS blast (Step 16) — only send to phone fields that are Mobile type
+3. Add Phone Type awareness to WF-Cold-Email-Subflow's Day 30 SMS blast (Step 16) — only send to phone fields that are Mobile type
 
 - **Files affected:** prospect-data/data-model.md (add Phone Type to field mapping), prospect-data/rules.md (add phone type validation to pre-push rules), ghl-setup.md (Phone Type custom fields)
 
@@ -443,10 +443,10 @@ Each lead sees a different message every 90 days for a full year before any repe
   - Q2 (Apr-Jun): Spring buyer demand angle
   - Q3 (Jul-Sep): Summer/fall market activity angle
   - Q4 (Oct-Dec): Year-end clean slate angle
-- **Challenge:** Quarterly timing follows the lead's enrollment date, not calendar quarters. A lead entering Cold in February hits "Q1 template" in May (90 days later), which is wrong seasonally. Proper implementation requires GHL date-based branching within WF-05Q/WF-08Q to select templates by current month, not position in loop. This adds significant workflow complexity.
+- **Challenge:** Quarterly timing follows the lead's enrollment date, not calendar quarters. A lead entering Cold in February hits "Q1 template" in May (90 days later), which is wrong seasonally. Proper implementation requires GHL date-based branching within WF-Cold-Drip-Quarterly/WF-Nurture-Quarterly to select templates by current month, not position in loop. This adds significant workflow complexity.
 - **Recommendation:** Implement only after the system is stable and producing data. Strong evergreen messaging first, seasonal layer second.
 
-- **Files affected:** messaging.md (rewrite quarterly templates), ghl-setup.md (date-based branching in WF-05Q/WF-08Q)
+- **Files affected:** messaging.md (rewrite quarterly templates), ghl-setup.md (date-based branching in WF-Cold-Drip-Quarterly/WF-Nurture-Quarterly)
 
 ---
 
@@ -468,7 +468,7 @@ Each lead sees a different message every 90 days for a full year before any repe
 
 ### 26. NL-SMS-07 Message-Truth Gap
 
-**Gap:** NL-SMS-07 ("tried to reach you just now") fires automatically 4 hours after the Day 1 call task is created (WF-02 Step 7), regardless of whether the LM/AM actually made the call. If the call task is still sitting in the queue, the SMS is inaccurate.
+**Gap:** NL-SMS-07 ("tried to reach you just now") fires automatically 4 hours after the Day 1 call task is created (WF-Day-1-10 Step 7), regardless of whether the LM/AM actually made the call. If the call task is still sitting in the queue, the SMS is inaccurate.
 
 **Why it matters:** Minor but relevant — if the lead does pick up later and says "you said you tried to call, I didn't see a missed call," it erodes trust. The NEPQ approach emphasizes authenticity.
 
@@ -483,19 +483,19 @@ Each lead sees a different message every 90 days for a full year before any repe
 
 ### 27. Re-Submission Write-Back Automation
 
-**Gap:** Prospect Data rules.md explicitly notes: "Currently manual — NL WF-01 does not write back to Prospect Data to update campaign tags and Account Push Date automatically." This means campaign tag stacking and Account Push Date updates require manual work on every re-submission.
+**Gap:** Prospect Data rules.md explicitly notes: "Currently manual — NL WF-New-Lead-Entry does not write back to Prospect Data to update campaign tags and Account Push Date automatically." This means campaign tag stacking and Account Push Date updates require manual work on every re-submission.
 
 **Why it matters:** Manual steps get skipped, especially under volume. If campaign tags don't stack automatically, Prospect Data loses its history of which properties were sent to which campaigns. Source tracking becomes unreliable over time.
 
 **Recommended approach:**
 
-- Add a webhook or automation from WF-01 to Prospect Data on re-submission detection:
+- Add a webhook or automation from WF-New-Lead-Entry to Prospect Data on re-submission detection:
   - Update the Property record's campaign tag (stack new tag alongside existing)
   - Update Account Push Date to today
   - Re-check `Pushed to New Leads` checkbox
 - Update prospect-data/rules.md to reflect automation instead of manual process
 
-- **Files affected:** ghl-setup.md (WF-01 webhook step), prospect-data/rules.md (update re-submission section)
+- **Files affected:** ghl-setup.md (WF-New-Lead-Entry webhook step), prospect-data/rules.md (update re-submission section)
 
 ---
 
@@ -507,8 +507,8 @@ Each lead sees a different message every 90 days for a full year before any repe
 | 1   | Speed to Lead          | Push notification + SMS alert to owner. 5-min call target. No auto-call bridge. | 2026-03-18 |
 | 2   | Multi-Property Overlap | Removed — not a real concern for this business.                 | 2026-03-18 |
 | 3   | GHL Looping            | Native re-enrollment (Enroll in same WF at last step)           | 2026-03-17 |
-| 4   | WF-11 Filter           | Stage filter added (Day 1-10, Day 11-30, Cold, Nurture, Dispo Re-Engage). `Re-Engaged` tag eliminated. `Pause WFs Until` prevents duplicate triggers. Soft opt-out guidance added. | 2026-03-18 |
-| 5   | Missed Call Text-Back  | WF-12 built. 2-min delay, MC-SMS-01 template, no task. 11 → 12 workflows. | 2026-03-18 |
+| 4   | WF-Response-Handler Filter           | Stage filter added (Day 1-10, Day 11-30, Cold, Nurture, Dispo Re-Engage). `Re-Engaged` tag eliminated. `Pause WFs Until` prevents duplicate triggers. Soft opt-out guidance added. | 2026-03-18 |
+| 5   | Missed Call Text-Back  | WF-Missed-Call-Textback built. 2-min delay, MC-SMS-01 template, no task. 11 → 12 workflows. | 2026-03-18 |
 | 6   | Property Merge Fields  | Blocked until GHL setup. Export actual merge field keys after custom fields are created, then update templates. | 2026-03-18 |
 | 7   | Message Variety        | 4 quarterly variants per channel (1-year cycle). Covers both Cold and Nurture. No additional variants needed. | 2026-03-18 |
 | 8   | Voicemail Strategy     | VM scripts (NL-VM-01/02) + combo SMS (NL-VMSMS-01) for manual calls. 3 automated RVM drops in Day 11-30 (NL-RVM-01/02/03). Protocol in rules.md §12. | 2026-03-18 |
@@ -516,9 +516,9 @@ Each lead sees a different message every 90 days for a full year before any repe
 | 10  | Expired MLS Trigger    | Pending                                                         | —          |
 | 11  | Dispo Review           | Pending                                                         | —          |
 | 12  | Stage Consolidation    | 3 stages → 2: Day 1-10 + Day 11-30. WF-04 eliminated. | 2026-03-18 |
-| 13  | Monthly/Quarterly Split | WF-05 → WF-05 + WF-05Q. WF-08 → WF-08 + WF-08Q. Quarterly self-loops. 10 → 12 workflows. | 2026-03-18 |
+| 13  | Monthly/Quarterly Split | WF-Cold-Drip-Monthly → WF-Cold-Drip-Monthly + WF-Cold-Drip-Quarterly. WF-Nurture-Monthly → WF-Nurture-Monthly + WF-Nurture-Quarterly. Quarterly self-loops. 10 → 12 workflows. | 2026-03-18 |
 | 14  | WF-07 Removed          | Qualified stages (Due Diligence → Under Contract) are human-led by AM. No automated workflow — smart lists are the safety net. 12 → 11 workflows. | 2026-03-18 |
-| 15  | Re-Engaged Tag Removed | `Re-Engaged` tag eliminated. `Pause WFs Until` date field handles pausing + duplicate-trigger prevention. WF-11 stage filter + soft opt-out guidance added. | 2026-03-18 |
+| 15  | Re-Engaged Tag Removed | `Re-Engaged` tag eliminated. `Pause WFs Until` date field handles pausing + duplicate-trigger prevention. WF-Response-Handler stage filter + soft opt-out guidance added. | 2026-03-18 |
 | 16  | Source-Specific Day 0  | Pending                                                         | —          |
 | 17  | Deceased Owner Protocol | No special handling. Known deceased owners — already talking to someone. Standard outreach applies. | 2026-03-18 |
 | 18  | Multi-Owner Coordination | Not a GHL concern. Handled outside the system. Standard outreach for all owners. | 2026-03-18 |
