@@ -1,4 +1,5 @@
 # Bana Land — New Leads Account: Follow-Up Sequences
+*Last edited: 2026-03-18 · Last reviewed: —*
 
 This is the cadence document for **New Leads**. It defines exactly when to touch a lead,
 with which channel, and whether that touch is human-driven or automated.

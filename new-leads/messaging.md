@@ -1,4 +1,5 @@
 # Bana Land — New Leads Account: Message Templates
+*Last edited: 2026-03-18 · Last reviewed: —*
 
 ## Voice & Principles
 

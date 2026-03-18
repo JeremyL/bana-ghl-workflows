@@ -1,4 +1,5 @@
 # Prospect Data — Data Model
+*Last edited: 2026-03-18 · Last reviewed: —*
 
 Prospect Data in the Bana Land GHL system. Stores all raw property and skip trace data in a single flat Custom Object. No contacts, no opportunities, no pipeline.
 

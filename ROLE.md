@@ -1,4 +1,5 @@
 # AI Role & Project Context — Bana Land Follow-Up System
+*Last edited: 2026-03-18 · Last reviewed: —*
 
 ## Who I Am in This Project
 

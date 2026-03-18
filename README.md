@@ -1,4 +1,5 @@
 # Bana Land — GHL Follow-Up System
+*Last edited: 2026-03-18 · Last reviewed: —*
 
 Documentation for Bana Land's multi-channel motivated seller follow-up system, built in Go High Level (GHL). Covers the full lead lifecycle — from first outreach response through deal close, disqualification, or long-term drip.
 

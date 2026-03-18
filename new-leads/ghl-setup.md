@@ -1,4 +1,5 @@
 # Bana Land — New Leads Account: GHL Setup Guide
+*Last edited: 2026-03-18 · Last reviewed: —*
 
 This guide walks through building the New Leads GHL sub-account from scratch.
 Follow the steps in order — each section depends on the previous one being complete.
