@@ -319,7 +319,7 @@ Build each workflow in **Automation > Workflows**.
 
 **Pause mechanic:** Every email send step has a "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before it.
 
-**Exit conditions:** Phone number populated (at any check point) OR stage changes to a qualified/dispo stage.
+**Exit conditions:** Phone number populated (at any check point) OR contact stage changes (moved to any other pipeline stage).
 
 ---
 
@@ -409,7 +409,7 @@ Build each workflow in **Automation > Workflows**.
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
-**Exit conditions:** Contact stage changes (moved to qualified or disqualified stage).
+**Exit conditions:** Contact stage changes (moved to any other pipeline stage).
 
 ---
 
@@ -450,7 +450,7 @@ Build each workflow in **Automation > Workflows**.
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
-**Exit conditions:** Contact stage changes (moved to qualified or disqualified stage).
+**Exit conditions:** Contact stage changes (moved to any other pipeline stage).
 
 ---
 
@@ -464,23 +464,24 @@ Build each workflow in **Automation > Workflows**.
 
 **Actions:**
 
-1. Wait: 30 days
-2. **If NOT tagged `Cold: Email Only`:** Send SMS: COLD-SMS-01
-3. Wait: 14 days
-4. Send Email: COLD-EMAIL-01
-5. Wait: 14 days
-6. **If NOT tagged `Cold: Email Only`:** Send SMS: COLD-SMS-02
-7. Wait: 14 days
-8. Send Email: COLD-EMAIL-02
-9. Wait: 14 days
-10. **If NOT tagged `Cold: Email Only`:** Send SMS: COLD-SMS-03
-11. Wait: 14 days
-12. Send Email: COLD-EMAIL-03
-13. Enroll in WF-Cold-Drip-Quarterly (Cold Drip — Quarterly)
+1. **Defensive cleanup:** Remove from WF-Nurture-Monthly, WF-Nurture-Quarterly (prevents dual drip if contact moved from Nurture → Cold)
+2. Wait: 30 days
+3. **If NOT tagged `Cold: Email Only`:** Send SMS: COLD-SMS-01
+4. Wait: 14 days
+5. Send Email: COLD-EMAIL-01
+6. Wait: 14 days
+7. **If NOT tagged `Cold: Email Only`:** Send SMS: COLD-SMS-02
+8. Wait: 14 days
+9. Send Email: COLD-EMAIL-02
+10. Wait: 14 days
+11. **If NOT tagged `Cold: Email Only`:** Send SMS: COLD-SMS-03
+12. Wait: 14 days
+13. Send Email: COLD-EMAIL-03
+14. Enroll in WF-Cold-Drip-Quarterly (Cold Drip — Quarterly)
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
-**Exit conditions:** Contact stage changes (moved to qualified or disqualified stage).
+**Exit conditions:** Contact stage changes (moved to any other pipeline stage).
 
 ---
 
@@ -512,6 +513,8 @@ Build each workflow in **Automation > Workflows**.
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
+**Exit conditions:** Contact stage changes (moved to any other pipeline stage).
+
 ---
 
 ### WF-Nurture-Monthly | Nurture — Monthly (Months 1–3)
@@ -521,17 +524,18 @@ Build each workflow in **Automation > Workflows**.
 
 **Actions:**
 
-1. Wait: 30 days
-2. Send SMS: NUR-SMS-01
-3. Wait: 30 days
-4. Send Email: NUR-EMAIL-01
-5. Wait: 30 days
-6. Send SMS: NUR-SMS-02
-7. Enroll in WF-Nurture-Quarterly (Nurture — Quarterly)
+1. **Defensive cleanup:** Remove from WF-Cold-Drip-Monthly, WF-Cold-Drip-Quarterly (prevents dual drip if contact moved from Cold → Nurture)
+2. Wait: 30 days
+3. Send SMS: NUR-SMS-01
+4. Wait: 30 days
+5. Send Email: NUR-EMAIL-01
+6. Wait: 30 days
+7. Send SMS: NUR-SMS-02
+8. Enroll in WF-Nurture-Quarterly (Nurture — Quarterly)
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
-**Exit conditions:** Contact stage changes (moved to qualified or disqualified stage).
+**Exit conditions:** Contact stage changes (moved to any other pipeline stage).
 
 ---
 
@@ -560,6 +564,8 @@ Build each workflow in **Automation > Workflows**.
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
+**Exit conditions:** Contact stage changes (moved to any other pipeline stage).
+
 ---
 
 ### WF-Dispo-Re-Engage | Dispo Re-Engage — Long-Term Drip Enrollment
@@ -567,8 +573,9 @@ Build each workflow in **Automation > Workflows**.
 **Trigger:** Contact moved to any Dispo Re-Engage stage: No Motivation, Wants Retail, On MLS, or Lead Declined
 **Actions:**
 
-1. Update custom field: Stage Entry Date = Today
-2. Enroll in WF-Cold-Drip-Monthly (Cold Drip — Monthly)
+1. **Defensive cleanup:** Remove from WF-Nurture-Monthly, WF-Nurture-Quarterly (prevents dual drip if contact moved from Nurture → Dispo Re-Engage)
+2. Update custom field: Stage Entry Date = Today
+3. Enroll in WF-Cold-Drip-Monthly (Cold Drip — Monthly)
 
 That's it. All re-engage dispo leads flow into the same Long-Term Drip as Cold stage leads (WF-Cold-Drip-Monthly monthly, then WF-Cold-Drip-Quarterly quarterly).
 
@@ -599,7 +606,7 @@ That's it. All re-engage dispo leads flow into the same Long-Term Drip as Cold s
 **Stage filter:** Contact is in pipeline stage: Day 1-10, Day 11-30, Cold, Nurture, Dispo: No Motivation, Dispo: Wants Retail, Dispo: On MLS, OR Dispo: Lead Declined
 **Enrollment conditions:**
 - Lead NOT tagged DNC
-- `Pause WFs Until` field is empty (prevents re-trigger if lead replies again during an active review window)
+- `Pause WFs Until` field is empty OR `Pause WFs Until` < today (prevents re-trigger during an active review window, but allows re-trigger after a prior pause has expired)
 
 **Pause mechanic:** Every drip/automated-send workflow (WF-Cold-Email-Subflow, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Cold-Drip-Quarterly, WF-Nurture-Monthly, WF-Nurture-Quarterly) has a "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
@@ -669,6 +676,9 @@ Create these Smart Lists under Contacts for daily team use:
 | Active Qualified Leads   | Stage is one of: Due Diligence, Make Offer, Negotiations |
 | Contracts in Progress    | Stage is one of: Contract Sent, Under Contract           |
 | DNC Contacts             | Tag = DNC                                                |
+| Stale New Leads          | Stage = New Leads, Stage Entry Date > 24 hours ago       |
+
+**Stale New Leads — daily notification:** Set up a daily internal notification (9 AM) to the assigned owner for any contacts on the Stale New Leads list. Message: "{{count}} lead(s) still in New Leads for 24+ hours — move to Day 1-10 or take action. [Smart List Link]". This catches leads that didn't get moved to Day 1-10 after Day 0 speed-to-lead.
 
 ---
 

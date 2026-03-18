@@ -19,6 +19,8 @@ Items that require hands-on GHL testing before go-live. Cannot be verified from 
 | DNC sync to Prospect Data      | New Leads     | WF-DNC-Handler               | Automation webhook updates Property record in Prospect Data on DNC                                                                                                            |
 | Prospect Data push automation  | Prospect Data | Automation          | Field mapping from Properties to Contact + Opportunity works correctly                                                                                                        |
 | Source-based task assignment   | New Leads     | WF-New-Lead-Entry/02/03         | Workflows correctly branch on source tag to assign tasks to LM vs AM                                                                                                          |
+| Manual stage move workflow exit | New Leads     | All drip workflows | Test manual stage moves between all drip stages (Cold ↔ Nurture ↔ Dispo Re-Engage ↔ Qualified) and verify the prior workflow exits cleanly. Defensive removal steps in WF-Cold-Drip-Monthly, WF-Nurture-Monthly, and WF-Dispo-Re-Engage should also fire as belt-and-suspenders. |
+| Stale New Leads Smart List     | New Leads     | N/A                 | Smart List "Stale New Leads" correctly filters contacts in New Leads stage where Stage Entry Date > 24 hours ago. Daily notification fires to assigned owner. |
 
 
 ---
