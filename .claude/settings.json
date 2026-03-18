@@ -8,7 +8,8 @@
       "Bash(find 'c:/Users/J/Projects/Bana Follow Up/warm-response' -type f -name *)",
       "Read(//c/Users/J/Projects/**)",
       "Bash(grep -n \"Day 11-30\\\\|Day 11 to 30\\\\|Day 11-30 stage\" \"/c/Users/J/Projects/Bana Follow Up/new-leads/\"*.md)",
-      "Read(//c/Users/J/.claude/plans/**)"
+      "Read(//c/Users/J/.claude/plans/**)",
+      "Bash(grep -E \"\\\\.\\(svg|pdf|png|jpg|md\\)$\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\J\\.claude\\projects\\c--Users-J-Projects-Bana-Follow-Up\\memory",
