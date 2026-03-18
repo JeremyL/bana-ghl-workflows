@@ -435,7 +435,7 @@ Either way is totally fine.
 
 ## Nurture — Monthly (Months 1–3)
 
-**Stage:** Nurture | **Cadence:** Every 30 days (first touch immediate on entry) | **Owner:** GHL auto only
+**Stage:** Nurture | **Cadence:** Every 30 days (30-day wait before first touch) | **Owner:** GHL auto only
 **Trigger:** WF-Nurture-Monthly fires on Nurture stage entry
 **Channels:** SMS + Email only
 
@@ -529,7 +529,7 @@ Would it be worth another conversation?
 
 Hey {{first_name}},
 
-I still have your property info in my files from when we talked. Just doing a check-in to see if anything's changed.
+I still have your property info in my files from when we talked. Wanted to see if anything's changed on your end.
 
 If you'd want to revisit things, I can pull everything up quickly. Just say the word.
 

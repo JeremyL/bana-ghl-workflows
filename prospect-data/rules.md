@@ -107,11 +107,14 @@ Removed ──► Active        (if data was corrected or error was reversed)
 
 ### DNC Handling
 
-- When a DNC is triggered in New Leads, the DNC sync should also update
-the Property record in Prospect Data:
+- **New Leads → Prospect Data:** When a DNC is triggered in New Leads, the DNC sync (WF-DNC-Handler) updates the Property record in Prospect Data:
   - Set DNC = checked
   - Set DNC Date = today
   - Set Status = DNC
+- **Prospect Data → New Leads:** When a property is manually marked DNC in Prospect Data (e.g., external DNC list, prior system data), automation should push DNC status to the corresponding Contact in New Leads if one exists:
+  - Tag `DNC` on Contact
+  - Move Opportunity to Dispo: DNC
+  - Remove from all active workflows
 - DNC applies to the entire property record, not individual owners. If any owner on the
 property is DNC, the property is DNC.
 - DNC properties must not be included in any future campaigns.
