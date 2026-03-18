@@ -1,4 +1,5 @@
 # Bana Land — New Leads Account: Pipeline Stage Definitions
+*Last edited: 2026-03-18 · Last reviewed: —*
 
 This is the pipeline reference for **New Leads** — the single working account for all lead sources.
 All leads enter here and are worked through close, disqualification, or long-term drip.

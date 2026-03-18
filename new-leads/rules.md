@@ -1,4 +1,5 @@
 # New Leads — Contact Rules & Compliance
+*Last edited: 2026-03-18 · Last reviewed: —*
 
 Operational rules that govern all outreach in **New Leads** (the single working account).
 Every GHL workflow, automation, and team member action must respect these rules.

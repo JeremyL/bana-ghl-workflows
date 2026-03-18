@@ -1,8 +1,7 @@
 #  file.Bana Land — For Review
+*Last edited: 2026-03-18 · Last reviewed: —*
 
 Catch-all for items that need attention before or after go-live: pre-launch verifications, cross-file consistency checks, improvement ideas, and open decisions.
-
-Last updated: 2026-03-18 (Round 2 improvements added)
 
 ---
 
@@ -193,43 +192,15 @@ Each lead sees a different message every 90 days for a full year before any repe
 
 ---
 
-### 12. Deceased Owner Protocol
+### 12. Deceased Owner Protocol — RESOLVED
 
-**Gap:** Deceased field exists on Contacts (Y/N/blank) and Properties, but there is no workflow branch, no heir-focused messaging, and no sensitivity guidelines. The system sends "had a question about YOUR property" to someone who may have inherited it from a deceased parent.
-
-**Why it matters:** Inherited rural land is one of the highest-conversion scenarios in land wholesaling. Heirs often have zero attachment to the property, may not know what to do with it, and are frequently motivated to sell. But tone-deaf messaging to heirs damages trust and loses deals that should be easy wins.
-
-**Recommended approach:**
-
-1. Add a workflow branch in WF-01: if Contact field `Deceased` = Y → add tag `Heir: Potential` → route to heir-specific Day 0 template
-2. Create heir-specific Day 0 template (e.g., HEIR-SMS-00): "Hey {{first_name}}, this is {{agent_name}} with Bana Land. We work with families who've inherited property and might have questions about what to do with it. Would it be worth a quick call about the land in {{opportunity.property_county}}?"
-3. Add a Deceased Owner Handling section to rules.md covering:
-   - Sensitivity guidelines (empathetic, no pressure)
-   - First call framework: confirm relationship to property, gauge interest, identify decision-maker among heirs
-   - When to proceed vs. back off
-4. Day 1-30 standard templates can continue after the heir-specific first touch — or consider heir-variant Cold/Nurture angles long-term
-
-- **Files affected:** messaging.md (heir-specific template), ghl-setup.md (WF-01 branch + `Heir: Potential` tag), rules.md (new deceased owner section), sequences.md (note heir variant in Day 0)
+**Resolution:** No special handling needed. These are known deceased owners — by the time a lead enters the system, we've already had a conversation with someone (heir, family member, etc.). The Deceased field is tracked for data completeness but does not trigger any workflow branch, special messaging, or sensitivity protocol. Standard outreach applies to all leads regardless of Deceased status.
 
 ---
 
-### 13. Multi-Owner Coordination Protocol
+### 13. Multi-Owner Coordination Protocol — RESOLVED
 
-**Gap:** Properties can have up to 3 owners. The system creates separate Contacts per owner, all linked to the same Opportunity. But there is no protocol for who to contact first, what happens with conflicting responses, or how DNC from one co-owner affects the others.
-
-**Why it matters:** Multi-owner properties are extremely common in rural land — married couples, siblings who inherited, LLCs with multiple members. Contacting all 3 owners simultaneously with the same automated messages creates confusion. One owner saying "not interested" while another is open to selling creates a decision tree the system doesn't handle.
-
-**Recommended approach:**
-
-1. Add a Multi-Owner Protocol section to rules.md:
-   - **Contact priority:** Owner 1 is primary. WF-01 fires for Owner 1 only. Owner 2/3 Contacts are created but NOT enrolled in any workflow initially.
-   - **Suppression tag:** Tag Owner 2/3 with `Co-Owner: Hold` at creation. Suppresses workflow enrollment until manually activated.
-   - **Escalation to co-owners:** If Owner 1 is unresponsive by Day 11-30, LM/AM makes a judgment call on reaching out to Owner 2/3 (remove `Co-Owner: Hold`, enroll in workflow).
-   - **Conflicting responses:** If Owner 1 says no (not DNC) and Owner 2 is reachable and interested, the interested owner is the path forward. Document in Opportunity notes.
-   - **DNC from one owner:** DNC applies to that Contact only, not all co-owners. Note on Opportunity: "Owner 1 DNC — Owner 2 still contactable." Property-level DNC in Prospect Data fires only when ALL owners are DNC'd or one explicitly requests no contact about the property.
-   - **Decision-maker identification:** On first call, ask: "Are you the only owner, or is there someone else involved in decisions about this property?"
-
-- **Files affected:** rules.md (new multi-owner section), ghl-setup.md (`Co-Owner: Hold` tag + WF-01 suppression logic), prospect-data/rules.md (clarify DNC behavior for multi-owner properties)
+**Resolution:** Not a GHL concern. Multi-owner coordination is handled outside the system. The marketing is the marketing — we're either storing data or contacting people we've already had conversations with. All owners get standard outreach. No workflow suppression, no co-owner hold tags, no special routing needed.
 
 ---
 
@@ -399,23 +370,9 @@ Each lead sees a different message every 90 days for a full year before any repe
 
 ---
 
-### 20. Post-Close & Referral System
+### 20. Post-Close & Referral System — RESOLVED
 
-**Gap:** Under Contract exits to "Dispo: Purchased" which has "Follow-Up: None." The lifecycle ends at closing. No referral ask, no testimonial collection, no check for additional properties owned by the seller.
-
-**Why it matters:** Rural landowners frequently own multiple parcels — someone who sold you 40 acres in County A may own 200 acres in County B. They also know other landowners — rural communities are tight-knit. A post-close referral ask costs nothing and has disproportionate ROI. This is free deal flow.
-
-**Recommended approach:**
-
-- Add a post-close workflow (WF-13) that fires when opportunity moves to Dispo: Purchased:
-  - **Day 1:** Thank-you SMS — "{{first_name}}, appreciate working with you on this. If you know anyone else with land they'd consider selling, send them my way."
-  - **Day 7:** Testimonial ask (optional, SMS or email)
-  - **Day 30:** "By the way, do you own any other parcels you'd ever consider parting with?"
-  - **Quarterly:** Light relationship maintenance (1 SMS per quarter, indefinite)
-- Add Opportunity custom field: "Owns Other Properties" (Yes/No/Unknown)
-- Add post-close templates (PC-SMS-01 through 04)
-
-- **Files affected:** ghl-setup.md (WF-13 + custom field), messaging.md (post-close templates), pipeline.md (update Purchased stage notes), sequences.md (add post-close sequence)
+**Resolution:** Not implementing. Post-close and referral outreach is not a priority for this system. The lifecycle ends at closing.
 
 ---
 
@@ -563,15 +520,15 @@ Each lead sees a different message every 90 days for a full year before any repe
 | 14  | WF-07 Removed          | Qualified stages (Due Diligence → Under Contract) are human-led by AM. No automated workflow — smart lists are the safety net. 12 → 11 workflows. | 2026-03-18 |
 | 15  | Re-Engaged Tag Removed | `Re-Engaged` tag eliminated. `Pause WFs Until` date field handles pausing + duplicate-trigger prevention. WF-11 stage filter + soft opt-out guidance added. | 2026-03-18 |
 | 16  | Source-Specific Day 0  | Pending                                                         | —          |
-| 17  | Deceased Owner Protocol | Pending                                                        | —          |
-| 18  | Multi-Owner Coordination | Pending                                                       | —          |
+| 17  | Deceased Owner Protocol | No special handling. Known deceased owners — already talking to someone. Standard outreach applies. | 2026-03-18 |
+| 18  | Multi-Owner Coordination | Not a GHL concern. Handled outside the system. Standard outreach for all owners. | 2026-03-18 |
 | 19  | Email Bounce Handling  | Pending                                                         | —          |
 | 20  | Email 2-4 Fallback     | Pending                                                         | —          |
 | 21  | Phone Type-Aware Outreach | Pending                                                      | —          |
 | 22  | Skip Trace Refresh     | Pending                                                         | —          |
 | 23  | Under Contract Cadence | Pending                                                         | —          |
 | 24  | AM Playbook            | Pending                                                         | —          |
-| 25  | Post-Close & Referral  | Pending                                                         | —          |
+| 25  | Post-Close & Referral  | Not implementing. Lifecycle ends at closing. | 2026-03-18 |
 | 26  | Reporting / KPIs       | Pending                                                         | —          |
 | 27  | VAPI Integration Details | Pending                                                       | —          |
 | 28  | Channel Preference     | Pending                                                         | —          |

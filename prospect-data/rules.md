@@ -1,4 +1,5 @@
 # Prospect Data — Rules
+*Last edited: 2026-03-18 · Last reviewed: —*
 
 Operating rules for the Prospect Data instance. Covers data uploads,
 campaign management, status transitions, and push-to-account rules.
