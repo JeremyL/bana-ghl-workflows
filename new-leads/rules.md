@@ -202,7 +202,7 @@ If a lead becomes hostile, threatening, or legally threatening:
 | Contact hours                        | 9am–7pm local time only                                       |
 | DNC opt-out response time            | Immediate                                                     |
 | DNC re-contact                       | Never                                                         |
-| DNC sync                             | New Leads → Prospect Data (WF-DNC-Handler)                             |
+| DNC sync                             | Bi-directional (NL → PD via WF-DNC-Handler; PD → NL via automation)    |
 | No response = opt-out?               | No — keep following up per cadence                            |
 | Who can qualify a lead?              | LM or AM (based on source) — no automation                    |
 | Who can dispo a lead?                | LM or AM — both can dispo directly                            |
@@ -237,7 +237,7 @@ WF-New-Lead-Entry fires the following on lead entry (Day 0):
 1. **Immediate (120 seconds) SMS** (NL-SMS-00) — warms the number before the call
 2. **Push notification** — GHL mobile app alert to assigned owner
 3. **SMS alert** — text to owner's personal number: "NEW LEAD — {{first_name}} — call now: {{phone}}"
-4. **1-hour check** — if no call logged, missed-call SMS (NL-SMS-07) fires automatically
+4. **1-hour check** — if no call logged, missed-call SMS (NL-SMS-00A) fires automatically
 
 ### Team Responsibility
 

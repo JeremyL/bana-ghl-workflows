@@ -58,7 +58,7 @@ The system is split across two GHL sub-accounts:
 
 **Owner:** Lead Manager (Cold Email/SMS/Call sources) + Acquisition Manager (Direct Mail/VAPI/Referral/Website sources)
 **Purpose:** Single working account for all leads. Handles all leads from entry through close, disqualification, or long-term drip. Workflows branch on source tag to assign tasks to LM or AM.
-**Stages:** New Leads (Day 0) → Day 1-10 → Day 11-30 → Cold → Qualified → Dispo → Nurture
+**Stages:** New Leads (Day 0) → Day 1-10 → Day 11-30 → Cold → Dispo (Terminal + Re-Engage) → Due Diligence → Make Offer → Negotiations → Contract Sent → Under Contract → Nurture
 **Entry:** All campaign types from Prospect Data + VAPI/Referral/Website inbound + re-submissions
 
 ### Cross-Account Integration
@@ -123,7 +123,7 @@ See [new-leads/pipeline.md](new-leads/pipeline.md) and [prospect-data/data-model
 - **Status-maintained:** We're the buyer with options, not a desperate investor
 - **Rural-appropriate:** Plain language, respectful, no industry jargon to the seller
 - **First name** where available
-- **Banned phrases:** "just following up," "checking in," "still interested," "no pressure," "no rush," "no obligation" — see [messaging.md](new-leads/messaging.md) for full list
+- **Banned phrases:** "just following up," "checking in," "still interested," "no pressure," "no rush," "no obligation," "whenever you're ready," "keeping the door open," "just wanted to make sure you saw it," "we're still here"
 
 **What this sounds like:**
 

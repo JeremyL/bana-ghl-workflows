@@ -48,7 +48,7 @@ Same pipeline stages, different task assignment based on source tag.
 
 ## Cold Email Special Handling
 
-Cold Email leads may not have a phone number on entry. They get a special sub-flow that runs concurrently with normal stage progression:
+Cold Email leads may not have a phone number on entry. They get a special sub-flow that runs concurrently with the Day 1–30 sequence (triggers on Day 1-10 entry):
 
 - **Phase 1 (no phone #):** Automated emails asking for phone number (WR-EMAIL templates). Runs alongside normal Day 1–30 stage progression (standard SMS, call, and email steps suppressed — WF-Cold-Email-Subflow is the sole communicator). LM monitors replies.
 - **Phase 2 (phone # received):** LM call tasks begin. Normal Day 1–30 cadence applies from this point.
@@ -73,7 +73,7 @@ They have not yet been spoken to and qualified. Every lead starts here.
 | **Entry**      | All sources: Cold Email, Cold SMS, Cold Call, Direct Mail, VAPI, Referral, Website, re-submission. |
 | **Exit**       | Owner works Day 0 speed-to-lead (immediate SMS + call + missed-call SMS), then manually moves to Day 1-10 the same day. |
 | **Owner**      | LM (Cold Email/SMS/Call) or AM (Direct Mail/VAPI/Referral/Website) — assigned on entry via WF-New-Lead-Entry. |
-| **Actions**    | WF-New-Lead-Entry branches on source tag: assigns to LM or AM, fires Day 0 speed-to-lead (NL-SMS-00 + call task + NL-SMS-07 if no call logged), sends notification to owner. |
+| **Actions**    | WF-New-Lead-Entry branches on source tag: assigns to LM or AM, fires Day 0 speed-to-lead (NL-SMS-00 + call task + NL-SMS-00A if no call logged), sends notification to owner. |
 
 ---
 
@@ -248,7 +248,7 @@ These leads have been spoken to and are actively progressing through the deal cy
 | **Owner**      | Acquisition Manager (active back-and-forth).                                        |
 | **Channels**   | Calls. SMS for quick follow-ups.                                                    |
 | **Frequency**  | Every 1–2 days while negotiating.                                                   |
-| **Actions**    | Daily call task. Light SMS automation for "checking in" messages.                   |
+| **Actions**    | Call every 1-2 days. SMS for quick follow-ups between calls.                   |
 
 ### Contract Sent
 

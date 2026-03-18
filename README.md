@@ -41,7 +41,7 @@ Single working account for all lead sources. Handles all leads from entry throug
 | [sequences.md](new-leads/sequences.md) | Cadence map: Day 1–30 + Cold Email sub-flow + Cold drip + Nurture + Qualified    |
 | [messaging.md](new-leads/messaging.md) | Message templates: NL-* + WR-EMAIL-* + COLD-* + COLDQ-* + NUR-* + NURQ-*        |
 | [rules.md](new-leads/rules.md)         | Contact rules and compliance: hours, DNC, stage movement, response protocol, data hygiene |
-| [ghl-setup.md](new-leads/ghl-setup.md) | GHL build guide: 12 workflows (WF-Cold-Email-Subflow, WF-New-Lead-Entry–WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Cold-Drip-Quarterly, WF-Nurture-Monthly–WF-Missed-Call-Textback, WF-Nurture-Quarterly) |
+| [ghl-setup.md](new-leads/ghl-setup.md) | GHL build guide: 12 workflows (WF-Cold-Email-Subflow, WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Cold-Drip-Quarterly, WF-Nurture-Monthly, WF-Nurture-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback) |
 
 
 ### Account: Prospect Data (`prospect-data/`)

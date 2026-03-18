@@ -695,7 +695,7 @@ Before going live, verify:
 - All pipeline stages created and in correct order
 - All custom fields created
 - All tags created
-- All 12 workflows built and tested (WF-Cold-Email-Subflow, WF-New-Lead-Entry through WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Cold-Drip-Quarterly, WF-Nurture-Monthly through WF-Missed-Call-Textback, WF-Nurture-Quarterly)
+- All 12 workflows built and tested (WF-Cold-Email-Subflow, WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Cold-Drip-Quarterly, WF-Nurture-Monthly, WF-Nurture-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback)
 - Smart lists created
 - Team members trained on GHL task queue and stage movement (LM and AM)
 - automation routing confirmed: all campaign types → New Leads
