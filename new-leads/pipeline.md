@@ -49,7 +49,7 @@ Same pipeline stages, different task assignment based on source tag.
 
 Cold Email leads may not have a phone number on entry. They get a special sub-flow that runs concurrently with normal stage progression:
 
-- **Phase 1 (no phone #):** Automated emails asking for phone number (WR-EMAIL templates). Runs alongside normal Day 1–30 stage progression. LM monitors replies.
+- **Phase 1 (no phone #):** Automated emails asking for phone number (WR-EMAIL templates). Runs alongside normal Day 1–30 stage progression (standard SMS, call, and email steps suppressed — WF-00A is the sole communicator). LM monitors replies.
 - **Phase 2 (phone # received):** LM call tasks begin. Normal Day 1–30 cadence applies from this point.
 - **Day 30 with no phone # received:** One-time SMS blast to all skip-traced phone numbers on file (Phone 1–4) → move to Cold stage with `Cold: Email Only` tag (email-only drip, no further SMS).
 
@@ -98,9 +98,9 @@ They have not yet been spoken to and qualified. Every lead starts here.
 | **Entry**      | No meaningful response by end of Day 10. Auto-advanced from Day 1-10.                                |
 | **Exit**       | Lead responds and qualifies → Due Diligence. Day 30 passes → Cold. Disqualifying info → Dispo.      |
 | **Owner**      | LM or AM based on source tag + GHL automation.                                                       |
-| **Frequency**  | Tuesdays & Thursdays only (entire stage).                                                            |
-| **Channels**   | Call, SMS, Email.                                                                                    |
-| **Actions**    | Tue/Thu call task + rotating automated message (SMS or Email). Tasks assigned to LM or AM per source. |
+| **Frequency**  | Every 2–3 days (11 touches across 20-day window).                                                            |
+| **Channels**   | Call, SMS, Email, RVM.                                                                               |
+| **Actions**    | Scheduled call task + rotating automated message (SMS, Email, or RVM). Tasks assigned to LM or AM per source. |
 
 ---
 
@@ -114,7 +114,7 @@ They have not yet been spoken to and qualified. Every lead starts here.
 | **Re-Engagement** | Lead replies to drip → WF-11: pause drip, owner reviews (LM for LM-sources, AM for AM-sources). 7-day auto-resume if no action. |
 | **Re-Submission** | Lead enters from new external campaign → WF-01: stop drip, move to New Leads, full restart as new lead.               |
 | **Owner**         | GHL automation only (no manual call tasks unless lead re-engages).                                                     |
-| **Frequency**     | Days 30–180: Monthly. Day 180+: Quarterly.                                                                            |
+| **Frequency**     | Months 1–3: Monthly (SMS + Email each month). Month 4+: Quarterly.                                                    |
 | **Channels**      | SMS + Email (monthly → quarterly). `Cold: Email Only` contacts receive email only.                                     |
 | **Actions**       | Automated drip only. If lead responds, WF-11 fires (see Re-Engagement above).                                         |
 
@@ -296,7 +296,7 @@ These leads have been spoken to and are actively progressing through the deal cy
         │   Day 0: Speed to Lead — immediate SMS + call task + missed-call SMS (WF-01)
         └─► Day 1-10 (2x daily Days 1-2, 1x daily Days 3-10)
               └─► Qualifies ──────────────────────────────────────► Due Diligence
-              └─► No response by Day 11 ──────────────────────────► Day 11-30 (Tue & Thu only)
+              └─► No response by Day 11 ──────────────────────────► Day 11-30 (every 2–3 days)
                     └─► Qualifies ──────────────────────────────► Due Diligence
                     └─► No response by Day 30 ──────────────────► Cold (monthly → quarterly drip)
                                 └─► Re-engages ──────────────► WF-11 → owner reviews
@@ -339,7 +339,7 @@ Any Qualified Stage (couldn't close) ──────────────�
 --- RE-ENTRY PATHS ---
 
 Cold / Nurture / Dispo Re-Engage (replies to our drip)
-  └─► WF-11: Re-Engaged → owner 7-day review
+  └─► WF-11: Pause WFs Until set → owner 7-day review
         └─► Owner moves to qualified stage ────────────────────► Due Diligence (or appropriate)
         └─► Owner moves to dispo ──────────────────────────────► Appropriate Dispo
         └─► Owner does nothing (7 days expire) ────────────────► Drip resumes from where it stopped

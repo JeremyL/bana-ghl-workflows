@@ -38,9 +38,9 @@ Single working account for all lead sources. Handles all leads from entry throug
 | -------------------------------------- | -------------------------------------------------------------------------------- |
 | [pipeline.md](new-leads/pipeline.md)   | Stage definitions: New Leads → Cold, all Dispo stages, Qualified stages, Nurture |
 | [sequences.md](new-leads/sequences.md) | Cadence map: Day 1–30 + Cold Email sub-flow + Cold drip + Nurture + Qualified    |
-| [messaging.md](new-leads/messaging.md) | Message templates: NL-* + WR-EMAIL-* + COLD-* + COLDQ-* + NUR-* + NURQ-* + NEPQ |
+| [messaging.md](new-leads/messaging.md) | Message templates: NL-* + WR-EMAIL-* + COLD-* + COLDQ-* + NUR-* + NURQ-*        |
 | [rules.md](new-leads/rules.md)         | Contact rules and compliance: hours, DNC, stage movement, response protocol, data hygiene |
-| [ghl-setup.md](new-leads/ghl-setup.md) | GHL build guide: 10 workflows (WF-00A, WF-01 through WF-03, WF-05, WF-07 through WF-11) |
+| [ghl-setup.md](new-leads/ghl-setup.md) | GHL build guide: 12 workflows (WF-00A, WF-01–WF-03, WF-05, WF-05Q, WF-08–WF-12, WF-08Q) |
 
 
 ### Account: Prospect Data (`prospect-data/`)

@@ -21,7 +21,7 @@ I think like a seasoned wholesaling operator who understands:
 
 | Field            | Detail                                                                                                                                     |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Company**      | Bana Land Company                                                                                                                          |
+| **Company**      | Bana Land                                                                                                                          |
 | **Niche**        | Rural land / rural properties                                                                                                              |
 | **Geography**    | All US states and counties (county-level targeting)                                                                                        |
 | **Lead Sources** | Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI AI Call, Referral, Website                                                              |
@@ -75,10 +75,10 @@ See [new-leads/pipeline.md](new-leads/pipeline.md) and [prospect-data/data-model
 
 | Stage Group              | Channels                                                                     | Who Executes                    |
 | ------------------------ | ---------------------------------------------------------------------------- | ------------------------------- |
-| Not Contacted (Day 1–30) | Calls + SMS + Email                                                          | LM or AM (by source) + GHL auto |
+| Not Contacted (Day 1–30) | Calls + SMS + Email + RVM (Day 11-30 only)                                   | LM or AM (by source) + GHL auto |
 | Cold Email Sub-Flow      | Phase 1: Email auto (get phone #). Phase 2: LM calls once # received.        | Lead Manager + GHL auto         |
-| Cold (Day 30–180)        | SMS + Email (monthly) — `Cold: Email Only` contacts get Email only, no SMS   | GHL auto only                   |
-| Cold (Day 180+)          | SMS + Email (quarterly) — `Cold: Email Only` contacts get Email only, no SMS | GHL auto only                   |
+| Cold (Months 1–3)        | SMS + Email monthly (~2 wks apart) — `Cold: Email Only` contacts get Email only, no SMS | GHL auto only          |
+| Cold (Month 4+)          | SMS + Email (quarterly) — `Cold: Email Only` contacts get Email only, no SMS | GHL auto only                   |
 | Qualified (Active)       | Calls + light SMS check-ins                                                  | Acquisition Manager             |
 | Nurture                  | SMS + Email (monthly × 3mo, quarterly thereafter)                            | Full GHL auto                   |
 | Dispo — Terminal         | No contact                                                                   | —                               |
@@ -98,9 +98,9 @@ See [new-leads/pipeline.md](new-leads/pipeline.md) and [prospect-data/data-model
 | Day 0      | Immediate (speed to lead) | New Leads |
 | Day 1–2    | 2x per day                | Day 1-10 |
 | Day 3–10   | 1x per day                | Day 1-10 |
-| Day 11–30  | Tuesdays & Thursdays only | Day 11-30 |
-| Day 30–180 | Monthly                   | Cold     |
-| Day 180+   | Quarterly                 | Cold     |
+| Day 11–30  | Every 2–3 days            | Day 11-30 |
+| Months 1–3 | Monthly                   | Cold     |
+| Month 4+   | Quarterly                 | Cold     |
 
 
 **Post-Qualification**
@@ -122,10 +122,11 @@ See [new-leads/pipeline.md](new-leads/pipeline.md) and [prospect-data/data-model
 - **Status-maintained:** We're the buyer with options, not a desperate investor
 - **Rural-appropriate:** Plain language, respectful, no industry jargon to the seller
 - **First name** where available
+- **Banned phrases:** "just following up," "checking in," "still interested," "no pressure," "no rush," "no obligation" — see [messaging.md](new-leads/messaging.md) for full list
 
 **What this sounds like:**
 
-- GOOD: "Hey {{first_name}}, been trying to connect — totally understand if the timing isn't right. Is selling something you're still thinking about at some point?"
+- GOOD: "{{first_name}}, I've been trying to connect about your property — where should we go from here?"
 - BAD: "Please call me back, I'm very interested in buying your property ASAP!"
 
 ---

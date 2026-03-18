@@ -117,16 +117,18 @@ There are two distinct re-entry events. Each has its own protocol.
 
 #### Protocol (WF-11):
 
+**WF-11 only fires for contacts in:** Day 1-10, Day 11-30, Cold, Nurture, Dispo: No Motivation, Dispo: Wants Retail, Dispo: On MLS, or Dispo: Lead Declined — AND `Pause WFs Until` is empty (prevents duplicate triggers during an active review window).
+
 1. Set field: `Pause WFs Until` = today + 7 days — all active workflows hold at the next send condition
-2. Add tag: `Re-Engaged`
-3. Create high-priority review task assigned to **lead owner** (LM for Cold Email/SMS/Call sources, AM for Direct Mail/VAPI/Referral/Website sources)
-4. Send internal notification to owner with contact link
-5. **Resolution — one of three outcomes:**
-   - **Owner moves to a qualified stage** → workflow exit triggers fire, active workflows killed. Clear `Pause WFs Until`. Remove tag `Re-Engaged`.
-   - **Owner moves to a Dispo stage** → dispo workflows take over. Clear `Pause WFs Until`. Remove tag `Re-Engaged`.
-   - **Owner clears `Pause WFs Until` field early** (reply not actionable, lead stays in current stage) → drip resumes from where it stopped. Remove tag `Re-Engaged`.
-6. **Auto-resume safety net (drip stages only):** If owner does nothing after **7 days**, `Pause WFs Until` date expires → drip resumes automatically. WF-11 clears the field and removes `Re-Engaged`.
-7. **Active stages (Day 1-10 / Day 11-30):** No 7-day auto-resume. Owner is already working this lead — they move the stage or manually clear `Pause WFs Until` when ready.
+2. Create high-priority review task assigned to **lead owner** (LM for Cold Email/SMS/Call sources, AM for Direct Mail/VAPI/Referral/Website sources)
+3. Send internal notification to owner with contact link
+4. **Resolution — one of three outcomes:**
+   - **Owner moves to a qualified stage** → workflow exit triggers fire, active workflows killed. Clear `Pause WFs Until`.
+   - **Owner moves to a Dispo stage** → dispo workflows take over. Clear `Pause WFs Until`.
+   - **Owner clears `Pause WFs Until` field early** (reply not actionable, lead stays in current stage) → drip resumes from where it stopped.
+5. **Auto-resume safety net (drip stages only):** If owner does nothing after **7 days**, `Pause WFs Until` date expires → drip resumes automatically. WF-11 clears the field.
+6. **Active stages (Day 1-10 / Day 11-30):** No 7-day auto-resume. Owner is already working this lead — they move the stage or manually clear `Pause WFs Until` when ready.
+7. **Soft opt-outs:** Replies like "not interested" or "leave me alone" without official opt-out keywords still trigger WF-11 normally. Owner reviews and decides case-by-case — may move to DNC or appropriate Dispo based on judgment.
 
 ### 6B. Re-Submission — Lead comes back from a new external campaign
 
@@ -156,7 +158,7 @@ The four **Dispo — Re-Engage** stages are NOT completely dead leads:
 - On MLS
 - Lead Declined
 
-When a lead enters any of these stages, WF-09 automatically enrolls them in **WF-05 (Long-Term Drip)** — the same indefinite drip used for Cold stage leads.
+When a lead enters any of these stages, WF-09 automatically enrolls them in **WF-05 → WF-05Q (Long-Term Drip)** — the same indefinite drip used for Cold stage leads (monthly first, then quarterly).
 
 - Drip continues indefinitely until opt-out — there is no automatic end date
 - If a Re-Engage lead responds positively at any point, move to the appropriate active stage (human decision)
@@ -199,3 +201,52 @@ If a lead becomes hostile, threatening, or legally threatening:
 | Auto-resume after re-engagement      | 7 days (drip stages only)                            |
 | SMS opt-out keywords handled by GHL? | Yes — verify configured                              |
 | LM → AM handoff mechanism            | LM sets call appointment for AM at qualification     |
+| Speed to lead — new/inbound leads    | Call within 5 minutes (push + SMS alert to owner)    |
+| Speed to lead — re-submitted leads   | Call within 30 minutes                               |
+| Voicemail protocol                   | Script + SMS combo on manual calls. RVM auto-drops Day 11-30. |
+
+---
+
+## 11. Speed to Lead
+
+**Calling within 5 minutes of a lead entering the system increases contact rate by 10x+ vs. calling within an hour.** These leads just responded or reached out — they're hot right now.
+
+### Time Targets
+
+| Lead Type | Target | Owner |
+|-----------|--------|-------|
+| Cold SMS, Cold Call, Direct Mail, VAPI, Referral, Website | **Call within 5 minutes** | LM or AM (by source) |
+| Cold Email (phone # just received via WF-00A) | **Call within 5 minutes** | LM |
+| Re-submitted leads (any source) | **Call within 30 minutes** | LM or AM (by new source) |
+
+### How It Works
+
+WF-01 fires the following on lead entry (Day 0):
+
+1. **Immediate SMS** (NL-SMS-00) — warms the number before the call
+2. **Push notification** — GHL mobile app alert to assigned owner
+3. **SMS alert** — text to owner's personal number: "NEW LEAD — {{first_name}} — call now: {{phone}}"
+4. **1-hour check** — if no call logged, missed-call SMS (NL-SMS-07) fires automatically
+
+### Team Responsibility
+
+- When you receive a speed-to-lead push notification or SMS alert, **drop what you're doing and call**
+- If you can't call within 5 minutes, notify your team so someone else can cover
+- Log the call in GHL immediately after — the 1-hour missed-call SMS check depends on it
+
+---
+
+## 12. Voicemail Protocol
+
+70-80% of calls go to voicemail. A voicemail followed immediately by an SMS dramatically increases callback rate.
+
+### Manual Voicemail (Day 1-10 and Day 11-30)
+
+- **Script:** Use NL-VM-01 (Day 1-10) or NL-VM-02 (Day 11-30). Keep under 15 seconds. Identify as Bana Land. Leave callback number.
+- **Voicemail + SMS combo:** After leaving a voicemail, send NL-VMSMS-01 manually via GHL conversation. This is a manual send — not automated — because it only fires when the caller actually reaches voicemail.
+
+### Ringless Voicemail Drops (Day 11-30)
+
+- **RVM drops** are automated via WF-03. No manual action needed.
+- Contact hours (9am–7pm local) still apply.
+- RVM drops are delivered directly to voicemail without ringing the phone — they fill gaps between existing Day 11-30 touches.
