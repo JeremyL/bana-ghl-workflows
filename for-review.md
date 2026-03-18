@@ -2,7 +2,7 @@
 
 Catch-all for items that need attention before or after go-live: pre-launch verifications, cross-file consistency checks, improvement ideas, and open decisions.
 
-Last updated: 2026-03-18
+Last updated: 2026-03-18 (Round 2 improvements added)
 
 ---
 
@@ -120,6 +120,27 @@ No open notes.
 
 ---
 
+### 11. Source-Specific Day 0 First Touch
+
+**Gap:** WF-01 sends the same NL-SMS-00 ("had a quick question about your property") for all 7 sources. Inbound leads (Website, VAPI, Referral) expect acknowledgment of their inquiry, not cold outreach language. Direct Mail leads received a physical letter with a dollar amount — referencing that letter creates instant recognition and continuity.
+
+**Why it matters:** Inbound leads are the rarest and highest-intent in land wholesaling — these people came to us. Direct Mail is the highest-cost outbound channel. First impression on both deserves a tailored touch, not a generic cold opener. A website inquiry that gets "had a quick question about your property" instead of "thanks for reaching out" feels like cold outreach, not a response to their action.
+
+**Recommended approach:**
+
+1. Add a source branch to WF-01 Day 0 step (after source tag is applied, before SMS fires)
+2. Create 2 new template pairs:
+   - **IN-SMS-00 / IN-SMS-00A** — Inbound acknowledgment (Website, VAPI, Referral): "Hey {{first_name}}, just saw your info come through about your property in {{opportunity.property_county}} — I'd love to chat about it. Mind if I give you a call?"
+   - **DM-SMS-00 / DM-SMS-00A** — Direct Mail reference: "Hey {{first_name}}, it's {{agent_name}} with Bana Land — following up on the letter we sent about your property in {{opportunity.property_county}}. Would it be worth a quick call?"
+3. Cold Email, Cold SMS, Cold Call sources continue using NL-SMS-00 / NL-SMS-00A (cold outreach opener is appropriate for these)
+4. Rest of Day 1-30 sequence stays identical across all sources — only the Day 0 first impression changes
+
+**4 new templates, 1 workflow branch.**
+
+- **Files affected:** messaging.md (add IN-SMS-00, IN-SMS-00A, DM-SMS-00, DM-SMS-00A), ghl-setup.md (WF-01 source branch), sequences.md (note Day 0 variants)
+
+---
+
 ## Improvements — Medium Priority (Implement Early)
 
 ---
@@ -169,6 +190,138 @@ Each lead sees a different message every 90 days for a full year before any repe
 - 3 automated RVM drops added to Day 11-30 sequence: NL-RVM-01 (~Day 14), NL-RVM-02 (~Day 20), NL-RVM-03 (~Day 27)
 - Voicemail protocol added to rules.md §12
 - Template count: 37 → 43
+
+---
+
+### 12. Deceased Owner Protocol
+
+**Gap:** Deceased field exists on Contacts (Y/N/blank) and Properties, but there is no workflow branch, no heir-focused messaging, and no sensitivity guidelines. The system sends "had a question about YOUR property" to someone who may have inherited it from a deceased parent.
+
+**Why it matters:** Inherited rural land is one of the highest-conversion scenarios in land wholesaling. Heirs often have zero attachment to the property, may not know what to do with it, and are frequently motivated to sell. But tone-deaf messaging to heirs damages trust and loses deals that should be easy wins.
+
+**Recommended approach:**
+
+1. Add a workflow branch in WF-01: if Contact field `Deceased` = Y → add tag `Heir: Potential` → route to heir-specific Day 0 template
+2. Create heir-specific Day 0 template (e.g., HEIR-SMS-00): "Hey {{first_name}}, this is {{agent_name}} with Bana Land. We work with families who've inherited property and might have questions about what to do with it. Would it be worth a quick call about the land in {{opportunity.property_county}}?"
+3. Add a Deceased Owner Handling section to rules.md covering:
+   - Sensitivity guidelines (empathetic, no pressure)
+   - First call framework: confirm relationship to property, gauge interest, identify decision-maker among heirs
+   - When to proceed vs. back off
+4. Day 1-30 standard templates can continue after the heir-specific first touch — or consider heir-variant Cold/Nurture angles long-term
+
+- **Files affected:** messaging.md (heir-specific template), ghl-setup.md (WF-01 branch + `Heir: Potential` tag), rules.md (new deceased owner section), sequences.md (note heir variant in Day 0)
+
+---
+
+### 13. Multi-Owner Coordination Protocol
+
+**Gap:** Properties can have up to 3 owners. The system creates separate Contacts per owner, all linked to the same Opportunity. But there is no protocol for who to contact first, what happens with conflicting responses, or how DNC from one co-owner affects the others.
+
+**Why it matters:** Multi-owner properties are extremely common in rural land — married couples, siblings who inherited, LLCs with multiple members. Contacting all 3 owners simultaneously with the same automated messages creates confusion. One owner saying "not interested" while another is open to selling creates a decision tree the system doesn't handle.
+
+**Recommended approach:**
+
+1. Add a Multi-Owner Protocol section to rules.md:
+   - **Contact priority:** Owner 1 is primary. WF-01 fires for Owner 1 only. Owner 2/3 Contacts are created but NOT enrolled in any workflow initially.
+   - **Suppression tag:** Tag Owner 2/3 with `Co-Owner: Hold` at creation. Suppresses workflow enrollment until manually activated.
+   - **Escalation to co-owners:** If Owner 1 is unresponsive by Day 11-30, LM/AM makes a judgment call on reaching out to Owner 2/3 (remove `Co-Owner: Hold`, enroll in workflow).
+   - **Conflicting responses:** If Owner 1 says no (not DNC) and Owner 2 is reachable and interested, the interested owner is the path forward. Document in Opportunity notes.
+   - **DNC from one owner:** DNC applies to that Contact only, not all co-owners. Note on Opportunity: "Owner 1 DNC — Owner 2 still contactable." Property-level DNC in Prospect Data fires only when ALL owners are DNC'd or one explicitly requests no contact about the property.
+   - **Decision-maker identification:** On first call, ask: "Are you the only owner, or is there someone else involved in decisions about this property?"
+
+- **Files affected:** rules.md (new multi-owner section), ghl-setup.md (`Co-Owner: Hold` tag + WF-01 suppression logic), prospect-data/rules.md (clarify DNC behavior for multi-owner properties)
+
+---
+
+### 14. Email Bounce Handling Process
+
+**Gap:** The `Bounced` tag exists in ghl-setup.md but there is no documented process for what happens when an email bounces. Rules.md §8 covers disconnected phone numbers but not bounced emails. Continued sends to bounced addresses damage sender reputation, which affects deliverability for ALL emails across the entire account.
+
+**Why it matters:** Email deliverability is a shared resource. One bad address hurts every email you send. For Cold Email leads especially, email is the primary (sometimes only) channel — a bounce with no fallback means that lead is dead.
+
+**Recommended approach:**
+
+1. Add bounce handling to rules.md §8 (Data Hygiene):
+   - When email bounces → auto-tag `Bounced` → immediately stop email sends to this Contact
+   - Attempt Email 2-4 fallback from Prospect Data (see Improvement #15)
+   - If no fallback available → convert to SMS/call-only contact
+   - For Cold Email leads with no phone + bounced email → dead lead → apply `Can't Find` tag or move to appropriate Dispo
+2. Configure GHL bounce webhook or automation to auto-apply `Bounced` tag on hard bounce
+
+- **Files affected:** rules.md (§8 expansion), ghl-setup.md (bounce automation configuration)
+
+---
+
+### 15. Email 2-4 Fallback from Prospect Data
+
+**Gap:** Only Email 1 maps from Prospect Data to New Leads (GHL Contacts natively support 1 email). If Email 1 bounces, Emails 2-4 sit unused in Prospect Data. This is critical for Cold Email source leads where email is the only channel until a phone number is obtained via WF-00A.
+
+**Why it matters:** A Cold Email lead with a bounced Email 1 is completely unreachable — but Email 2, 3, or 4 might work. These backup emails exist in Prospect Data and can rescue the lead.
+
+**Recommended approach:**
+
+1. When `Bounced` tag is applied → look up the original Property record in Prospect Data (via Reference ID)
+2. If Email 2, 3, or 4 exists for that owner → update Contact's email field with the next available email
+3. Remove `Bounced` tag → add `Email Fallback Attempted` tag to prevent infinite loops
+4. If that email also bounces → lead is truly email-dead, follow bounce handling process (Improvement #14)
+5. This can be automated via webhook or manual via LM checklist
+
+- **Files affected:** rules.md (fallback protocol), ghl-setup.md (`Email Fallback Attempted` tag + process), prospect-data/rules.md (note Emails 2-4 as fallback source)
+
+---
+
+### 16. Phone Type-Aware Outreach
+
+**Gap:** Prospect Data stores Phone Type for each number (Mobile, Residential, Landline, VoIP) but this data is not used. SMS to a landline fails silently — the lead appears unresponsive but never received the message.
+
+**Why it matters:** Landlines are common among rural landowners (older demographic, rural areas). If Phone 1 is a landline and Phone 2 is a mobile, the system sends SMS to Phone 1 which never arrives. Every SMS in the Day 0-30 cadence is wasted on that lead.
+
+**Recommended approach:**
+
+1. **Pre-push validation in Prospect Data:** When pushing to New Leads, if Phone 1 Type = Landline and a Mobile number exists in Phone 2/3/4, swap so the Mobile number is Phone 1 (primary). This ensures SMS reaches a mobile number.
+2. Map Phone Type fields to Contact custom fields in New Leads for visibility (Phone 1 Type, Phone 2 Type, etc.)
+3. Add Phone Type awareness to WF-00A's Day 30 SMS blast (Step 16) — only send to phone fields that are Mobile type
+
+- **Files affected:** prospect-data/data-model.md (add Phone Type to field mapping), prospect-data/rules.md (add phone type validation to pre-push rules), ghl-setup.md (Phone Type custom fields)
+
+---
+
+### 17. Skip Trace Refresh Schedule
+
+**Gap:** Prospect Data rules.md §6 mentions quarterly review of stale properties, but there is no systematic refresh schedule tied to Skip Trace Date age and no defined threshold for when data becomes unreliable.
+
+**Why it matters:** Phone numbers go stale within 6-12 months. People move, change numbers, pass away. Campaigns targeting stale skip trace data waste money on disconnected numbers and lower response rates.
+
+**Recommended approach:**
+
+1. Add a documented refresh policy to prospect-data/rules.md §6:
+   - **6 months:** Flag for re-skip-trace if being included in a new campaign
+   - **12 months:** Mandatory re-skip-trace before any new campaign inclusion or push to New Leads
+   - **Pre-push validation:** If Skip Trace Date > 12 months old, block push and flag for refresh
+2. Add a Smart List or filter in Prospect Data: "Stale Skip Trace" = Status: Active + Skip Trace Date older than 12 months
+3. Track re-skip-trace results: how many numbers changed, how many new numbers found — helps calibrate the refresh cadence over time
+
+- **Files affected:** prospect-data/rules.md (§6 expansion with refresh schedule + pre-push validation)
+
+---
+
+### 18. Under Contract Communication Cadence
+
+**Gap:** Pipeline.md says "Keep seller informed" for Under Contract, but there is no structured communication cadence. Sequences.md says "Regular deal management calls" with no specifics. Land closings take 30-60+ days with often-complicated title work (boundary disputes, easements, mineral rights, unclear chain of title).
+
+**Why it matters:** Silence during the closing period causes sellers to panic, call their attorney, or back out. This is where deals fall apart — not because the terms were wrong, but because the seller felt abandoned. A simple weekly check-in prevents most deal falloff.
+
+**Recommended approach:**
+
+1. Add an Under Contract communication cadence to sequences.md:
+   - **Day 1 post-contract:** Expectations SMS — "Contract received. Here's what happens next: [brief title/closing process overview]. I'll keep you updated every step."
+   - **Weekly:** Brief update SMS or call — "Title work is progressing, everything looks good" or "Ran into a small item with [X], working on it — nothing to worry about"
+   - **Milestone notifications:** Title clear, closing date set, closing instructions sent
+   - **Day before closing:** Confirmation SMS
+2. Create 3-4 templates: UC-SMS-01 (contract received / expectations), UC-SMS-02 (weekly check-in), UC-SMS-03 (closing scheduled), UC-SMS-04 (day-before closing)
+3. Semi-automated: AM manually triggers milestone messages, or a weekly timer fires UC-SMS-02 while opportunity is in Under Contract stage
+
+- **Files affected:** messaging.md (add UC templates), sequences.md (add Under Contract cadence), pipeline.md (expand Under Contract stage notes)
 
 ---
 
@@ -226,6 +379,169 @@ Each lead sees a different message every 90 days for a full year before any repe
 
 ---
 
+### 19. AM Qualified Stage Playbook
+
+**Gap:** The LM side of the system is exhaustively documented (cadence, templates, workflow steps). The AM qualified stages (Due Diligence through Under Contract) are a black box: "AM handles it, every 1-2 days." No qualification call framework, no offer presentation approach, no stall thresholds, no objection responses.
+
+**Why it matters:** The AM is the revenue-generating role — everything before qualification is just filtering. If you hire a second AM or replace one, there is nothing to train from. The difference between a good and great AM is often a repeatable framework, not just instinct.
+
+**Recommended approach:**
+
+- Create a new file `new-leads/am-playbook.md` covering:
+  - **Qualification call framework:** What to confirm (interest level, motivation, timeline, asking price, authority to sell, property condition/access)
+  - **Offer presentation:** NEPQ-style approach — "Based on what I'm seeing, the range I'd be looking at is... how does that sit with you?"
+  - **Stage advancement criteria:** Specific triggers for Due Diligence → Make Offer → Negotiations → Contract Sent → Under Contract
+  - **Stall thresholds:** If no progress in X days in a stage, consider next action (escalate, Nurture, Dispo)
+  - **Common objection responses:** Price too low, need to think about it, talking to other buyers, spouse needs to agree
+- Link from sequences.md qualified section and pipeline.md qualified stage definitions
+
+- **Files affected:** New file (am-playbook.md), pipeline.md (add advancement criteria), sequences.md (link to playbook), README.md (add to file index)
+
+---
+
+### 20. Post-Close & Referral System
+
+**Gap:** Under Contract exits to "Dispo: Purchased" which has "Follow-Up: None." The lifecycle ends at closing. No referral ask, no testimonial collection, no check for additional properties owned by the seller.
+
+**Why it matters:** Rural landowners frequently own multiple parcels — someone who sold you 40 acres in County A may own 200 acres in County B. They also know other landowners — rural communities are tight-knit. A post-close referral ask costs nothing and has disproportionate ROI. This is free deal flow.
+
+**Recommended approach:**
+
+- Add a post-close workflow (WF-13) that fires when opportunity moves to Dispo: Purchased:
+  - **Day 1:** Thank-you SMS — "{{first_name}}, appreciate working with you on this. If you know anyone else with land they'd consider selling, send them my way."
+  - **Day 7:** Testimonial ask (optional, SMS or email)
+  - **Day 30:** "By the way, do you own any other parcels you'd ever consider parting with?"
+  - **Quarterly:** Light relationship maintenance (1 SMS per quarter, indefinite)
+- Add Opportunity custom field: "Owns Other Properties" (Yes/No/Unknown)
+- Add post-close templates (PC-SMS-01 through 04)
+
+- **Files affected:** ghl-setup.md (WF-13 + custom field), messaging.md (post-close templates), pipeline.md (update Purchased stage notes), sequences.md (add post-close sequence)
+
+---
+
+### 21. Reporting / KPI Framework
+
+**Gap:** Zero documented KPIs, dashboards, or reporting cadence anywhere in the project. The go-live checklist mentions a monitoring dashboard but doesn't define what to monitor or what success looks like.
+
+**Why it matters:** Can't improve what you don't measure. Land wholesaling has long sales cycles (often months). Without tracking response rates by source, stage conversion rates, and time-in-stage, you cannot tell which campaigns are working, whether the cadence is too aggressive or too passive, or where leads are getting stuck.
+
+**Recommended approach:**
+
+- Create a new file `new-leads/reporting.md` covering:
+  - **Core KPIs:** Response rate by source, speed-to-lead actual vs. 5-min target, stage conversion rates (Day 1-10 → Day 11-30, Day 11-30 → Cold, any stage → Due Diligence), qualification rate, close rate, time in each stage (average), cost per lead by source, revenue per lead by source
+  - **Weekly dashboard:** New leads in, responses received, leads qualified, offers made, contracts sent, deals closed
+  - **Monthly review:** Source performance comparison, cadence effectiveness (which templates get replies), stage funnel analysis, dispo breakdown
+  - **GHL dashboard setup:** Which Smart Lists to check daily, which reports to run weekly
+- Define framework now, implement after 30-60 days of live data
+
+- **Files affected:** New file (reporting.md), README.md (file index), ghl-setup.md (expand go-live dashboard section)
+
+---
+
+### 22. VAPI AI Call Integration Details
+
+**Gap:** VAPI is listed as an inbound source with one paragraph of documentation (ghl-setup.md Entry Path 2). No script, no data flow, no quality thresholds documented.
+
+**Why it matters:** If the VAPI AI call collects bad data, asks the wrong questions, or fails to set expectations, the leads entering GHL will be low quality or confused by the follow-up. The handoff between AI and human is a critical moment.
+
+**Recommended approach (GHL-side scope only — VAPI config is external):**
+
+- Expand ghl-setup.md Entry Path 2 with:
+  - Minimum data requirements for a VAPI lead to enter the pipeline (name, county, phone at minimum)
+  - What the AM should expect when reviewing a VAPI-sourced lead (transcript location, what to look for)
+  - Quality threshold: if VAPI lead is missing key data, flag for manual review before workflow enrollment
+- Add a "VAPI Lead Review" note to rules.md
+
+- **Files affected:** ghl-setup.md (Entry Path 2 expansion), rules.md (VAPI review process)
+
+---
+
+### 23. Channel Preference Tracking
+
+**Gap:** Last Contact Type is tracked on Contacts but never used for routing decisions. If a lead always responds to SMS but never email, the system sends both on schedule regardless.
+
+**Why it matters:** Rural demographics skew older and may strongly prefer phone/SMS over email, or vice versa. Adapting to preference increases response rate and reduces wasted touches.
+
+**Recommended approach:**
+
+- Add Contact custom field: "Preferred Channel" (Dropdown: SMS / Email / Call / Unknown)
+- After 2+ responses from the same channel, LM/AM manually sets Preferred Channel
+- In Cold and Nurture drips, add a branch: if Preferred Channel = SMS, double SMS touches and reduce email (and vice versa)
+- **Note:** This is a v2 optimization. The workflow branching required is significant. Start with manual tracking, automate later.
+
+- **Files affected:** ghl-setup.md (new field + eventual branching), rules.md (channel preference tracking rule)
+
+---
+
+### 24. Seasonal Messaging Angles
+
+**Gap:** All 53 templates are generic year-round. Land has genuine seasonal patterns — spring buyer demand, tax season selling motivation, year-end "clean slate" decisions.
+
+**Why it matters:** Seasonal angles create natural urgency that generic messages lack. "Buyers are most active right now" in spring feels timely. "Checking in about your property" in January feels identical to the same message in July.
+
+**Recommended approach:**
+
+- Align quarterly drip templates (COLDQ, NURQ) to seasonal themes:
+  - Q1 (Jan-Mar): Tax season / new year angle
+  - Q2 (Apr-Jun): Spring buyer demand angle
+  - Q3 (Jul-Sep): Summer/fall market activity angle
+  - Q4 (Oct-Dec): Year-end clean slate angle
+- **Challenge:** Quarterly timing follows the lead's enrollment date, not calendar quarters. A lead entering Cold in February hits "Q1 template" in May (90 days later), which is wrong seasonally. Proper implementation requires GHL date-based branching within WF-05Q/WF-08Q to select templates by current month, not position in loop. This adds significant workflow complexity.
+- **Recommendation:** Implement only after the system is stable and producing data. Strong evergreen messaging first, seasonal layer second.
+
+- **Files affected:** messaging.md (rewrite quarterly templates), ghl-setup.md (date-based branching in WF-05Q/WF-08Q)
+
+---
+
+### 25. Win-Back for "No Longer Own" Dispo
+
+**Gap:** Terminal dispo "No Longer Own" has zero future outreach. These sellers sold the specific property we targeted, but may own other parcels.
+
+**Why it matters:** Rural landowners frequently own multiple parcels across counties. "No Longer Own" doesn't mean "no longer a seller" — it means that specific property is gone. An annual check-in costs almost nothing.
+
+**Recommended approach:**
+
+- Add an optional annual SMS for "No Longer Own" contacts only: "Hey {{first_name}}, it's {{agent_name}} with Bana Land — I know you sold your property in {{opportunity.property_county}}. Do you have any other land you'd ever consider parting with?"
+- 1 template (NLO-SMS-01), 1 lightweight workflow or manual annual touch
+- Other terminal dispos (Not a Fit, Purchased, DNC) stay as-is — "Not a Fit" is property-specific and unlikely to change, "Purchased" is covered by Improvement #20, "DNC" is untouchable
+
+- **Files affected:** pipeline.md (update No Longer Own notes), messaging.md (1 new template)
+
+---
+
+### 26. NL-SMS-07 Message-Truth Gap
+
+**Gap:** NL-SMS-07 ("tried to reach you just now") fires automatically 4 hours after the Day 1 call task is created (WF-02 Step 7), regardless of whether the LM/AM actually made the call. If the call task is still sitting in the queue, the SMS is inaccurate.
+
+**Why it matters:** Minor but relevant — if the lead does pick up later and says "you said you tried to call, I didn't see a missed call," it erodes trust. The NEPQ approach emphasizes authenticity.
+
+**Recommended approach:**
+
+- Reword NL-SMS-07 to not imply a call was just made. Current: "tried to reach you just now." Suggested: "Hey {{first_name}}, this is {{agent_name}} with Bana Land — trying to connect with you about your property in {{opportunity.property_county}}. Here's my direct line: [CALLBACK NUMBER]"
+- Alternatively, make NL-SMS-07 conditional on call task completion (if GHL supports this trigger)
+
+- **Files affected:** messaging.md (revise NL-SMS-07 wording)
+
+---
+
+### 27. Re-Submission Write-Back Automation
+
+**Gap:** Prospect Data rules.md explicitly notes: "Currently manual — NL WF-01 does not write back to Prospect Data to update campaign tags and Account Push Date automatically." This means campaign tag stacking and Account Push Date updates require manual work on every re-submission.
+
+**Why it matters:** Manual steps get skipped, especially under volume. If campaign tags don't stack automatically, Prospect Data loses its history of which properties were sent to which campaigns. Source tracking becomes unreliable over time.
+
+**Recommended approach:**
+
+- Add a webhook or automation from WF-01 to Prospect Data on re-submission detection:
+  - Update the Property record's campaign tag (stack new tag alongside existing)
+  - Update Account Push Date to today
+  - Re-check `Pushed to New Leads` checkbox
+- Update prospect-data/rules.md to reflect automation instead of manual process
+
+- **Files affected:** ghl-setup.md (WF-01 webhook step), prospect-data/rules.md (update re-submission section)
+
+---
+
 ## Decision Log
 
 
@@ -246,5 +562,22 @@ Each lead sees a different message every 90 days for a full year before any repe
 | 13  | Monthly/Quarterly Split | WF-05 → WF-05 + WF-05Q. WF-08 → WF-08 + WF-08Q. Quarterly self-loops. 10 → 12 workflows. | 2026-03-18 |
 | 14  | WF-07 Removed          | Qualified stages (Due Diligence → Under Contract) are human-led by AM. No automated workflow — smart lists are the safety net. 12 → 11 workflows. | 2026-03-18 |
 | 15  | Re-Engaged Tag Removed | `Re-Engaged` tag eliminated. `Pause WFs Until` date field handles pausing + duplicate-trigger prevention. WF-11 stage filter + soft opt-out guidance added. | 2026-03-18 |
+| 16  | Source-Specific Day 0  | Pending                                                         | —          |
+| 17  | Deceased Owner Protocol | Pending                                                        | —          |
+| 18  | Multi-Owner Coordination | Pending                                                       | —          |
+| 19  | Email Bounce Handling  | Pending                                                         | —          |
+| 20  | Email 2-4 Fallback     | Pending                                                         | —          |
+| 21  | Phone Type-Aware Outreach | Pending                                                      | —          |
+| 22  | Skip Trace Refresh     | Pending                                                         | —          |
+| 23  | Under Contract Cadence | Pending                                                         | —          |
+| 24  | AM Playbook            | Pending                                                         | —          |
+| 25  | Post-Close & Referral  | Pending                                                         | —          |
+| 26  | Reporting / KPIs       | Pending                                                         | —          |
+| 27  | VAPI Integration Details | Pending                                                       | —          |
+| 28  | Channel Preference     | Pending                                                         | —          |
+| 29  | Seasonal Messaging     | Pending                                                         | —          |
+| 30  | Win-Back No Longer Own | Pending                                                         | —          |
+| 31  | NL-SMS-07 Wording      | Pending                                                         | —          |
+| 32  | Re-Submission Write-Back | Pending                                                       | —          |
 
 
