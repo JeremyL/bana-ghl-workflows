@@ -1,15 +1,29 @@
 # Bana Land — New Leads Account: Message Templates
 
-All outreach for Bana Land must follow this voice:
+## Voice & Principles
 
-- **Short** — SMS <= 2 sentences, Email <= 4 sentences
-- **Casual and curious** — not desperate, not salesy
-- **NEPQ-influenced** — ask questions, don't pitch, let them talk
-- **Status-maintained** — we're a solution-provider, not a beggar
+- **Short** — SMS ≤ 2 sentences, Email ≤ 4 sentences
+- **Casual and curious** — like a peer asking a question, not a salesperson pitching
+- **NEPQ-influenced** — ask questions, don't make statements about their situation
+- **Status-maintained** — tone says "I have plenty of deals, this one would be nice"
 - **Rural-appropriate** — plain language, no jargon
+- **Incomplete loops** — voicemails should leave something unsaid to create a reason to call back
+- **Unique angles** — no two messages in the sequence should use the same approach
+
+**Banned Phrases (never use in any template):**
+
+- "just following up" / "following up"
+- "checking in" / "check-in"
+- "still interested"
+- "no pressure" / "no rush" / "no obligation"
+- "whenever you're ready"
+- "keeping the door open"
+- "just wanted to make sure you saw it"
+- "we're still here"
 
 Use `{{first_name}}` for GHL merge tag (first name of contact).
 Use `{{agent_name}}` for the team member's name.
+Use `{{opportunity.property_county}}` for the property's county (Opportunity custom field).
 Replace `[CALLBACK NUMBER]` with the agent's dedicated phone line.
 
 ---
@@ -21,12 +35,15 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 
 | Prefix | Stage                                       |
 | ------ | ------------------------------------------- |
-| NL     | New Leads (Day 1-30)                        |
+| NL     | New Leads (Day 0-30)                        |
+| NL-VM  | Voicemail Scripts (manual, with calls)      |
+| NL-RVM | Ringless Voicemail Drops (automated)        |
 | WR     | Cold Email Sub-Flow (get phone #)           |
-| COLD   | Cold Monthly Drip (Day 30-180)              |
-| COLDQ  | Cold Quarterly Drip (Day 180+)              |
-| NUR    | Nurture Monthly (Months 0-3)                |
-| NURQ   | Nurture Quarterly (Month 3+)                |
+| COLD   | Cold Monthly Drip (Months 1–3)              |
+| COLDQ  | Cold Quarterly Drip (Month 4+)              |
+| NUR    | Nurture Monthly (Months 1–3)                |
+| NURQ   | Nurture Quarterly (Month 4+)                |
+| MC     | Missed Call Text-Back                       |
 
 
 ---
@@ -37,8 +54,9 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 | ID             | Channel | Stage                       | Timing            | Workflow | Auto/Manual |
 | -------------- | ------- | --------------------------- | ----------------- | -------- | ----------- |
 | NL-SMS-00      | SMS     | New Leads — Day 0           | Immediate         | WF-01    | Auto        |
+| NL-SMS-00A     | SMS     | New Leads — Day 0           | ~1hr post-call    | WF-01    | Auto        |
 | NL-SMS-01      | SMS     | New Leads — Day 1-10        | Day 1, Morning    | WF-02    | Auto        |
-| NL-SMS-07      | SMS     | New Leads — Day 1-10        | Day 1, Afternoon  | WF-01 / WF-02 | Auto   |
+| NL-SMS-07      | SMS     | New Leads — Day 1-10        | Day 1, Afternoon  | WF-02    | Auto        |
 | NL-EMAIL-01    | Email   | New Leads — Day 1-10        | Day 2, Morning    | WF-02    | Auto        |
 | NL-SMS-02      | SMS     | New Leads — Day 1-10        | Day 2, Day 4      | WF-02    | Auto        |
 | NL-EMAIL-05    | Email   | New Leads — Day 1-10        | Day 5             | WF-02    | Auto        |
@@ -51,25 +69,44 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 | NL-SMS-05      | SMS     | New Leads — Day 11-30       | Day 22            | WF-03    | Auto        |
 | NL-EMAIL-04    | Email   | New Leads — Day 11-30       | Day 29            | WF-03    | Auto        |
 | NL-SMS-06      | SMS     | New Leads — Day 11-30       | Day 30            | WF-03    | Auto        |
-| COLD-SMS-01    | SMS     | Cold Monthly                | Month 1           | WF-05    | Auto        |
-| COLD-EMAIL-01  | Email   | Cold Monthly                | Month 2           | WF-05    | Auto        |
-| COLD-SMS-04    | SMS     | Cold Monthly                | Month 3           | WF-05    | Auto        |
-| COLD-SMS-02    | SMS     | Cold Monthly                | Month 4           | WF-05    | Auto        |
-| COLD-EMAIL-02  | Email   | Cold Monthly                | Month 5           | WF-05    | Auto        |
-| COLDQ-SMS-01   | SMS     | Cold Quarterly              | Every 90 days     | WF-05    | Auto        |
-| COLDQ-EMAIL-01 | Email   | Cold Quarterly              | Every 90 days     | WF-05    | Auto        |
-| NUR-SMS-01     | SMS     | Nurture Monthly             | Month 0           | WF-08    | Auto        |
-| NUR-EMAIL-01   | Email   | Nurture Monthly / Quarterly | Month 1, Month 9  | WF-08    | Auto        |
-| NUR-SMS-02     | SMS     | Nurture Monthly / Quarterly | Month 2, Month 15 | WF-08    | Auto        |
-| NURQ-EMAIL-01  | Email   | Nurture Quarterly           | Month 3           | WF-08    | Auto        |
-| NURQ-SMS-01    | SMS     | Nurture Quarterly           | Month 6           | WF-08    | Auto        |
-| NURQ-SMS-02    | SMS     | Nurture Quarterly           | Month 12 (1-Year) | WF-08    | Auto        |
+| COLD-SMS-01    | SMS     | Cold Monthly                | Day 30             | WF-05    | Auto        |
+| COLD-EMAIL-01  | Email   | Cold Monthly                | Day 44             | WF-05    | Auto        |
+| COLD-SMS-02    | SMS     | Cold Monthly                | Day 58             | WF-05    | Auto        |
+| COLD-EMAIL-02  | Email   | Cold Monthly                | Day 72             | WF-05    | Auto        |
+| COLD-SMS-03    | SMS     | Cold Monthly                | Day 86             | WF-05    | Auto        |
+| COLD-EMAIL-03  | Email   | Cold Monthly                | Day 100            | WF-05    | Auto        |
+| COLDQ-SMS-01   | SMS     | Cold Quarterly              | Q1                | WF-05Q   | Auto        |
+| COLDQ-EMAIL-01 | Email   | Cold Quarterly              | Q1                | WF-05Q   | Auto        |
+| COLDQ-SMS-02   | SMS     | Cold Quarterly              | Q2                | WF-05Q   | Auto        |
+| COLDQ-EMAIL-02 | Email   | Cold Quarterly              | Q2                | WF-05Q   | Auto        |
+| COLDQ-SMS-03   | SMS     | Cold Quarterly              | Q3                | WF-05Q   | Auto        |
+| COLDQ-EMAIL-03 | Email   | Cold Quarterly              | Q3                | WF-05Q   | Auto        |
+| COLDQ-SMS-04   | SMS     | Cold Quarterly              | Q4                | WF-05Q   | Auto        |
+| COLDQ-EMAIL-04 | Email   | Cold Quarterly              | Q4                | WF-05Q   | Auto        |
+| NUR-SMS-01     | SMS     | Nurture Monthly             | Month 1           | WF-08    | Auto        |
+| NUR-EMAIL-01   | Email   | Nurture Monthly             | Month 2           | WF-08    | Auto        |
+| NUR-SMS-02     | SMS     | Nurture Monthly             | Month 3           | WF-08    | Auto        |
+| NURQ-SMS-01    | SMS     | Nurture Quarterly           | Q1                | WF-08Q   | Auto        |
+| NURQ-EMAIL-01  | Email   | Nurture Quarterly           | Q1                | WF-08Q   | Auto        |
+| NURQ-SMS-02    | SMS     | Nurture Quarterly           | Q2                | WF-08Q   | Auto        |
+| NURQ-EMAIL-02  | Email   | Nurture Quarterly           | Q2                | WF-08Q   | Auto        |
+| NURQ-SMS-03    | SMS     | Nurture Quarterly           | Q3                | WF-08Q   | Auto        |
+| NURQ-EMAIL-03  | Email   | Nurture Quarterly           | Q3                | WF-08Q   | Auto        |
+| NURQ-SMS-04    | SMS     | Nurture Quarterly           | Q4                | WF-08Q   | Auto        |
+| NURQ-EMAIL-04  | Email   | Nurture Quarterly           | Q4                | WF-08Q   | Auto        |
 | WR-EMAIL-01    | Email   | Cold Email Sub-Flow         | Day 1             | WF-00A   | Auto        |
 | WR-EMAIL-02    | Email   | Cold Email Sub-Flow         | Day 3             | WF-00A   | Auto        |
 | WR-EMAIL-03    | Email   | Cold Email Sub-Flow         | Day 7             | WF-00A   | Auto        |
 | WR-EMAIL-04    | Email   | Cold Email Sub-Flow         | Day 14            | WF-00A   | Auto        |
 | WR-EMAIL-05    | Email   | Cold Email Sub-Flow         | Day 21            | WF-00A   | Auto        |
 | WR-COLD-SMS-01 | SMS     | Cold Email → Cold (one-time)| Day 30            | WF-00A   | Auto        |
+| NL-VM-01       | VM      | New Leads — Day 1-10        | With manual calls | WF-02    | Manual      |
+| NL-VM-02       | VM      | New Leads — Day 11-30       | With manual calls | WF-03    | Manual      |
+| NL-VMSMS-01    | SMS     | New Leads — Day 1-10 / 11-30| After voicemail   | WF-02/03 | Manual      |
+| NL-RVM-01      | RVM     | New Leads — Day 11-30       | ~Day 14           | WF-03    | Auto        |
+| NL-RVM-02      | RVM     | New Leads — Day 11-30       | ~Day 20           | WF-03    | Auto        |
+| NL-RVM-03      | RVM     | New Leads — Day 11-30       | ~Day 27           | WF-03    | Auto        |
+| MC-SMS-01      | SMS     | Missed Call Text-Back       | 2 min after miss  | WF-12    | Auto        |
 
 
 ---
@@ -82,7 +119,13 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 
 ### NL-SMS-00 | Speed to Lead (Day 0, Immediate)
 
-> Hey {{first_name}}, this is {{agent_name}} with Bana Land — just reaching out about your property in {{county}}. Would you have a quick minute to chat?
+> Hey {{first_name}}, it's {{agent_name}} with Bana Land — had a quick question about your property in {{opportunity.property_county}}. Mind if I give you a call?
+
+---
+
+### NL-SMS-00A | Missed Call (Day 0, ~1hr after call attempt)
+
+> Hey {{first_name}}, it's {{agent_name}} from Bana Land — just tried you on the phone. Call me back when you get a chance: [CALLBACK NUMBER]
 
 ---
 
@@ -94,36 +137,34 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 
 ### NL-SMS-01 | First Touch (Day 1, Morning)
 
-> Hey {{first_name}}, this is {{agent_name}} with Bana Land — we buy land in your area and thought you might be open to a cash offer. Is that something worth a quick conversation?
+> {{first_name}}, it's {{agent_name}} from Bana Land — we've been buying some land in {{opportunity.property_county}} and yours came up. Would it be worth a quick conversation?
 
 ---
 
-### NL-SMS-02 | Follow-Up (Day 2 / Day 4)
+### NL-SMS-07 | Missed Call Follow-Up (Day 1-10, Afternoon)
 
-> Hey {{first_name}}, just following up on my last message. We're still interested in your property — no pressure, just wanted to make sure you saw it.
+> Hey {{first_name}}, tried to reach you just now — this is {{agent_name}} with Bana Land. When you get a sec, here's my direct line: [CALLBACK NUMBER]
 
 ---
 
-### NL-EMAIL-01 | First Touch (Day 2, Morning)
+### NL-EMAIL-01 | First Email (Day 2, Morning)
 
-**Subject:** Quick question about your land in [County Name]
+**Subject:** Your land in {{opportunity.property_county}}
 
 Hey {{first_name}},
 
-My name is {{agent_name}} — I work with Bana Land, a company that buys rural properties directly from owners like yourself.
+This is {{agent_name}} with Bana Land — we buy rural properties and yours caught my attention. I had a couple of questions about it.
 
-I came across your property and wanted to reach out. Are you open to hearing a cash offer?
-
-No agents, no fees, no obligations. Just wanted to ask.
+Would you be open to a 5-minute call this week?
 
 — {{agent_name}}
 Bana Land | [CALLBACK NUMBER]
 
 ---
 
-### NL-SMS-07 | Missed Call Follow-Up (Day 1, Afternoon)
+### NL-SMS-02 | Follow-Up (Day 2 / Day 4)
 
-> Hey {{first_name}}, just tried giving you a call — this is {{agent_name}} with Bana Land. Give me a call back when you get a chance: [CALLBACK NUMBER]
+> {{first_name}}, wanted to run something by you about your land in {{opportunity.property_county}}. Got a minute to talk? — {{agent_name}}, Bana Land
 
 ---
 
@@ -133,265 +174,385 @@ Template NL-SMS-02 is reused from above (Day 2 and Day 4).
 
 ---
 
-### NL-SMS-03 | Day 8
+### NL-EMAIL-05 | Quick Follow-Up (Day 5)
 
-> {{first_name}}, still reaching out about your property. If you've got a few minutes, I'd love to hear what's going on with it. — {{agent_name}}, Bana Land
+**Subject:** Quick question for you
+
+Hey {{first_name}},
+
+We've been working on a few deals in {{opportunity.property_county}} and your property keeps coming up in our research. Figured I should reach out directly.
+
+Have you given any thought to what you'd want for it?
+
+— {{agent_name}}
+Bana Land | [CALLBACK NUMBER]
 
 ---
 
 ### NL-EMAIL-02 | Follow-Up (Day 7)
 
-**Subject:** Re: Your property in [County Name]
+**Subject:** Am I reaching the right person?
 
 Hey {{first_name}},
 
-Just following up on my note from a few days ago about your land.
+I've sent a couple messages about your property in {{opportunity.property_county}} — wanted to make sure I'm reaching the right person.
 
-If now isn't a good time or you have questions, no worries at all — I just want to make sure you had a chance to see it.
-
-Happy to answer anything you've got.
+If you're the owner, I'd love to connect for a few minutes. If not, no worries — just let me know.
 
 — {{agent_name}}
 Bana Land | [CALLBACK NUMBER]
 
 ---
 
-### NL-EMAIL-05 | Quick Follow-Up (Day 5)
+### NL-SMS-03 | Day 8
 
-**Subject:** Following up — Bana Land
-
-Hey {{first_name}},
-
-Just a quick follow-up from {{agent_name}} at Bana Land. I've been trying to reach you about your property.
-
-If you've got a couple minutes, I'd love to connect — feel free to call or text me at [CALLBACK NUMBER].
-
-— {{agent_name}}
-Bana Land | [CALLBACK NUMBER]
+> {{first_name}}, curious — is your property in {{opportunity.property_county}} something you'd consider selling this year, or is the timing off? — {{agent_name}}, Bana Land
 
 ---
 
 ### NL-SMS-08 | Check-In (Day 10)
 
-> Hey {{first_name}}, still trying to connect about your property. If you have a few minutes, give me a call or shoot me a text. — {{agent_name}}, Bana Land [CALLBACK NUMBER]
+> Hey {{first_name}}, I've reached out a few times — not trying to bug you. Would a conversation even make sense, or should I take a step back? — {{agent_name}}, Bana Land
 
 ---
 
 ## New Leads — Day 11-30
 
-**Stage:** Day 11-30 | **Cadence:** Tuesdays & Thursdays only | **Owner:** LM or AM (by source) + GHL auto
+**Stage:** Day 11-30 | **Cadence:** Every 2–3 days | **Owner:** LM or AM (by source) + GHL auto
 
 ---
 
 ### NL-SMS-04 | Re-Engage (Day 11)
 
-> Hey {{first_name}}, been trying to connect — totally understand if the timing isn't right. Is selling something you're still thinking about at some point? — {{agent_name}}, Bana Land
-
----
-
-### NL-SMS-09 | Mid-Range Follow-Up (Day 17)
-
-> {{first_name}}, just circling back one more time. We're still interested in your property — no pressure, just want to make sure you know we're here. — {{agent_name}}, Bana Land
-
----
-
-### NL-SMS-05 | Check-In (Day 22)
-
-> {{first_name}}, just a quick check-in — if you ever want a no-obligation offer on your land, we're still here. No rush. — Bana Land
-
----
-
-### NL-SMS-06 | 30-Day Close
-
-> Hey {{first_name}}, this'll be my last reach-out for a while. If things change and you want to talk about your land, feel free to text or call anytime — {{agent_name}} with Bana Land. [CALLBACK NUMBER]
+> {{first_name}}, I've been trying to connect about your property — where should we go from here? — {{agent_name}}, Bana Land
 
 ---
 
 ### NL-EMAIL-03 | Mid-Range Follow-Up (Day 15)
 
-**Subject:** Still interested in your property
+**Subject:** Has anything changed?
 
 Hey {{first_name}},
 
-I know you're probably busy — just wanted to check in one more time.
+I reached out a couple weeks ago about your land in {{opportunity.property_county}}. Sometimes the timing just isn't right, and that's fine.
 
-We work with sellers across the country who want a straightforward, no-hassle sale. If that's something you'd consider, I'd love to get on a quick call.
-
-No pressure at all — just here if you want to talk.
+I'm curious — has anything changed with your situation since then?
 
 — {{agent_name}}
 Bana Land | [CALLBACK NUMBER]
+
+---
+
+### NL-SMS-09 | Mid-Range Follow-Up (Day 17)
+
+> {{first_name}}, would it help if I just sent you a number on your property? That way you can decide if it's even worth talking. — {{agent_name}}, Bana Land
+
+---
+
+### NL-SMS-05 | Check-In (Day 22)
+
+> {{first_name}}, out of curiosity — what would need to happen for selling your land to make sense? — {{agent_name}}, Bana Land
 
 ---
 
 ### NL-EMAIL-04 | Long-Game Setup (Day 29)
 
-**Subject:** Keeping the door open
+**Subject:** Wrapping up on your property
 
 Hey {{first_name}},
 
-I won't keep filling up your inbox — just wanted to say we're still here whenever the time is right.
+I'm going to move your property to the back of my list — figured I should give you one more heads up before I do.
 
-A lot of the sellers we work with weren't ready to sell right away. When the situation changed, they gave us a call — and we made it easy.
-
-If that ever becomes you, feel free to reach out anytime.
+If you want to have a conversation about what your land is worth, I'm here. Otherwise, no hard feelings.
 
 — {{agent_name}}
 Bana Land | [CALLBACK NUMBER]
 
 ---
 
-## Cold — Monthly Drip (Day 30-180)
+### NL-SMS-06 | 30-Day Close
 
-**Stage:** Cold | **Cadence:** Monthly (every 30 days) | **Owner:** GHL auto only
+> {{first_name}}, closing out my notes on your property. If you ever want to pick this back up, you've got my number. — {{agent_name}}, Bana Land
+
+---
+
+## Cold — Monthly Drip (Months 1–3)
+
+**Stage:** Cold | **Cadence:** 30-day wait on entry, then SMS + Email each month, ~2 weeks apart | **Owner:** GHL auto only
 **Applies to:** Cold stage leads AND all Dispo Re-Engage leads (No Motivation, Wants Retail, On MLS, Lead Declined)
-**Trigger:** WF-05 fires on stage entry
+**Trigger:** WF-05 fires on Cold stage entry
 
 ---
 
-### COLD-SMS-01 | Month 1
+### COLD-SMS-01 | Day 30
 
-> Hey {{first_name}}, it's {{agent_name}} from Bana Land. Just checking in — has anything changed with your property situation?
+> Hey {{first_name}}, it's {{agent_name}} from Bana Land — just had time to circle back. You ever figure out what you wanted to do with your property?
 
 ---
 
-### COLD-EMAIL-01 | Month 2
+### COLD-EMAIL-01 | Day 44
 
-**Subject:** Quick check-in on your property
+**Subject:** We just closed nearby
 
 Hey {{first_name}},
 
-Just a brief check-in from Bana Land. We're still active buyers in your county and wanted to see if anything had changed on your end.
+We picked up a property in your area recently and it reminded me of yours. Figured I'd reach out.
 
-If now's not the time, completely fine — just keeping the line open.
+Have your plans changed at all since we last talked?
 
 — {{agent_name}} | Bana Land
 
 ---
 
-### COLD-SMS-04 | Month 3
+### COLD-SMS-02 | Day 58
 
-> Hey {{first_name}}, quick check-in from Bana Land — we're still actively buying in your county. Has anything changed on your end? No rush, just checking in.
-
----
-
-### COLD-SMS-02 | Month 4
-
-> {{first_name}}, hope all is well — still interested in your land if the timing ever works. Just wanted to stay in touch. — Bana Land
+> {{first_name}}, random question — are you paying taxes on that property in {{opportunity.property_county}} and wondering if it's even worth holding onto? — Bana Land
 
 ---
 
-### COLD-EMAIL-02 | Month 5
+### COLD-EMAIL-02 | Day 72
 
-**Subject:** Still here when you're ready
+**Subject:** Something came up
 
 Hey {{first_name}},
 
-Hope things are going well. We're still buying land across the country and have helped a lot of sellers who just needed the right timing.
+I know it's been a while — we've been doing more deals in your area and I wanted to see if your property is something you'd reconsider.
 
-If that ever lines up for you, we'd love to reconnect.
+Even if it's a "not right now," that's helpful for me to know. What are you thinking?
 
-— Bana Land
-
----
-
-## Cold — Quarterly Drip (Day 180+)
-
-**Stage:** Cold | **Cadence:** Every 90 days (indefinite) | **Owner:** GHL auto only
-**Trigger:** WF-05 (Phase 2) continues automatically
+— {{agent_name}} | Bana Land
 
 ---
 
-### COLDQ-SMS-01 | Quarterly SMS
+### COLD-SMS-03 | Day 86
 
-> Hey {{first_name}}, quick check-in from Bana Land — still buying in your area. If your situation's changed, we'd love to talk.
+> {{first_name}}, it's Bana Land — your property still on your mind at all, or have you moved on from that?
 
 ---
 
-### COLDQ-EMAIL-01 | Quarterly Email
+### COLD-EMAIL-03 | Day 100
 
-**Subject:** Bana Land — still interested in your property
+**Subject:** One more from me
 
 Hey {{first_name}},
 
-Just a periodic check-in from our team. We continue to buy rural land across the US and your property is still of interest to us.
+I'll space out my messages after this one. Before I do — is selling your land something that's completely off the table, or just not the right time?
 
-If your situation has changed or you'd like to revisit a conversation, reply to this email or give us a call.
+Either way is fine. Just want to know where we stand.
+
+— {{agent_name}} | Bana Land
+
+---
+
+## Cold — Quarterly Drip (Month 4+)
+
+**Stage:** Cold | **Cadence:** SMS + Email same day, every 90 days | **Owner:** GHL auto only
+**Trigger:** WF-05Q fires after monthly phase completes (or directly to skip monthly)
+**Rotation:** 4 unique quarters (Q1–Q4), then loops indefinitely.
+
+---
+
+### COLDQ-SMS-01 | Q1 SMS
+
+> {{first_name}}, it's Bana Land — you ever decide what you wanted to do with that property?
+
+---
+
+### COLDQ-EMAIL-01 | Q1 Email
+
+**Subject:** Been a while
+
+Hey {{first_name}},
+
+It's been a few months since we connected. We're still actively buying land in your area and yours is still on my list.
+
+Worth a quick conversation, or should I hold off?
+
+— {{agent_name}} | Bana Land | [CALLBACK NUMBER]
+
+---
+
+### COLDQ-SMS-02 | Q2 SMS
+
+> {{first_name}}, we just picked up another property in your county. Yours still available? — {{agent_name}}, Bana Land
+
+---
+
+### COLDQ-EMAIL-02 | Q2 Email
+
+**Subject:** Sellers in your area
+
+Hey {{first_name}},
+
+We've been working with a few landowners in {{opportunity.property_county}} recently. Your name came back up.
+
+Would you want to hear what we'd offer, or is this still not the right time?
+
+— {{agent_name}} | Bana Land
+
+---
+
+### COLDQ-SMS-03 | Q3 SMS
+
+> {{first_name}}, figured you'd decided to keep your land — is that right, or is selling still on your radar? — Bana Land
+
+---
+
+### COLDQ-EMAIL-03 | Q3 Email
+
+**Subject:** Closing the loop
+
+Hey {{first_name}},
+
+I've had your property in my notes for a while now. Trying to figure out if I should keep it there or move on.
+
+What would you say — is this worth a conversation?
 
 — Bana Land | [CALLBACK NUMBER]
 
 ---
 
-## Nurture — Monthly (Months 0-3)
+### COLDQ-SMS-04 | Q4 SMS
 
-**Stage:** Nurture | **Cadence:** Every 30 days | **Owner:** GHL auto only
-**Trigger:** WF-08 fires on stage entry
+> {{first_name}}, honest question — what's keeping you from selling that land? Curious if there's something we could help with. — {{agent_name}}, Bana Land
+
+---
+
+### COLDQ-EMAIL-04 | Q4 Email
+
+**Subject:** Quick question
+
+Hey {{first_name}},
+
+I've been reaching out periodically about your land and wanted to ask you straight up — should I keep your property on my list, or would you rather I stop reaching out?
+
+Either way is totally fine.
+
+— {{agent_name}} | Bana Land
+
+---
+
+## Nurture — Monthly (Months 1–3)
+
+**Stage:** Nurture | **Cadence:** Every 30 days (first touch immediate on entry) | **Owner:** GHL auto only
+**Trigger:** WF-08 fires on Nurture stage entry
 **Channels:** SMS + Email only
 
 ---
 
-### NUR-SMS-01 | Month 0
+### NUR-SMS-01 | Month 1
 
-> Hey {{first_name}}, it's {{agent_name}} with Bana Land. Wanted to circle back — has anything changed with your property since we last talked?
+> Hey {{first_name}}, it's {{agent_name}} from Bana Land — been thinking about our conversation. Has anything shifted on your end with the property?
 
 ---
 
-### NUR-EMAIL-01 | Month 1 (reused at Month 9)
+### NUR-EMAIL-01 | Month 2
 
-**Subject:** Following up from Bana Land
+**Subject:** Thinking about our conversation
 
 Hey {{first_name}},
 
-It's been a little while since we connected. Wanted to touch base and see if anything's changed with your property.
+Last time we spoke, it sounded like the timing wasn't quite right. Totally get that.
 
-No pressure — just wanted to stay on your radar in case the timing ever works out.
+I'm curious — has anything changed, or are you still in the same spot?
 
 — {{agent_name}} | Bana Land
 
 ---
 
-### NUR-SMS-02 | Month 2 (reused at Month 15)
+### NUR-SMS-02 | Month 3
 
-> {{first_name}}, just wanted to stay on your radar. We're still actively buying land — if the timing's ever right, we're here.
+> {{first_name}}, just circling back — where do things stand with your property these days? Would love to reconnect if it makes sense. — {{agent_name}}, Bana Land
 
-Trigger: WF-08 transitions to quarterly phase automatically at Month 3.
-
----
-
-## Nurture — Quarterly (Month 3+)
-
-**Stage:** Nurture | **Cadence:** Every 90 days (indefinite) | **Owner:** GHL auto only
-**Trigger:** WF-08 (Phase 2) continues automatically
-
-Templates NUR-EMAIL-01 and NUR-SMS-02 are reused from the Monthly section above.
+Trigger: WF-08 enrolls contact in WF-08Q at Month 3.
 
 ---
 
-### NURQ-EMAIL-01 | Month 3
+## Nurture — Quarterly (Month 4+)
 
-**Subject:** Still buying in your area
+**Stage:** Nurture | **Cadence:** SMS + Email same day, every 90 days | **Owner:** GHL auto only
+**Trigger:** WF-08Q fires after monthly phase completes (or directly to skip monthly)
+**Rotation:** 4 unique quarters (Q1–Q4), then loops indefinitely.
+
+---
+
+### NURQ-SMS-01 | Q1 SMS
+
+> {{first_name}}, it's {{agent_name}} with Bana Land — been a while. Your property situation change at all?
+
+---
+
+### NURQ-EMAIL-01 | Q1 Email
+
+**Subject:** Picking back up
 
 Hey {{first_name}},
 
-We've been active buyers in your region this year and wanted to make sure you still have our info.
+We had a good conversation a while back about your property. Just wanted to see if things have shifted at all on your end.
 
-If you've been thinking about making a move on your land, we'd love to have that conversation.
+If you'd want to revisit, I'm around. If not, all good.
+
+— {{agent_name}} | Bana Land | [CALLBACK NUMBER]
+
+---
+
+### NURQ-SMS-02 | Q2 SMS
+
+> {{first_name}}, we've been doing a lot of deals lately and thought of you. Your property — still holding onto it? — {{agent_name}}, Bana Land
+
+---
+
+### NURQ-EMAIL-02 | Q2 Email
+
+**Subject:** Your property came to mind
+
+Hey {{first_name}},
+
+Was working on something in your area and your property came to mind. We had a good talk and I always wondered if things would line up eventually.
+
+Would it be worth another conversation?
+
+— {{agent_name}} | Bana Land
+
+---
+
+### NURQ-SMS-03 | Q3 SMS
+
+> Hey {{first_name}}, it's Bana Land — any updates on your property? Would love to reconnect if the timing's better now.
+
+---
+
+### NURQ-EMAIL-03 | Q3 Email
+
+**Subject:** Still have your info
+
+Hey {{first_name}},
+
+I still have your property info in my files from when we talked. Just doing a check-in to see if anything's changed.
+
+If you'd want to revisit things, I can pull everything up quickly. Just say the word.
 
 — Bana Land | [CALLBACK NUMBER]
 
 ---
 
-### NURQ-SMS-01 | Month 6
+### NURQ-SMS-04 | Q4 SMS
 
-> Hey {{first_name}}, hope things are well — we've helped a lot of sellers in similar situations this year. Whenever you're ready, we'd love to revisit. — Bana Land
+> {{first_name}}, honest question — if we could make the numbers work, would you still want to sell? — {{agent_name}}, Bana Land
 
 ---
 
-### NURQ-SMS-02 | 1-Year Touch (Month 12)
+### NURQ-EMAIL-04 | Q4 Email
 
-> {{first_name}}, it's been about a year — still thinking about your land at all? We're still in the market. — Bana Land
+**Subject:** One more from me
 
-Continue rotating NUR-SMS-02, NUR-EMAIL-01, NURQ-SMS-01, NURQ-SMS-02 every 90 days indefinitely.
+Hey {{first_name}},
+
+It's been a while since we connected. I wanted to reach out one more time and see where you're at with your property.
+
+If you ever want to pick things back up, you know where to find me.
+
+— {{agent_name}} | Bana Land
 
 ---
 
@@ -410,9 +571,9 @@ These templates specifically ask for a phone number. They are different from the
 
 Hey {{first_name}},
 
-Thanks for getting back to me — glad to hear you're open to a conversation.
+Appreciate you getting back to me. I've got a couple of questions about your property that would be a lot quicker over the phone.
 
-What's the best number to reach you at? I'd love to connect for just a few minutes.
+What's the best number to reach you at?
 
 — {{agent_name}} | Bana Land
 
@@ -422,9 +583,11 @@ What's the best number to reach you at? I'd love to connect for just a few minut
 
 **Subject:** Re: Your property
 
-Hey {{first_name}}, just following up — did you get my last message?
+Hey {{first_name}},
 
-If you're still open to a quick chat, just reply with your number and I'll give you a call.
+Happy to do everything over email if that's easier — but a quick call would save us both some back and forth.
+
+If you'd rather talk, just drop your number and I'll reach out at a time that works for you.
 
 — {{agent_name}} | Bana Land
 
@@ -434,9 +597,11 @@ If you're still open to a quick chat, just reply with your number and I'll give 
 
 **Subject:** Re: Your property
 
-Hey {{first_name}}, one more check-in. Happy to work around your schedule — just need a good number to reach you.
+Hey {{first_name}},
 
-Or if it's easier, feel free to call or text me directly: [CALLBACK NUMBER]
+If it's easier, you can call or text me directly: [CALLBACK NUMBER]. I'm around most days.
+
+Otherwise just reply with a good number and I'll come to you.
 
 — {{agent_name}} | Bana Land
 
@@ -446,9 +611,11 @@ Or if it's easier, feel free to call or text me directly: [CALLBACK NUMBER]
 
 **Subject:** Re: Your property
 
-Hey {{first_name}}, still thinking about connecting on your property.
+Hey {{first_name}},
 
-If a quick call works better than email, just reply with your number and I'll reach out at a time that works for you.
+I've been looking into your property and have some thoughts I'd rather share over the phone than over email.
+
+Best way to reach you?
 
 — {{agent_name}} | Bana Land
 
@@ -458,9 +625,11 @@ If a quick call works better than email, just reply with your number and I'll re
 
 **Subject:** Re: Your property
 
-Hey {{first_name}}, I know life gets busy — no rush on my end.
+Hey {{first_name}},
 
-When you're ready, just reply with a good number or call me directly: [CALLBACK NUMBER]
+I realize we've been going back and forth over email. Would a 5-minute call make sense, or would you rather keep it to email?
+
+Either way works — just let me know: [CALLBACK NUMBER]
 
 — {{agent_name}} | Bana Land
 
@@ -471,4 +640,79 @@ When you're ready, just reply with a good number or call me directly: [CALLBACK 
 **Used by:** WF-00A — sent once to each skip-traced phone number when a Cold Email lead hits Day 30 with no confirmed phone number.
 **Goal:** Bridge the email conversation to a phone connection. Sent once per number. No further SMS in Cold drip for these contacts.
 
-> Hey {{first_name}}, we've been trying to connect over email about your land — this is {{agent_name}} with Bana Land. Is this a good number to reach you?
+> Hey {{first_name}}, it's {{agent_name}} from Bana Land — we've been emailing about your property. Is this a good number to reach you?
+
+---
+
+## Missed Call Text-Back
+
+**Workflow:** WF-12 | **Owner:** Auto (SMS) — reply visible in conversation + notification
+
+---
+
+### MC-SMS-01 | Missed Call Auto-Reply (2 min delay)
+
+**Used by:** WF-12 — sent 2 minutes after a missed inbound call from a known contact.
+
+> Hey, this is {{agent_name}} with Bana Land — saw you just called. I'll try you right back, or feel free to text me here.
+
+---
+
+## Voicemail Scripts
+
+**When to use:** When a manual call goes to voicemail, leave the appropriate voicemail script below, then immediately send NL-VMSMS-01 (combo SMS) via GHL conversation. The voicemail + SMS combo dramatically increases callback rate.
+
+**Key principle:** Voicemails should be incomplete — mention that something came up or you have a question, but do NOT say what. This creates an open loop that gives them a reason to call back.
+
+---
+
+### NL-VM-01 | Day 1-10 Voicemail Script (~15 sec)
+
+**Used by:** LM or AM during manual call tasks in WF-02. Leave this voicemail, then send NL-VMSMS-01.
+
+> Hey {{first_name}}, it's {{agent_name}} with Bana Land. I was looking into your property in {{opportunity.property_county}} and something came up I wanted to ask you about. Give me a call when you get this: [CALLBACK NUMBER].
+
+---
+
+### NL-VM-02 | Day 11-30 Voicemail Script (~15 sec)
+
+**Used by:** LM or AM during manual call tasks in WF-03. Leave this voicemail, then send NL-VMSMS-01.
+
+> Hey {{first_name}}, it's {{agent_name}} from Bana Land. I've got a quick update on your property — call me back when you get a chance: [CALLBACK NUMBER].
+
+---
+
+### NL-VMSMS-01 | Voicemail Combo SMS
+
+**Used by:** LM or AM — sent manually via GHL conversation immediately after leaving a voicemail (NL-VM-01 or NL-VM-02).
+
+> Hey {{first_name}}, just left you a voicemail — call me back when you get a sec: [CALLBACK NUMBER]. — {{agent_name}}, Bana Land
+
+---
+
+## Ringless Voicemail Drops (RVM) — Day 11-30
+
+**Stage:** Day 11-30 | **Cadence:** Automated drops filling gaps between existing touches | **Owner:** GHL auto
+**Workflow:** WF-03 | **Send window:** 9am–7pm contact local time
+
+These are automated RVM drops delivered directly to voicemail without ringing the phone. They maintain presence during the wind-down phase without adding more SMS or email.
+
+**Key principle:** Each RVM uses a different hook. Sound natural, like you're calling between meetings. ~15 seconds each.
+
+---
+
+### NL-RVM-01 | ~Day 14
+
+> Hey {{first_name}}, it's {{agent_name}} from Bana Land. Was going through some properties in your area and had a question about yours. Call me when you get a chance: [CALLBACK NUMBER].
+
+---
+
+### NL-RVM-02 | ~Day 20
+
+> Hey {{first_name}}, it's {{agent_name}} with Bana Land — wanted to touch base on your property, got something I wanted to run by you. Give me a ring: [CALLBACK NUMBER].
+
+---
+
+### NL-RVM-03 | ~Day 27
+
+> Hey {{first_name}}, it's Bana Land — before I wrap up on your property, wanted to see if we could connect. Call me at [CALLBACK NUMBER].
