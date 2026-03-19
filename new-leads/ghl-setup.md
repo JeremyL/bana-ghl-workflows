@@ -1,5 +1,5 @@
 # Bana Land — New Leads Account: GHL Setup Guide
-*Last edited: 2026-03-19 · Last reviewed: —*
+*Last edited: 2026-03-20 · Last reviewed: —*
 
 This guide walks through building the New Leads GHL sub-account from scratch.
 Follow the steps in order — each section depends on the previous one being complete.
@@ -345,17 +345,23 @@ Build each workflow in **Automation > Workflows**.
 6. Update custom field: Latest Source Date = Today
 7. Update custom field: Stage Entry Date = Today
 8. **Day 0 — Speed to Lead:**
-   - **Branch: If tagged `Source: Cold Email` AND Phone field is empty:**
-     - Skip NL-SMS-00, skip call notifications, skip NL-SMS-00A
+   - **Branch A: If tagged `Source: Cold Email` AND Phone field is empty:**
+     - Skip SMS, skip call notifications
      - Send internal notification to Lead Manager: "New Cold Email lead — no phone number on file. WF-Cold-Email-Subflow will run starting at Day 1-10. {{first_name}}"
      - *(WF-Cold-Email-Subflow takes over when owner moves contact to Day 1-10)*
-   - **All other cases (phone present, or non-Cold-Email source):**
-     - Send SMS: NL-SMS-00 (Speed to Lead) — fires after 120-second wait
+   - **Branch B: Phone present — branch on source for Day 0 SMS:**
      - Send internal notification to assigned owner: "New lead — speed-to-lead touches firing now: {{first_name}} ({{source tag}}). Work the lead, then move to Day 1-10 when done."
      - **Push notification** (GHL mobile app) to assigned owner: "NEW LEAD — {{first_name}} — call NOW"
      - **Internal SMS alert** to assigned owner's personal number: "NEW LEAD — {{first_name}} — call now: {{phone}}"
-     - Wait: 1 hour
-     - **Check: Was a call logged for this contact in the last hour?** If no → Send SMS: NL-SMS-00A (Missed Call Follow-Up)
+     - **B1 — Cold outbound (`Source: Cold Email` OR `Source: Cold SMS` OR `Source: Cold Call`):**
+       - Send SMS: NL-SMS-00 (Cold Outbound Speed to Lead) — fires after 120-second wait
+       - Wait: 1 hour → If no call logged → Send SMS: NL-SMS-00A (Missed Call)
+     - **B2 — Inbound (`Source: Website` OR `Source: VAPI AI Call` OR `Source: Referral`):**
+       - Send SMS: IN-SMS-00 (Inbound Speed to Lead) — fires after 120-second wait
+       - Wait: 1 hour → If no call logged → Send SMS: IN-SMS-00A (Inbound Missed Call)
+     - **B3 — Direct Mail (`Source: Direct Mail`):**
+       - Send SMS: DM-SMS-00 (Direct Mail Speed to Lead) — fires after 120-second wait
+       - Wait: 1 hour → If no call logged → Send SMS: DM-SMS-00A (Direct Mail Missed Call)
 
 **Note:** Day 0 speed-to-lead touches fire automatically on entry. Owner works the lead on Day 0, then manually moves the contact to Day 1-10 the same day — that stage move triggers WF-Day-1-10 (and WF-Cold-Email-Subflow for Cold Email leads with no phone). WF-Day-1-10 waits until the next business day to start automated touches.
 
