@@ -73,7 +73,7 @@ They have not yet been spoken to and qualified. Every lead starts here.
 | **Entry**      | All sources: Cold Email, Cold SMS, Cold Call, Direct Mail, VAPI, Referral, Website, re-submission. |
 | **Exit**       | Owner works Day 0 speed-to-lead (immediate SMS + call + missed-call SMS), then manually moves to Day 1-10 the same day. |
 | **Owner**      | LM (Cold Email/SMS/Call) or AM (Direct Mail/VAPI/Referral/Website) — assigned on entry via WF-New-Lead-Entry. |
-| **Actions**    | WF-New-Lead-Entry branches on source tag: assigns to LM or AM, fires Day 0 speed-to-lead (NL-SMS-00 + call task + NL-SMS-00A if no call logged), sends notification to owner. |
+| **Actions**    | WF-New-Lead-Entry branches on source tag: assigns to LM or AM, fires Day 0 speed-to-lead (CO-SMS-00 + call task + CO-SMS-00A if no call logged), sends notification to owner. |
 
 ---
 

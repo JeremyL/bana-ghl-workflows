@@ -51,15 +51,15 @@ disqualify themselves, or land in the long-term Cold drip.
 
 | Touch # | Timing         | Channel | Type   | Message Ref               |
 | ------- | -------------- | ------- | ------ | ------------------------- |
-| 1       | 120s wait      | SMS     | Auto   | NL-SMS-00 / IN-SMS-00 / DM-SMS-00 (by source) |
+| 1       | 120s wait      | SMS     | Auto   | CO-SMS-00 / IN-SMS-00 / DM-SMS-00 (by source) |
 | 2       | After SMS      | Call    | Manual | Call                      |
-| 3       | ~1hr post-call | SMS     | Auto   | NL-SMS-00A / IN-SMS-00A / DM-SMS-00A (by source) |
+| 3       | ~1hr post-call | SMS     | Auto   | CO-SMS-00A / IN-SMS-00A / DM-SMS-00A (by source) |
 
 
 **Notes:**
 
 - Fires automatically via WF-New-Lead-Entry the moment a lead enters the New Leads stage
-- **Day 0 SMS varies by source:** NL-SMS-00/00A for Cold Email, Cold SMS, Cold Call (cold outbound opener). IN-SMS-00/00A for Website, VAPI AI Call, Referral (inbound acknowledgment). DM-SMS-00/00A for Direct Mail (letter reference). Rest of Day 1-30 sequence is identical across all sources.
+- **Day 0 SMS varies by source:** CO-SMS-00/00A for Cold Email, Cold SMS, Cold Call (cold outbound opener). IN-SMS-00/00A for Website, VAPI AI Call, Referral (inbound acknowledgment). DM-SMS-00/00A for Direct Mail (letter reference). Rest of Day 1-30 sequence is identical across all sources.
 - Speed-to-lead SMS sends before the call task — warms the number and signals we're reaching out
 - Missed-call SMS fires ~1 hour later only if no call was logged
 - Owner works the lead on Day 0 (calls, reviews any reply), then moves stage to Day 1-10 the same day

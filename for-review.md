@@ -109,7 +109,7 @@ No open notes.
 
 ### 5. Property-Specific Merge Fields in Templates
 
-**Gap:** NL-SMS-00 already uses {{county}}, but most other templates only use {{first_name}} and {{agent_name}}. Cold, Nurture, and Dispo Re-Engage templates do not reference any property details (county, acres).
+**Gap:** CO-SMS-00 already uses {{county}}, but most other templates only use {{first_name}} and {{agent_name}}. Cold, Nurture, and Dispo Re-Engage templates do not reference any property details (county, acres).
 
 **Why it matters:** "Checking in about your 40 acres in Garfield County" feels personal. "Checking in about your property" feels generic.
 
@@ -436,7 +436,7 @@ No open notes.
 | 13  | Monthly/Quarterly Split | WF-Cold-Drip-Monthly → WF-Cold-Drip-Monthly + WF-Cold-Drip-Quarterly. WF-Nurture-Monthly → WF-Nurture-Monthly + WF-Nurture-Quarterly. Quarterly self-loops. 10 → 12 workflows. | 2026-03-18 |
 | 14  | WF-07 Removed          | Qualified stages (Due Diligence → Under Contract) are human-led by AM. No automated workflow — smart lists are the safety net. 12 → 11 workflows. | 2026-03-18 |
 | 15  | Re-Engaged Tag Removed | `Re-Engaged` tag eliminated. `Pause WFs Until` date field handles pausing + duplicate-trigger prevention. WF-Response-Handler stage filter + soft opt-out guidance added. | 2026-03-18 |
-| 16  | Source-Specific Day 0  | 3-way source branch in WF-New-Lead-Entry Day 0: NL-SMS-00/00A (cold outbound), IN-SMS-00/00A (inbound), DM-SMS-00/00A (direct mail). 4 new templates, 54 → 58 total. | 2026-03-20 |
+| 16  | Source-Specific Day 0  | 3-way source branch in WF-New-Lead-Entry Day 0: CO-SMS-00/00A (cold outbound), IN-SMS-00/00A (inbound), DM-SMS-00/00A (direct mail). 4 new templates, 54 → 58 total. | 2026-03-20 |
 | 17  | Deceased Owner Protocol | No special handling. Known deceased owners — already talking to someone. Standard outreach applies. | 2026-03-18 |
 | 18  | Multi-Owner Coordination | Not a GHL concern. Handled outside the system. Standard outreach for all owners. | 2026-03-18 |
 | 19  | Email Bounce Handling  | Pending                                                         | —          |
