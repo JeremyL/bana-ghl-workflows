@@ -13,9 +13,8 @@ Items that require hands-on GHL testing before go-live. Cannot be verified from 
 | Item                           | Account       | Workflow            | What to Verify                                                                                                                                                                |
 | ------------------------------ | ------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Conditional SMS by phone field | New Leads     | WF-Cold-Email-Subflow Step 16      | GHL can send SMS to Phone 1–4 individually, skipping empty fields                                                                                                             |
-| Conditional SMS skip by tag    | New Leads     | WF-Cold-Drip-Monthly, WF-Cold-Drip-Quarterly       | GHL can branch on `Cold: Email Only` tag to skip SMS steps                                                                                                                    |
+| Conditional SMS skip by tag    | New Leads     | WF-Cold-Drip-Monthly, WF-Long-Term-Quarterly       | GHL can branch on `Cold: Email Only` tag to skip SMS steps                                                                                                                    |
 | WF-Cold-Email-Subflow conditional suppression | New Leads     | WF-Day-1-10/03            | Standard workflow steps are correctly skipped while contact is enrolled in WF-Cold-Email-Subflow                                                                                             |
-| Workflow looping               | New Leads     | WF-Cold-Drip-Quarterly, WF-Nurture-Quarterly      | Verify GHL "Add to Workflow" action can re-enroll a contact into the same workflow (enabling native loop). If blocked, implement twin-workflow fallback (see Improvement #2). |
 | DNC sync to Prospect Data      | New Leads     | WF-DNC-Handler               | Automation webhook updates Property record in Prospect Data on DNC                                                                                                            |
 | Prospect Data push automation  | Prospect Data | Automation          | Field mapping from Properties to Contact + Opportunity works correctly                                                                                                        |
 | Source-based task assignment   | New Leads     | WF-New-Lead-Entry/02/03         | Workflows correctly branch on source tag to assign tasks to LM vs AM                                                                                                          |
@@ -41,7 +40,7 @@ No open notes.
 
 - **N-28:** Changed `NL-SMS-07` → `NL-SMS-00A` for Day 0 missed-call SMS in pipeline.md line 76 and rules.md line 240. NL-SMS-07 is a Day 1-10 template; NL-SMS-00A is the correct Day 0 missed-call template.
 - **N-29:** Changed messaging.md Nurture Monthly header from "first touch immediate on entry" → "30-day wait before first touch." Matches sequences.md and ghl-setup.md WF-Nurture-Monthly Step 1 (Wait: 30 days).
-- **N-30:** Rewrote NURQ-EMAIL-03 in messaging.md to replace banned phrase "Just doing a check-in" → "Wanted to see if anything's changed on your end."
+- **N-30:** ~~Rewrote NURQ-EMAIL-03 in messaging.md to replace banned phrase.~~ (NURQ templates removed — merged into LTQ. See Decision Log #34.)
 - **N-31:** Changed pipeline.md Negotiations Actions from "Daily call task. Light SMS automation for 'checking in' messages" → "Call every 1-2 days. SMS for quick follow-ups between calls." Removed false automation claim (qualified stages are human-only per sequences.md) and banned phrase.
 - **N-32:** Changed Decision Log #1 speed-to-lead target from "5-min" → "10-min" to match rules.md §11 and sequences.md.
 - **N-33:** Updated template count from 53 → 54 across for-review.md (verified section, N-23, Improvement #24) and MEMORY.md workflow index (was 43).
@@ -56,7 +55,7 @@ No open notes.
 - **N-12:** Standardized all county references to `{{opportunity.property_county}}` merge field syntax across all templates in messaging.md. Verify correct GHL Opportunity custom field syntax at build time.
 
 - **N-13:** Removed "+ NEPQ" from README.md messaging.md description.
-- **N-14:** Split WF-Cold-Drip-Monthly/WF-Nurture-Monthly into monthly + quarterly workflows (WF-Cold-Drip-Quarterly, WF-Nurture-Quarterly). See Decision Log #13.
+- **N-14:** Split WF-Cold-Drip-Monthly/WF-Nurture-Monthly into monthly + quarterly workflows. Quarterly later merged into single WF-Long-Term-Quarterly. See Decision Log #13, #34.
 - **N-15:** Removed Improvement #2 (Multi-Property Cadence Overlap) entirely. See Decision Log #2.
 - **N-16:** Renamed COLD-SMS templates to sequential order (01/02/03) across messaging.md, sequences.md, ghl-setup.md.
 - **N-17:** Changed "Bana Land Company" → "Bana Land" in ROLE.md.
@@ -69,15 +68,15 @@ No open notes.
 - **N-24:** Changed NL prefix from "New Leads (Day 1-30)" to "New Leads (Day 0-30)" in messaging.md.
 - **N-25:** Updated NL-SMS-07 stage to "New Leads / Day 1-10" and timing to "Day 0-1, Afternoon" in messaging.md.
 - **N-26:** Clarified pipeline.md Cold Email sub-flow — standard steps suppressed while WF-Cold-Email-Subflow is active.
-- **N-27:** Aligned Nurture quarterly transition to match Cold — removed trailing 30-day wait from WF-Nurture-Monthly, added leading 90-day wait to WF-Nurture-Quarterly. Both now: last monthly touch → enroll quarterly → 90-day wait → first quarterly touch.
+- **N-27:** Aligned Nurture quarterly transition to match Cold — removed trailing 30-day wait from WF-Nurture-Monthly, added leading 90-day wait to quarterly. Both now: last monthly touch → enroll quarterly → 90-day wait → first quarterly touch. (Quarterly later merged into single WF-Long-Term-Quarterly. See Decision Log #34.)
 
 ---
 
 ### Verified — No Issues (2026-03-18)
 
-- **Nurture sequence** — internally consistent across pipeline.md, sequences.md, messaging.md, and ghl-setup.md. Phase 1 monthly (WF-Nurture-Monthly: 30-day initial wait + 3 monthly sends) → Phase 2 quarterly (WF-Nurture-Quarterly: 90-day leading wait, indefinite self-loop). Template references match.
+- **Nurture sequence** — internally consistent across pipeline.md, sequences.md, messaging.md, and ghl-setup.md. Phase 1 monthly (WF-Nurture-Monthly: 30-day initial wait + 3 monthly sends) → Phase 2 shared Long-Term Quarterly (WF-Long-Term-Quarterly: 90-day leading wait, Q1–Q4 x2 then stops). Template references match.
 - **New Leads 30-day Cold entry** — consistent across NL pipeline.md, sequences.md, and ghl-setup.md (WF-Day-11-30 → Cold → WF-Cold-Drip-Monthly)
-- **Cold drip sequence (WF-Cold-Drip-Monthly monthly + WF-Cold-Drip-Quarterly quarterly)** — template references, timing (30-day initial wait + 14-day spacing), and `Cold: Email Only` SMS skip logic consistent across sequences.md, messaging.md, and ghl-setup.md
+- **Cold drip sequence (WF-Cold-Drip-Monthly monthly + WF-Long-Term-Quarterly)** — template references, timing (30-day initial wait + 14-day spacing), and `Cold: Email Only` SMS skip logic consistent across sequences.md, messaging.md, and ghl-setup.md
 - **WF-Cold-Email-Subflow Cold Email Sub-Flow** — email timing (Days 1, 3, 7, 14, 21), Day 30 SMS blast, suppression of WF-Day-1-10/03 all consistent across pipeline.md, sequences.md, messaging.md, and ghl-setup.md
 - **Day 1–30 sequence timing** — template references and day assignments in sequences.md match ghl-setup.md WF-Day-1-10/03 step order and wait durations
 - **Source tracking** — Original Source (immutable, set once) + Latest Source (updated on re-submission) + Latest Source Date. 7 dropdown values: Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI AI Call, Referral, Website. Source tags match dropdown values. All 7 sources routed in WF-New-Lead-Entry/WF-Response-Handler.
@@ -90,14 +89,14 @@ No open notes.
 - **Prospect Data DNC handling** — "DNC applies to the entire property record, not individual owners" consistent between PD data-model.md (DNC checkbox on Property) and PD rules.md §3
 - **DNC protocol** — bi-directional (New Leads ↔ Prospect Data). WF-DNC-Handler syncs to PD. Same trigger keywords (STOP/QUIT/UNSUBSCRIBE/CANCEL/END). No stale WR references.
 - **LM/AM dual-owner model** — consistent across all files: both can dispo, LM sets appointment for AM at qualification, AM owns all qualified stages regardless of source.
-- **Quick reference template-to-workflow mapping** — all 58 template IDs in messaging.md quick reference match their workflow assignments in ghl-setup.md.
+- **Quick reference template-to-workflow mapping** — all 50 template IDs in messaging.md quick reference match their workflow assignments in ghl-setup.md.
 - **WF-Dispo-Re-Engage Dispo Re-Engage stage list** — "No Motivation, Wants Retail, On MLS, Lead Declined" consistent across ghl-setup.md (WF-Dispo-Re-Engage), sequences.md, messaging.md Cold drip header, and pipeline.md Dispo Re-Engage definitions.
-- **Nurture Phase 1/2 timing accuracy** — Phase 1 "Months 1–3" has 30-day initial wait + 3 monthly sends, Phase 2 starts with 90-day wait. Consistent across sequences.md, messaging.md, and ghl-setup.md (WF-Nurture-Monthly + WF-Nurture-Quarterly). Both Cold and Nurture use same transition pattern: last monthly touch → enroll quarterly → 90-day wait → first quarterly touch.
+- **Nurture Phase 1/2 timing accuracy** — Phase 1 "Months 1–3" has 30-day initial wait + 3 monthly sends, Phase 2 starts with 90-day wait. Consistent across sequences.md, messaging.md, and ghl-setup.md (WF-Nurture-Monthly + WF-Long-Term-Quarterly). Both Cold and Nurture use same transition pattern: last monthly touch → enroll shared quarterly → 90-day wait → first quarterly touch.
 - **Age and Deceased fields** — present in both accounts. Age is Number type, Deceased is Text type. Consistent values for Deceased (Y / N / blank).
 - **Stage consolidation (Day 1-10 / Day 11-30)** — stage names, definitions, and cadence descriptions consistent across all 5 New Leads files (pipeline.md, sequences.md, messaging.md, ghl-setup.md, rules.md) + ROLE.md + MEMORY.md. Zero references to old stage names (Day 1-2, Day 3-14, Day 15-30) in active files.
 - **WF-04 elimination** — zero active-file references except Decision Log entry #12. Archive files retain old references (expected).
-- **Workflow count** — 12 workflows confirmed across ghl-setup.md, MEMORY.md, and README.md (was 10 before monthly+quarterly split → 12 → 11 after WF-07 removal → 12 after WF-Missed-Call-Textback addition).
-- **Template-to-workflow mapping post-consolidation** — all 58 template IDs in messaging.md quick reference re-verified against WF-Day-1-10 (Day 1-10) and WF-Day-11-30 (Day 11-30) assignments in ghl-setup.md. All match.
+- **Workflow count** — 11 workflows confirmed across ghl-setup.md, MEMORY.md, and README.md (was 10 → 12 after monthly+quarterly split → 11 after quarterly merge into WF-Long-Term-Quarterly).
+- **Template-to-workflow mapping post-consolidation** — all 50 template IDs in messaging.md quick reference re-verified against workflow assignments in ghl-setup.md. All match.
 - **Day 11-30 cadence uniformity** — "Every 2–3 days (11 touches)" consistently described in pipeline.md, sequences.md, and ghl-setup.md WF-Day-11-30. Wait-step spacing, no day-of-week restriction.
 - **Voicemail strategy** — 6 new template IDs (NL-VM-01, NL-VM-02, NL-VMSMS-01, NL-RVM-01/02/03) consistent across messaging.md quick reference, sequences.md Day 11-30 table, ghl-setup.md WF-Day-11-30 steps, and rules.md §12. Voicemail scripts comply with voice guidelines (short, casual, identifies Bana Land). RVM drops respect 9am–7pm send window and WF-Cold-Email-Subflow conditional logic.
 
@@ -349,21 +348,21 @@ No open notes.
 
 ### 24. Seasonal Messaging Angles
 
-**Gap:** All 58 templates are generic year-round. Land has genuine seasonal patterns — spring buyer demand, tax season selling motivation, year-end "clean slate" decisions.
+**Gap:** All 50 templates are generic year-round. Land has genuine seasonal patterns — spring buyer demand, tax season selling motivation, year-end "clean slate" decisions.
 
 **Why it matters:** Seasonal angles create natural urgency that generic messages lack. "Buyers are most active right now" in spring feels timely. "Checking in about your property" in January feels identical to the same message in July.
 
 **Recommended approach:**
 
-- Align quarterly drip templates (COLDQ, NURQ) to seasonal themes:
+- Align quarterly drip templates (LTQ) to seasonal themes:
   - Q1 (Jan-Mar): Tax season / new year angle
   - Q2 (Apr-Jun): Spring buyer demand angle
   - Q3 (Jul-Sep): Summer/fall market activity angle
   - Q4 (Oct-Dec): Year-end clean slate angle
-- **Challenge:** Quarterly timing follows the lead's enrollment date, not calendar quarters. A lead entering Cold in February hits "Q1 template" in May (90 days later), which is wrong seasonally. Proper implementation requires GHL date-based branching within WF-Cold-Drip-Quarterly/WF-Nurture-Quarterly to select templates by current month, not position in loop. This adds significant workflow complexity.
+- **Challenge:** Quarterly timing follows the lead's enrollment date, not calendar quarters. A lead entering Cold in February hits "Q1 template" in May (90 days later), which is wrong seasonally. Proper implementation requires GHL date-based branching within WF-Long-Term-Quarterly to select templates by current month, not position in sequence. This adds significant workflow complexity.
 - **Recommendation:** Implement only after the system is stable and producing data. Strong evergreen messaging first, seasonal layer second.
 
-- **Files affected:** messaging.md (rewrite quarterly templates), ghl-setup.md (date-based branching in WF-Cold-Drip-Quarterly/WF-Nurture-Quarterly)
+- **Files affected:** messaging.md (rewrite quarterly templates), ghl-setup.md (date-based branching in WF-Long-Term-Quarterly)
 
 ---
 
@@ -453,5 +452,7 @@ No open notes.
 | 30  | Win-Back No Longer Own | Pending                                                         | —          |
 | 31  | NL-SMS-07 Wording      | Pending                                                         | —          |
 | 32  | Re-Submission Write-Back | Pending                                                       | —          |
+| 33  | NL-SMS-10 Day 4 Template | Created NL-SMS-10 (Casual Value Hint) for Day 4 — NL-SMS-02 was incorrectly reused on Day 2 and Day 4. NL-SMS-02 now Day 2 only. | 2026-03-20 |
+| 34  | Quarterly Drip Merge   | Merged WF-Cold-Drip-Quarterly + WF-Nurture-Quarterly into single WF-Long-Term-Quarterly. 24-month cap (Q1–Q4 x2, no loop). 8 LTQ templates replace 16 COLDQ+NURQ. 12 → 11 workflows. 58 → 50 templates. Cold Monthly and Nurture Monthly unchanged. | 2026-03-20 |
 
 

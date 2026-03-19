@@ -165,7 +165,7 @@ The four **Dispo — Re-Engage** stages are NOT completely dead leads:
 - On MLS
 - Lead Declined
 
-When a lead enters any of these stages, WF-Dispo-Re-Engage automatically enrolls them in **WF-Cold-Drip-Monthly → WF-Cold-Drip-Quarterly (Long-Term Drip)** — the same indefinite drip used for Cold stage leads (monthly first, then quarterly).
+When a lead enters any of these stages, WF-Dispo-Re-Engage automatically enrolls them in **WF-Cold-Drip-Monthly → WF-Long-Term-Quarterly** — the same drip used for Cold stage leads (monthly first, then quarterly with a 24-month cap).
 
 - Drip continues indefinitely until opt-out — there is no automatic end date
 - If a Re-Engage lead responds positively at any point, move to the appropriate active stage (human decision)

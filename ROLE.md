@@ -101,7 +101,7 @@ See [new-leads/pipeline.md](new-leads/pipeline.md) and [prospect-data/data-model
 | Day 3–10   | 1x per day                | Day 1-10 |
 | Day 11–30  | Every 2–3 days            | Day 11-30 |
 | Months 1–3 | Monthly                   | Cold     |
-| Month 4+   | Quarterly                 | Cold     |
+| Month 4–28 | Quarterly (24-month cap)  | Cold     |
 
 
 **Post-Qualification**
@@ -110,7 +110,7 @@ See [new-leads/pipeline.md](new-leads/pipeline.md) and [prospect-data/data-model
 | Window             | Frequency                        |
 | ------------------ | -------------------------------- |
 | Qualified (Active) | Every 1–2 days                   |
-| Nurture            | Monthly → quarterly (indefinite) |
+| Nurture            | Monthly → quarterly (24-month cap) |
 
 
 ---

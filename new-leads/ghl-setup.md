@@ -199,7 +199,7 @@ Go to **Settings > Tags** and create these tags:
 | Re-Submitted            | Lead came back in from a new external campaign (different source). Resets to New Leads.                                  |
 | Warm: Email             | Entered via cold email response — Cold Email sub-flow tracking.                                                          |
 | Warm: SMS               | Entered via cold SMS response — historical tracking.                                                                     |
-| Cold: Email Only        | Cold Email lead with no confirmed phone number. Email-only Cold drip (WF-Cold-Drip-Monthly/WF-Cold-Drip-Quarterly skip SMS steps).                     |
+| Cold: Email Only        | Cold Email lead with no confirmed phone number. Email-only drip (WF-Cold-Drip-Monthly/WF-Long-Term-Quarterly skip SMS steps).                     |
 | Source: Cold Call        | Lead came from cold calling.                                                                                             |
 | Source: Cold Email       | Lead came from cold email campaign.                                                                                      |
 | Source: Cold SMS         | Lead came from SMS blast campaign.                                                                                       |
@@ -264,9 +264,8 @@ Build each workflow in **Automation > Workflows**.
 | **WF-Day-1-10**  | Day 1-10 Sequence                           |
 | **WF-Day-11-30**  | Day 11-30 Sequence                          |
 | **WF-Cold-Drip-Monthly**  | Cold Drip — Monthly (Months 1–3)            |
-| **WF-Cold-Drip-Quarterly** | Cold Drip — Quarterly (Month 4+)            |
 | **WF-Nurture-Monthly**  | Nurture — Monthly (Months 1–3)              |
-| **WF-Nurture-Quarterly** | Nurture — Quarterly (Month 4+)              |
+| **WF-Long-Term-Quarterly** | Long-Term Quarterly Drip (Month 4–28)       |
 | **WF-Dispo-Re-Engage**  | Dispo Re-Engage — Long-Term Drip Enrollment |
 | **WF-DNC-Handler**  | DNC Handler (+ DNC Sync)                   |
 | **WF-Response-Handler**  | Inbound Response Handler (Re-Engagement)    |
@@ -308,7 +307,7 @@ Build each workflow in **Automation > Workflows**.
     - Send SMS to Phone 3: WR-COLD-SMS-01 (if Phone 3 is not empty)
     - Send SMS to Phone 4: WR-COLD-SMS-01 (if Phone 4 is not empty)
     - **This is a one-time blast only.** No more SMS will be sent in Cold stage for this contact.
-17. Add tag: `Cold: Email Only` — flags contact for email-only Cold drip (WF-Cold-Drip-Monthly/WF-Cold-Drip-Quarterly skip SMS steps)
+17. Add tag: `Cold: Email Only` — flags contact for email-only drip (WF-Cold-Drip-Monthly/WF-Long-Term-Quarterly skip SMS steps)
 18. Send internal notification to Lead Manager: "{{first_name}} — Cold Email lead moved to Cold after 30 days with no phone number received. One-time SMS blast sent to all skip-traced numbers."
 
 **If any skip-traced number responds to the one-time SMS:**
@@ -329,7 +328,7 @@ Build each workflow in **Automation > Workflows**.
 **Actions:**
 
 1. **If contact is tagged `Re-Submitted` (re-entry from new external campaign):**
-   - Remove from all active workflows: WF-Cold-Email-Subflow, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Cold-Drip-Quarterly, WF-Nurture-Monthly, WF-Nurture-Quarterly, WF-Dispo-Re-Engage
+   - Remove from all active workflows: WF-Cold-Email-Subflow, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage
    - Clear field: `Pause WFs Until` (if set from a prior cycle)
    - Remove tag: `Re-Submitted` (cleanup — it has served its purpose as a trigger)
 2. **Branch on source tag — assign to LM or AM:**
@@ -397,7 +396,7 @@ Build each workflow in **Automation > Workflows**.
 14. Wait: until next day, 9:00 AM contact local time
 15. **[Conditional]** Create Task: "Call {{first_name}} — Day 3" — Assigned to: **LM or AM** — Due: Today
 16. Wait: 1 day
-17. **[Conditional]** Send SMS: NL-SMS-02
+17. **[Conditional]** Send SMS: NL-SMS-10
 18. Wait: 1 day
 19. **[Conditional]** Send Email: NL-EMAIL-05
 20. Wait: 1 day
@@ -470,7 +469,7 @@ Build each workflow in **Automation > Workflows**.
 
 **Actions:**
 
-1. **Defensive cleanup:** Remove from WF-Nurture-Monthly, WF-Nurture-Quarterly (prevents dual drip if contact moved from Nurture → Cold)
+1. **Defensive cleanup:** Remove from WF-Nurture-Monthly, WF-Long-Term-Quarterly (prevents dual drip if contact moved from Nurture → Cold)
 2. Wait: 30 days
 3. **If NOT tagged `Cold: Email Only`:** Send SMS: COLD-SMS-01
 4. Wait: 14 days
@@ -483,7 +482,7 @@ Build each workflow in **Automation > Workflows**.
 11. **If NOT tagged `Cold: Email Only`:** Send SMS: COLD-SMS-03
 12. Wait: 14 days
 13. Send Email: COLD-EMAIL-03
-14. Enroll in WF-Cold-Drip-Quarterly (Cold Drip — Quarterly)
+14. Enroll in WF-Long-Term-Quarterly (Long-Term Quarterly Drip)
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
@@ -491,31 +490,45 @@ Build each workflow in **Automation > Workflows**.
 
 ---
 
-### WF-Cold-Drip-Quarterly | Cold Drip — Quarterly (Month 4+)
+### WF-Long-Term-Quarterly | Long-Term Quarterly Drip (Month 4–28)
 
-**Trigger:** Enrolled from WF-Cold-Drip-Monthly (end of monthly phase) OR enrolled directly (to skip monthly phase)
-**Applies to:** Same as WF-Cold-Drip-Monthly — Cold stage leads and Dispo Re-Engage leads
+**Trigger:** Enrolled from WF-Cold-Drip-Monthly or WF-Nurture-Monthly (end of monthly phase) OR enrolled directly
+**Applies to:** Cold, Nurture, and Dispo Re-Engage leads — all share this quarterly drip
 **Enrollment condition:** Lead NOT tagged DNC
 
 **Note — `Cold: Email Only` contacts:** Skip all SMS steps — send email steps only.
 
-**Actions — 4 unique quarters, then loops indefinitely:**
+**Actions — Q1–Q4 plays twice (24 months), then stops:**
 
+**Year 1:**
 1. Wait: 90 days
-2. **If NOT tagged `Cold: Email Only`:** Send SMS: COLDQ-SMS-01
-3. Send Email: COLDQ-EMAIL-01
+2. **If NOT tagged `Cold: Email Only`:** Send SMS: LTQ-SMS-01
+3. Send Email: LTQ-EMAIL-01
 4. Wait: 90 days
-5. **If NOT tagged `Cold: Email Only`:** Send SMS: COLDQ-SMS-02
-6. Send Email: COLDQ-EMAIL-02
+5. **If NOT tagged `Cold: Email Only`:** Send SMS: LTQ-SMS-02
+6. Send Email: LTQ-EMAIL-02
 7. Wait: 90 days
-8. **If NOT tagged `Cold: Email Only`:** Send SMS: COLDQ-SMS-03
-9. Send Email: COLDQ-EMAIL-03
+8. **If NOT tagged `Cold: Email Only`:** Send SMS: LTQ-SMS-03
+9. Send Email: LTQ-EMAIL-03
 10. Wait: 90 days
-11. **If NOT tagged `Cold: Email Only`:** Send SMS: COLDQ-SMS-04
-12. Send Email: COLDQ-EMAIL-04
-13. Enroll in WF-Cold-Drip-Quarterly (re-starts quarterly loop from step 1)
+11. **If NOT tagged `Cold: Email Only`:** Send SMS: LTQ-SMS-04
+12. Send Email: LTQ-EMAIL-04
 
-**Note:** Uses native GHL "Add to Workflow" action to re-enroll the contact, creating an indefinite loop. If GHL blocks same-workflow re-enrollment, create WF-Cold-Drip-QuarterlyA (identical steps) and alternate: WF-Cold-Drip-Quarterly ends by enrolling in WF-Cold-Drip-QuarterlyA, WF-Cold-Drip-QuarterlyA ends by enrolling back in WF-Cold-Drip-Quarterly.
+**Year 2 (same templates, second pass):**
+13. Wait: 90 days
+14. **If NOT tagged `Cold: Email Only`:** Send SMS: LTQ-SMS-01
+15. Send Email: LTQ-EMAIL-01
+16. Wait: 90 days
+17. **If NOT tagged `Cold: Email Only`:** Send SMS: LTQ-SMS-02
+18. Send Email: LTQ-EMAIL-02
+19. Wait: 90 days
+20. **If NOT tagged `Cold: Email Only`:** Send SMS: LTQ-SMS-03
+21. Send Email: LTQ-EMAIL-03
+22. Wait: 90 days
+23. **If NOT tagged `Cold: Email Only`:** Send SMS: LTQ-SMS-04
+24. Send Email: LTQ-EMAIL-04
+
+Workflow ends. No re-enrollment. Lead stays in their current stage. WF-Response-Handler still catches any future inbound reply.
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
@@ -530,43 +543,14 @@ Build each workflow in **Automation > Workflows**.
 
 **Actions:**
 
-1. **Defensive cleanup:** Remove from WF-Cold-Drip-Monthly, WF-Cold-Drip-Quarterly (prevents dual drip if contact moved from Cold → Nurture)
+1. **Defensive cleanup:** Remove from WF-Cold-Drip-Monthly, WF-Long-Term-Quarterly (prevents dual drip if contact moved from Cold → Nurture)
 2. Wait: 30 days
 3. Send SMS: NUR-SMS-01
 4. Wait: 30 days
 5. Send Email: NUR-EMAIL-01
 6. Wait: 30 days
 7. Send SMS: NUR-SMS-02
-8. Enroll in WF-Nurture-Quarterly (Nurture — Quarterly)
-
-**Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
-
-**Exit conditions:** Contact stage changes (moved to any other pipeline stage).
-
----
-
-### WF-Nurture-Quarterly | Nurture — Quarterly (Month 4+)
-
-**Trigger:** Enrolled from WF-Nurture-Monthly (end of monthly phase) OR enrolled directly (to skip monthly phase)
-**Enrollment condition:** Lead NOT tagged DNC
-
-**Actions — 4 unique quarters, then loops indefinitely:**
-
-1. Wait: 90 days
-2. Send SMS: NURQ-SMS-01
-3. Send Email: NURQ-EMAIL-01
-4. Wait: 90 days
-5. Send SMS: NURQ-SMS-02
-6. Send Email: NURQ-EMAIL-02
-7. Wait: 90 days
-8. Send SMS: NURQ-SMS-03
-9. Send Email: NURQ-EMAIL-03
-10. Wait: 90 days
-11. Send SMS: NURQ-SMS-04
-12. Send Email: NURQ-EMAIL-04
-13. Enroll in WF-Nurture-Quarterly (re-starts quarterly loop from step 1)
-
-**Note:** Uses native GHL "Add to Workflow" action to re-enroll the contact, creating an indefinite loop. If GHL blocks same-workflow re-enrollment, create WF-Nurture-QuarterlyA (identical steps) and alternate: WF-Nurture-Quarterly ends by enrolling in WF-Nurture-QuarterlyA, WF-Nurture-QuarterlyA ends by enrolling back in WF-Nurture-Quarterly.
+8. Enroll in WF-Long-Term-Quarterly (Long-Term Quarterly Drip)
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
@@ -579,11 +563,11 @@ Build each workflow in **Automation > Workflows**.
 **Trigger:** Contact moved to any Dispo Re-Engage stage: No Motivation, Wants Retail, On MLS, or Lead Declined
 **Actions:**
 
-1. **Defensive cleanup:** Remove from WF-Nurture-Monthly, WF-Nurture-Quarterly (prevents dual drip if contact moved from Nurture → Dispo Re-Engage)
+1. **Defensive cleanup:** Remove from WF-Nurture-Monthly, WF-Long-Term-Quarterly (prevents dual drip if contact moved from Nurture → Dispo Re-Engage)
 2. Update custom field: Stage Entry Date = Today
 3. Enroll in WF-Cold-Drip-Monthly (Cold Drip — Monthly)
 
-That's it. All re-engage dispo leads flow into the same Long-Term Drip as Cold stage leads (WF-Cold-Drip-Monthly monthly, then WF-Cold-Drip-Quarterly quarterly).
+That's it. All re-engage dispo leads flow into the same Long-Term Drip as Cold stage leads (WF-Cold-Drip-Monthly monthly, then WF-Long-Term-Quarterly).
 
 ---
 
@@ -593,7 +577,7 @@ That's it. All re-engage dispo leads flow into the same Long-Term Drip as Cold s
 **Actions:**
 
 1. Move to pipeline stage: Dispo: DNC (ensures correct stage regardless of trigger source)
-2. Remove from ALL active workflow enrollments (use "Remove from Workflow" action for each active WF: WF-Cold-Email-Subflow, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Cold-Drip-Quarterly, WF-Nurture-Monthly, WF-Nurture-Quarterly, WF-Dispo-Re-Engage)
+2. Remove from ALL active workflow enrollments (use "Remove from Workflow" action for each active WF: WF-Cold-Email-Subflow, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage)
 3. Add tag: DNC
 4. Update custom field: DNC Date = Today
 5. Cancel all pending tasks for this contact
@@ -614,7 +598,7 @@ That's it. All re-engage dispo leads flow into the same Long-Term Drip as Cold s
 - Lead NOT tagged DNC
 - `Pause WFs Until` field is empty OR `Pause WFs Until` < today (prevents re-trigger during an active review window, but allows re-trigger after a prior pause has expired)
 
-**Pause mechanic:** Every drip/automated-send workflow (WF-Cold-Email-Subflow, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Cold-Drip-Quarterly, WF-Nurture-Monthly, WF-Nurture-Quarterly) has a "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
+**Pause mechanic:** Every drip/automated-send workflow (WF-Cold-Email-Subflow, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly) has a "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` < today" condition before each send step.
 
 **Actions:**
 
@@ -711,7 +695,7 @@ Before going live, verify:
 - All pipeline stages created and in correct order
 - All custom fields created
 - All tags created
-- All 12 workflows built and tested (WF-Cold-Email-Subflow, WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Cold-Drip-Quarterly, WF-Nurture-Monthly, WF-Nurture-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback)
+- All 11 workflows built and tested (WF-Cold-Email-Subflow, WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback)
 - Smart lists created
 - Team members trained on GHL task queue and stage movement (LM and AM)
 - automation routing confirmed: all campaign types → New Leads
