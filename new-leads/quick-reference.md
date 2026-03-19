@@ -1,6 +1,6 @@
 # Quick Reference — New Leads Outreach
 
-*Last edited: 2026-03-19 · Last reviewed: —*
+*Last edited: 2026-03-20 · Last reviewed: —*
 
 Every outreach touch across the New Leads pipeline — stage by stage, with template IDs and message counts.
 Templates follow `PREFIX-CHANNEL-##` format. Owner = LM (Cold Email/SMS/Call) or AM (Direct Mail/VAPI/Referral/Website).
@@ -8,10 +8,16 @@ Templates follow `PREFIX-CHANNEL-##` format. Owner = LM (Cold Email/SMS/Call) or
 ```
 [ALL SOURCES: Cold Email / Cold SMS / Cold Call / Direct Mail / VAPI / Referral / Website / Re-Submission]
   └─► NEW LEADS — Day 0: Speed to Lead (immediate on entry)
-        │   120s wait ──► SMS (NL-SMS-00)
+        │   SMS varies by source (120s wait):
+        │     Cold Email / Cold SMS / Cold Call ──► NL-SMS-00
+        │     Website / VAPI / Referral ───────────► IN-SMS-00
+        │     Direct Mail ─────────────────────────► DM-SMS-00
         │   After SMS ──► Call (manual)
-        │   ~1hr later ──► SMS if no call logged (NL-SMS-00A)
-        │   Totals: 2 SMS, 1 Call 
+        │   ~1hr later ──► Missed-call SMS if no call logged:
+        │     Cold Email / Cold SMS / Cold Call ──► NL-SMS-00A
+        │     Website / VAPI / Referral ───────────► IN-SMS-00A
+        │     Direct Mail ─────────────────────────► DM-SMS-00A
+        │   Totals: 2 SMS, 1 Call (per lead — template varies by source)
         │
         └─► DAY 1-10 — Active Daily Pursuit (10 calendar days)
               │
@@ -127,9 +133,9 @@ Missed inbound call ──► 2 min wait ──► SMS (MC-SMS-01)
 
 ═══════════════════════════════════════════════════════════════════
 
-TEMPLATE TOTALS (54 unique templates)
+TEMPLATE TOTALS (58 unique templates)
 
-  SMS ········ 27   NL-SMS (11) · COLD-SMS (3) · COLDQ-SMS (4) · NUR-SMS (2) · NURQ-SMS (4)
+  SMS ········ 31   NL-SMS (11) · IN-SMS (2) · DM-SMS (2) · COLD-SMS (3) · COLDQ-SMS (4) · NUR-SMS (2) · NURQ-SMS (4)
                     WR-COLD-SMS (1) · NL-VMSMS (1) · MC-SMS (1)
   Email ······ 22   NL-EMAIL (5) · COLD-EMAIL (3) · COLDQ-EMAIL (4) · NUR-EMAIL (1) · NURQ-EMAIL (4)
                     WR-EMAIL (5)

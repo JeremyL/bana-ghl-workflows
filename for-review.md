@@ -1,5 +1,5 @@
 #  file.Bana Land — For Review
-*Last edited: 2026-03-19 · Last reviewed: 2026-03-19*
+*Last edited: 2026-03-20 · Last reviewed: 2026-03-20*
 
 Catch-all for items that need attention before or after go-live: pre-launch verifications, cross-file consistency checks, improvement ideas, and open decisions.
 
@@ -90,79 +90,20 @@ No open notes.
 - **Prospect Data DNC handling** — "DNC applies to the entire property record, not individual owners" consistent between PD data-model.md (DNC checkbox on Property) and PD rules.md §3
 - **DNC protocol** — bi-directional (New Leads ↔ Prospect Data). WF-DNC-Handler syncs to PD. Same trigger keywords (STOP/QUIT/UNSUBSCRIBE/CANCEL/END). No stale WR references.
 - **LM/AM dual-owner model** — consistent across all files: both can dispo, LM sets appointment for AM at qualification, AM owns all qualified stages regardless of source.
-- **Quick reference template-to-workflow mapping** — all 54 template IDs in messaging.md quick reference match their workflow assignments in ghl-setup.md.
+- **Quick reference template-to-workflow mapping** — all 58 template IDs in messaging.md quick reference match their workflow assignments in ghl-setup.md.
 - **WF-Dispo-Re-Engage Dispo Re-Engage stage list** — "No Motivation, Wants Retail, On MLS, Lead Declined" consistent across ghl-setup.md (WF-Dispo-Re-Engage), sequences.md, messaging.md Cold drip header, and pipeline.md Dispo Re-Engage definitions.
 - **Nurture Phase 1/2 timing accuracy** — Phase 1 "Months 1–3" has 30-day initial wait + 3 monthly sends, Phase 2 starts with 90-day wait. Consistent across sequences.md, messaging.md, and ghl-setup.md (WF-Nurture-Monthly + WF-Nurture-Quarterly). Both Cold and Nurture use same transition pattern: last monthly touch → enroll quarterly → 90-day wait → first quarterly touch.
 - **Age and Deceased fields** — present in both accounts. Age is Number type, Deceased is Text type. Consistent values for Deceased (Y / N / blank).
 - **Stage consolidation (Day 1-10 / Day 11-30)** — stage names, definitions, and cadence descriptions consistent across all 5 New Leads files (pipeline.md, sequences.md, messaging.md, ghl-setup.md, rules.md) + ROLE.md + MEMORY.md. Zero references to old stage names (Day 1-2, Day 3-14, Day 15-30) in active files.
 - **WF-04 elimination** — zero active-file references except Decision Log entry #12. Archive files retain old references (expected).
 - **Workflow count** — 12 workflows confirmed across ghl-setup.md, MEMORY.md, and README.md (was 10 before monthly+quarterly split → 12 → 11 after WF-07 removal → 12 after WF-Missed-Call-Textback addition).
-- **Template-to-workflow mapping post-consolidation** — all 54 template IDs in messaging.md quick reference re-verified against WF-Day-1-10 (Day 1-10) and WF-Day-11-30 (Day 11-30) assignments in ghl-setup.md. All match.
+- **Template-to-workflow mapping post-consolidation** — all 58 template IDs in messaging.md quick reference re-verified against WF-Day-1-10 (Day 1-10) and WF-Day-11-30 (Day 11-30) assignments in ghl-setup.md. All match.
 - **Day 11-30 cadence uniformity** — "Every 2–3 days (11 touches)" consistently described in pipeline.md, sequences.md, and ghl-setup.md WF-Day-11-30. Wait-step spacing, no day-of-week restriction.
 - **Voicemail strategy** — 6 new template IDs (NL-VM-01, NL-VM-02, NL-VMSMS-01, NL-RVM-01/02/03) consistent across messaging.md quick reference, sequences.md Day 11-30 table, ghl-setup.md WF-Day-11-30 steps, and rules.md §12. Voicemail scripts comply with voice guidelines (short, casual, identifies Bana Land). RVM drops respect 9am–7pm send window and WF-Cold-Email-Subflow conditional logic.
 
 ---
 
-## Improvements — High Priority (Before Go-Live)
-
----
-
-### 1. Speed to Lead — RESOLVED
-
-**Resolution:** Speed-to-lead targets (5 min / 30 min) documented in rules.md §11, sequences.md, and ghl-setup.md WF-New-Lead-Entry. WF-New-Lead-Entry fires push notification + internal SMS alert to owner — no task creation (notifications are the urgency mechanism, not tasks).
-
----
-
-### 2. GHL Looping Limitation — RESOLVED
-
-**Gap:** WF-Cold-Drip-Quarterly (Cold Quarterly) and WF-Nurture-Quarterly (Nurture Quarterly) require looping behavior. GHL does not support native "go to step" loops.
-
-**Resolution (2026-03-18):** Both workflows now re-enroll in themselves at the last step via native GHL "Add to Workflow" action. WF-07 (Qualified Check-In) was removed — qualified stages are human-led by AM with no automated workflow.
-
-**Fallback (if GHL blocks same-workflow re-enrollment):** Create twin workflows (e.g. WF-Cold-Drip-QuarterlyA) and alternate enrollment between them.
-
-**Applies to:** WF-Cold-Drip-Quarterly (last step), WF-Nurture-Quarterly (last step)
-
----
-
-### 3. WF-Response-Handler Enrollment Filter & Edge Cases — RESOLVED
-
-**Resolution (2026-03-18):**
-
-1. **Stage filter added** to WF-Response-Handler trigger — only fires for Day 1-10, Day 11-30, Cold, Nurture, and Dispo Re-Engage stages. Terminal stages (DNC, Purchased, etc.) and qualified stages excluded.
-2. **Re-trigger guard** uses `Pause WFs Until` field — if field is set, WF-Response-Handler won't fire again. `Re-Engaged` tag eliminated entirely (redundant with `Pause WFs Until` field).
-3. **Soft opt-out guidance** added to rules.md §6A and ghl-setup.md WF-Response-Handler — owner reviews case-by-case, decides DNC or appropriate Dispo.
-
----
-
-### 11. Source-Specific Day 0 First Touch
-
-**Gap:** WF-New-Lead-Entry sends the same NL-SMS-00 ("had a quick question about your property") for all 7 sources. Inbound leads (Website, VAPI, Referral) expect acknowledgment of their inquiry, not cold outreach language. Direct Mail leads received a physical letter with a dollar amount — referencing that letter creates instant recognition and continuity.
-
-**Why it matters:** Inbound leads are the rarest and highest-intent in land wholesaling — these people came to us. Direct Mail is the highest-cost outbound channel. First impression on both deserves a tailored touch, not a generic cold opener. A website inquiry that gets "had a quick question about your property" instead of "thanks for reaching out" feels like cold outreach, not a response to their action.
-
-**Recommended approach:**
-
-1. Add a source branch to WF-New-Lead-Entry Day 0 step (after source tag is applied, before SMS fires)
-2. Create 2 new template pairs:
-   - **IN-SMS-00 / IN-SMS-00A** — Inbound acknowledgment (Website, VAPI, Referral): "Hey {{first_name}}, just saw your info come through about your property in {{opportunity.property_county}} — I'd love to chat about it. Mind if I give you a call?"
-   - **DM-SMS-00 / DM-SMS-00A** — Direct Mail reference: "Hey {{first_name}}, it's {{agent_name}} with Bana Land — following up on the letter we sent about your property in {{opportunity.property_county}}. Would it be worth a quick call?"
-3. Cold Email, Cold SMS, Cold Call sources continue using NL-SMS-00 / NL-SMS-00A (cold outreach opener is appropriate for these)
-4. Rest of Day 1-30 sequence stays identical across all sources — only the Day 0 first impression changes
-
-**4 new templates, 1 workflow branch.**
-
-- **Files affected:** messaging.md (add IN-SMS-00, IN-SMS-00A, DM-SMS-00, DM-SMS-00A), ghl-setup.md (WF-New-Lead-Entry source branch), sequences.md (note Day 0 variants)
-
----
-
 ## Improvements — Medium Priority (Implement Early)
-
----
-
-### 4. Missed Call Text-Back (WF-Missed-Call-Textback) — RESOLVED
-
-**Resolution:** WF-Missed-Call-Textback added to ghl-setup.md and MC-SMS-01 template added to messaging.md. Trigger: missed inbound call from known contact (not DNC). 2-minute delay before SMS fires. Internal notification to assigned owner. No task — reply shows in conversation + triggers notification. Workflow count updated to 12 across all files.
 
 ---
 
@@ -183,40 +124,6 @@ No open notes.
 5. New Leads templates can stay generic — owner is actively personalizing via calls
 
 - **Files affected:** ghl-setup.md (add merge field reference table), messaging.md (update Cold, Nurture, and Quarterly templates with verified merge field syntax)
-
----
-
-### 6. Message Variety in Quarterly Drips — RESOLVED
-
-**Resolution:** 4 unique quarterly templates per channel now exist for both Cold and Nurture drips:
-
-- **Cold Quarterly:** COLDQ-SMS-01 through -04, COLDQ-EMAIL-01 through -04 (8 templates)
-- **Nurture Quarterly:** NURQ-SMS-01 through -04, NURQ-EMAIL-01 through -04 (8 templates)
-
-Each lead sees a different message every 90 days for a full year before any repeat. WF-Cold-Drip-Quarterly and WF-Nurture-Quarterly rotate through all 4 quarters then loop. Consistent across messaging.md, sequences.md, and ghl-setup.md.
-
----
-
-### 7. Voicemail Strategy — RESOLVED
-
-**Resolution:** Full voicemail strategy implemented:
-- Voicemail scripts added: NL-VM-01 (Day 1-10), NL-VM-02 (Day 11-30)
-- Voicemail + SMS combo: NL-VMSMS-01 — manual send after leaving a voicemail
-- 3 automated RVM drops added to Day 11-30 sequence: NL-RVM-01 (~Day 14), NL-RVM-02 (~Day 20), NL-RVM-03 (~Day 27)
-- Voicemail protocol added to rules.md §12
-- Template count: 37 → 43
-
----
-
-### 12. Deceased Owner Protocol — RESOLVED
-
-**Resolution:** No special handling needed. These are known deceased owners — by the time a lead enters the system, we've already had a conversation with someone (heir, family member, etc.). The Deceased field is tracked for data completeness but does not trigger any workflow branch, special messaging, or sensitivity protocol. Standard outreach applies to all leads regardless of Deceased status.
-
----
-
-### 13. Multi-Owner Coordination Protocol — RESOLVED
-
-**Resolution:** Not a GHL concern. Multi-owner coordination is handled outside the system. The marketing is the marketing — we're either storing data or contacting people we've already had conversations with. All owners get standard outreach. No workflow suppression, no co-owner hold tags, no special routing needed.
 
 ---
 
@@ -386,12 +293,6 @@ Each lead sees a different message every 90 days for a full year before any repe
 
 ---
 
-### 20. Post-Close & Referral System — RESOLVED
-
-**Resolution:** Not implementing. Post-close and referral outreach is not a priority for this system. The lifecycle ends at closing.
-
----
-
 ### 21. Reporting / KPI Framework
 
 **Gap:** Zero documented KPIs, dashboards, or reporting cadence anywhere in the project. The go-live checklist mentions a monitoring dashboard but doesn't define what to monitor or what success looks like.
@@ -448,7 +349,7 @@ Each lead sees a different message every 90 days for a full year before any repe
 
 ### 24. Seasonal Messaging Angles
 
-**Gap:** All 54 templates are generic year-round. Land has genuine seasonal patterns — spring buyer demand, tax season selling motivation, year-end "clean slate" decisions.
+**Gap:** All 58 templates are generic year-round. Land has genuine seasonal patterns — spring buyer demand, tax season selling motivation, year-end "clean slate" decisions.
 
 **Why it matters:** Seasonal angles create natural urgency that generic messages lack. "Buyers are most active right now" in spring feels timely. "Checking in about your property" in January feels identical to the same message in July.
 
@@ -535,7 +436,7 @@ Each lead sees a different message every 90 days for a full year before any repe
 | 13  | Monthly/Quarterly Split | WF-Cold-Drip-Monthly → WF-Cold-Drip-Monthly + WF-Cold-Drip-Quarterly. WF-Nurture-Monthly → WF-Nurture-Monthly + WF-Nurture-Quarterly. Quarterly self-loops. 10 → 12 workflows. | 2026-03-18 |
 | 14  | WF-07 Removed          | Qualified stages (Due Diligence → Under Contract) are human-led by AM. No automated workflow — smart lists are the safety net. 12 → 11 workflows. | 2026-03-18 |
 | 15  | Re-Engaged Tag Removed | `Re-Engaged` tag eliminated. `Pause WFs Until` date field handles pausing + duplicate-trigger prevention. WF-Response-Handler stage filter + soft opt-out guidance added. | 2026-03-18 |
-| 16  | Source-Specific Day 0  | Pending                                                         | —          |
+| 16  | Source-Specific Day 0  | 3-way source branch in WF-New-Lead-Entry Day 0: NL-SMS-00/00A (cold outbound), IN-SMS-00/00A (inbound), DM-SMS-00/00A (direct mail). 4 new templates, 54 → 58 total. | 2026-03-20 |
 | 17  | Deceased Owner Protocol | No special handling. Known deceased owners — already talking to someone. Standard outreach applies. | 2026-03-18 |
 | 18  | Multi-Owner Coordination | Not a GHL concern. Handled outside the system. Standard outreach for all owners. | 2026-03-18 |
 | 19  | Email Bounce Handling  | Pending                                                         | —          |
