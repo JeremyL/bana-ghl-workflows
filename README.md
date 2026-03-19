@@ -40,9 +40,9 @@ Single working account for all lead sources. Handles all leads from entry throug
 | [quick-reference.md](new-leads/quick-reference.md) | Copywriter-friendly quick reference: every outreach touch by stage with template IDs and counts |
 | [pipeline.md](new-leads/pipeline.md)   | Stage definitions: New Leads → Cold, all Dispo stages, Qualified stages, Nurture |
 | [sequences.md](new-leads/sequences.md) | Cadence map: Day 1–30 + Cold Email sub-flow + Cold drip + Nurture + Qualified    |
-| [messaging.md](new-leads/messaging.md) | Message templates: NL-* + WR-EMAIL-* + COLD-* + COLDQ-* + NUR-* + NURQ-*        |
+| [messaging.md](new-leads/messaging.md) | Message templates: NL-* + WR-EMAIL-* + COLD-* + NUR-* + LTQ-*                   |
 | [rules.md](new-leads/rules.md)         | Contact rules and compliance: hours, DNC, stage movement, response protocol, data hygiene |
-| [ghl-setup.md](new-leads/ghl-setup.md) | GHL build guide: 12 workflows (WF-Cold-Email-Subflow, WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Cold-Drip-Quarterly, WF-Nurture-Monthly, WF-Nurture-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback) |
+| [ghl-setup.md](new-leads/ghl-setup.md) | GHL build guide: 11 workflows (WF-Cold-Email-Subflow, WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback) |
 
 
 ### Account: Prospect Data (`prospect-data/`)

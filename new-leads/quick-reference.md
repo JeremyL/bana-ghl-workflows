@@ -27,7 +27,7 @@ Templates follow `PREFIX-CHANNEL-##` format. Owner = LM (Cold Email/SMS/Call) or
               │
               │   Days 3-10 (1x per day, rotating):
               │     Day 3:  Call
-              │     Day 4:  SMS (NL-SMS-02)
+              │     Day 4:  SMS (NL-SMS-10)
               │     Day 5:  Email (NL-EMAIL-05)
               │     Day 6:  Call
               │     Day 7:  Email (NL-EMAIL-02)
@@ -76,9 +76,9 @@ Cold Email (no confirmed phone #) enters New Leads → all standard SMS/call/ema
               └─► Tag: Cold: Email Only → Cold (email-only drip)
   Totals: 5 Emails, 1 SMS
 
---- COLD — LONG-TERM DRIP ---
+--- COLD MONTHLY (Months 1-3 — fully automated) ---
 
-COLD MONTHLY (Months 1-3 — SMS + Email alternating every ~14 days, fully automated)
+COLD MONTHLY (SMS + Email alternating every ~14 days)
   │     Day 30:  SMS (COLD-SMS-01)
   │     Day 44:  Email (COLD-EMAIL-01)
   │     Day 58:  SMS (COLD-SMS-02)
@@ -89,43 +89,41 @@ COLD MONTHLY (Months 1-3 — SMS + Email alternating every ~14 days, fully autom
   │   Cold: Email Only contacts skip all SMS steps
   │   Totals: 3 SMS, 3 Emails
   │
-  └─► COLD QUARTERLY (Month 4+ — SMS + Email same day, every 90 days, loops indefinitely)
-        │     Q1: SMS (COLDQ-SMS-01) + Email (COLDQ-EMAIL-01)
-        │     Q2: SMS (COLDQ-SMS-02) + Email (COLDQ-EMAIL-02)
-        │     Q3: SMS (COLDQ-SMS-03) + Email (COLDQ-EMAIL-03)
-        │     Q4: SMS (COLDQ-SMS-04) + Email (COLDQ-EMAIL-04)
-        │     ↻ loops Q1-Q4 indefinitely
-        │
-        │   Cold: Email Only contacts skip all SMS steps
-        │   Totals: 4 SMS, 4 Emails per year-cycle
-        │
-        └─► Re-engages (replies to drip) ───────────────────────────► Owner reviews (7-day window)
-        └─► DNC request ────────────────────────────────────────────► Dispo: DNC (zero contact)
+  └─► After Month 3 ──────────────────────────────────────────────► Long-Term Quarterly
 
---- NURTURE (qualified leads that stalled — fully automated) ---
+--- NURTURE MONTHLY (Months 1-3 — fully automated) ---
 
-NURTURE MONTHLY (Months 1-3 — alternating SMS + Email)
+NURTURE MONTHLY (alternating SMS + Email)
   │     Month 1: SMS (NUR-SMS-01)
   │     Month 2: Email (NUR-EMAIL-01)
   │     Month 3: SMS (NUR-SMS-02)
   │   Totals: 2 SMS, 1 Email
   │
-  └─► NURTURE QUARTERLY (Month 4+ — SMS + Email same day, every 90 days, loops indefinitely)
-        │     Q1: SMS (NURQ-SMS-01) + Email (NURQ-EMAIL-01)
-        │     Q2: SMS (NURQ-SMS-02) + Email (NURQ-EMAIL-02)
-        │     Q3: SMS (NURQ-SMS-03) + Email (NURQ-EMAIL-03)
-        │     Q4: SMS (NURQ-SMS-04) + Email (NURQ-EMAIL-04)
-        │     ↻ loops Q1-Q4 indefinitely
-        │   Totals: 4 SMS, 4 Emails per year-cycle
-        │
-        └─► Re-engages (replies to drip) ───────────────────────────► AM reviews (7-day window)
+  └─► After Month 3 ──────────────────────────────────────────────► Long-Term Quarterly
+
+--- LONG-TERM QUARTERLY (Month 4-28 — shared, fully automated) ---
+
+Fed by: Cold Monthly, Nurture Monthly, and Dispo Re-Engage
+SMS + Email same day, every 90 days — Q1-Q4 plays twice (24 months), then stops
+
+  │     Q1: SMS (LTQ-SMS-01) + Email (LTQ-EMAIL-01)
+  │     Q2: SMS (LTQ-SMS-02) + Email (LTQ-EMAIL-02)
+  │     Q3: SMS (LTQ-SMS-03) + Email (LTQ-EMAIL-03)
+  │     Q4: SMS (LTQ-SMS-04) + Email (LTQ-EMAIL-04)
+  │     ↻ plays Q1-Q4 twice (24 months), then stops
+  │
+  │   Cold: Email Only contacts skip all SMS steps
+  │   Totals: 4 SMS, 4 Emails (x2 = 8 SMS, 8 Emails over 24 months)
+  │
+  └─► Re-engages (replies to drip) ───────────────────────────────► Owner reviews (7-day window)
+  └─► DNC request ─────────────────────────────────────────────────► Dispo: DNC (zero contact)
 
 --- DISPO RE-ENGAGE ---
 
-Dispo: No Motivation ──────────────────────────────────────────────► Cold Monthly → Cold Quarterly (same drip)
-Dispo: Wants Retail ───────────────────────────────────────────────► Cold Monthly → Cold Quarterly (same drip)
-Dispo: On MLS ─────────────────────────────────────────────────────► Cold Monthly → Cold Quarterly (same drip)
-Dispo: Lead Declined ──────────────────────────────────────────────► Cold Monthly → Cold Quarterly (same drip)
+Dispo: No Motivation ──────────────────────────────────────────────► Cold Monthly → Long-Term Quarterly (same drip)
+Dispo: Wants Retail ───────────────────────────────────────────────► Cold Monthly → Long-Term Quarterly (same drip)
+Dispo: On MLS ─────────────────────────────────────────────────────► Cold Monthly → Long-Term Quarterly (same drip)
+Dispo: Lead Declined ──────────────────────────────────────────────► Cold Monthly → Long-Term Quarterly (same drip)
 
 --- MISSED CALL TEXT-BACK (any stage) ---
 
@@ -133,11 +131,11 @@ Missed inbound call ──► 2 min wait ──► SMS (MC-SMS-01)
 
 ═══════════════════════════════════════════════════════════════════
 
-TEMPLATE TOTALS (58 unique templates)
+TEMPLATE TOTALS (50 unique templates)
 
-  SMS ········ 31   NL-SMS (9) · CO-SMS (2) · IN-SMS (2) · DM-SMS (2) · COLD-SMS (3) · COLDQ-SMS (4) · NUR-SMS (2) · NURQ-SMS (4)
+  SMS ········ 27   NL-SMS (9) · CO-SMS (2) · IN-SMS (2) · DM-SMS (2) · COLD-SMS (3) · LTQ-SMS (4) · NUR-SMS (2)
                     WR-COLD-SMS (1) · NL-VMSMS (1) · MC-SMS (1)
-  Email ······ 22   NL-EMAIL (5) · COLD-EMAIL (3) · COLDQ-EMAIL (4) · NUR-EMAIL (1) · NURQ-EMAIL (4)
+  Email ······ 18   NL-EMAIL (5) · COLD-EMAIL (3) · LTQ-EMAIL (4) · NUR-EMAIL (1)
                     WR-EMAIL (5)
   RVM ········  3   NL-RVM-01, 02, 03
   VM Script ··  2   NL-VM-01, NL-VM-02

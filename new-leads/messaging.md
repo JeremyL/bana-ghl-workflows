@@ -42,9 +42,8 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 | NL-RVM | Ringless Voicemail Drops (automated)        |
 | WR     | Cold Email Sub-Flow (get phone #)           |
 | COLD   | Cold Monthly Drip (Months 1–3)              |
-| COLDQ  | Cold Quarterly Drip (Month 4+)              |
 | NUR    | Nurture Monthly (Months 1–3)                |
-| NURQ   | Nurture Quarterly (Month 4+)                |
+| LTQ    | Long-Term Quarterly Drip (Month 4–28)       |
 | IN     | Inbound Day 0 (Website, VAPI AI Call, Referral) |
 | DM     | Direct Mail Day 0                           |
 | MC     | Missed Call Text-Back                       |
@@ -66,7 +65,8 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 | NL-SMS-01      | SMS     | New Leads — Day 1-10        | Day 1, Morning    | WF-Day-1-10    | Auto        |
 | NL-SMS-07      | SMS     | New Leads — Day 1-10        | Day 1, Afternoon  | WF-Day-1-10    | Auto        |
 | NL-EMAIL-01    | Email   | New Leads — Day 1-10        | Day 2, Morning    | WF-Day-1-10    | Auto        |
-| NL-SMS-02      | SMS     | New Leads — Day 1-10        | Day 2, Day 4      | WF-Day-1-10    | Auto        |
+| NL-SMS-02      | SMS     | New Leads — Day 1-10        | Day 2             | WF-Day-1-10    | Auto        |
+| NL-SMS-10      | SMS     | New Leads — Day 1-10        | Day 4             | WF-Day-1-10    | Auto        |
 | NL-EMAIL-05    | Email   | New Leads — Day 1-10        | Day 5             | WF-Day-1-10    | Auto        |
 | NL-EMAIL-02    | Email   | New Leads — Day 1-10        | Day 7             | WF-Day-1-10    | Auto        |
 | NL-SMS-03      | SMS     | New Leads — Day 1-10        | Day 8             | WF-Day-1-10    | Auto        |
@@ -83,25 +83,17 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 | COLD-EMAIL-02  | Email   | Cold Monthly                | Day 72             | WF-Cold-Drip-Monthly    | Auto        |
 | COLD-SMS-03    | SMS     | Cold Monthly                | Day 86             | WF-Cold-Drip-Monthly    | Auto        |
 | COLD-EMAIL-03  | Email   | Cold Monthly                | Day 100            | WF-Cold-Drip-Monthly    | Auto        |
-| COLDQ-SMS-01   | SMS     | Cold Quarterly              | Q1                | WF-Cold-Drip-Quarterly   | Auto        |
-| COLDQ-EMAIL-01 | Email   | Cold Quarterly              | Q1                | WF-Cold-Drip-Quarterly   | Auto        |
-| COLDQ-SMS-02   | SMS     | Cold Quarterly              | Q2                | WF-Cold-Drip-Quarterly   | Auto        |
-| COLDQ-EMAIL-02 | Email   | Cold Quarterly              | Q2                | WF-Cold-Drip-Quarterly   | Auto        |
-| COLDQ-SMS-03   | SMS     | Cold Quarterly              | Q3                | WF-Cold-Drip-Quarterly   | Auto        |
-| COLDQ-EMAIL-03 | Email   | Cold Quarterly              | Q3                | WF-Cold-Drip-Quarterly   | Auto        |
-| COLDQ-SMS-04   | SMS     | Cold Quarterly              | Q4                | WF-Cold-Drip-Quarterly   | Auto        |
-| COLDQ-EMAIL-04 | Email   | Cold Quarterly              | Q4                | WF-Cold-Drip-Quarterly   | Auto        |
+| LTQ-SMS-01     | SMS     | Long-Term Quarterly         | Q1                | WF-Long-Term-Quarterly   | Auto        |
+| LTQ-EMAIL-01   | Email   | Long-Term Quarterly         | Q1                | WF-Long-Term-Quarterly   | Auto        |
+| LTQ-SMS-02     | SMS     | Long-Term Quarterly         | Q2                | WF-Long-Term-Quarterly   | Auto        |
+| LTQ-EMAIL-02   | Email   | Long-Term Quarterly         | Q2                | WF-Long-Term-Quarterly   | Auto        |
+| LTQ-SMS-03     | SMS     | Long-Term Quarterly         | Q3                | WF-Long-Term-Quarterly   | Auto        |
+| LTQ-EMAIL-03   | Email   | Long-Term Quarterly         | Q3                | WF-Long-Term-Quarterly   | Auto        |
+| LTQ-SMS-04     | SMS     | Long-Term Quarterly         | Q4                | WF-Long-Term-Quarterly   | Auto        |
+| LTQ-EMAIL-04   | Email   | Long-Term Quarterly         | Q4                | WF-Long-Term-Quarterly   | Auto        |
 | NUR-SMS-01     | SMS     | Nurture Monthly             | Month 1           | WF-Nurture-Monthly    | Auto        |
 | NUR-EMAIL-01   | Email   | Nurture Monthly             | Month 2           | WF-Nurture-Monthly    | Auto        |
 | NUR-SMS-02     | SMS     | Nurture Monthly             | Month 3           | WF-Nurture-Monthly    | Auto        |
-| NURQ-SMS-01    | SMS     | Nurture Quarterly           | Q1                | WF-Nurture-Quarterly   | Auto        |
-| NURQ-EMAIL-01  | Email   | Nurture Quarterly           | Q1                | WF-Nurture-Quarterly   | Auto        |
-| NURQ-SMS-02    | SMS     | Nurture Quarterly           | Q2                | WF-Nurture-Quarterly   | Auto        |
-| NURQ-EMAIL-02  | Email   | Nurture Quarterly           | Q2                | WF-Nurture-Quarterly   | Auto        |
-| NURQ-SMS-03    | SMS     | Nurture Quarterly           | Q3                | WF-Nurture-Quarterly   | Auto        |
-| NURQ-EMAIL-03  | Email   | Nurture Quarterly           | Q3                | WF-Nurture-Quarterly   | Auto        |
-| NURQ-SMS-04    | SMS     | Nurture Quarterly           | Q4                | WF-Nurture-Quarterly   | Auto        |
-| NURQ-EMAIL-04  | Email   | Nurture Quarterly           | Q4                | WF-Nurture-Quarterly   | Auto        |
 | WR-EMAIL-01    | Email   | Cold Email Sub-Flow         | Day 1             | WF-Cold-Email-Subflow   | Auto        |
 | WR-EMAIL-02    | Email   | Cold Email Sub-Flow         | Day 3             | WF-Cold-Email-Subflow   | Auto        |
 | WR-EMAIL-03    | Email   | Cold Email Sub-Flow         | Day 7             | WF-Cold-Email-Subflow   | Auto        |
@@ -196,7 +188,7 @@ Bana Land | [CALLBACK NUMBER]
 
 ---
 
-#### NL-SMS-02 | Follow-Up (Day 2 / Day 4)
+#### NL-SMS-02 | Follow-Up (Day 2)
 
 > {{first_name}}, wanted to run something by you about your land in {{opportunity.property_county}}. Got a minute to talk? — {{agent_name}}, Bana Land
 
@@ -204,7 +196,11 @@ Bana Land | [CALLBACK NUMBER]
 
 ## Day 3-10 Templates (continued — still Day 1-10 stage)
 
-Template NL-SMS-02 is reused from above (Day 2 and Day 4).
+---
+
+#### NL-SMS-10 | Casual Value Hint (Day 4)
+
+> {{first_name}}, something came up when I was looking into your property in {{opportunity.property_county}} — are you around for a quick call? — {{agent_name}}, Bana Land
 
 ---
 
@@ -378,27 +374,28 @@ Either way is fine. Just want to know where we stand.
 
 ---
 
-## Cold — Quarterly Drip (Month 4+)
+## Long-Term Quarterly Drip (Month 4–28)
 
-**Stage:** Cold | **Cadence:** SMS + Email same day, every 90 days | **Owner:** GHL auto only
-**Trigger:** WF-Cold-Drip-Quarterly fires after monthly phase completes (or directly to skip monthly)
-**Rotation:** 4 unique quarters (Q1–Q4), then loops indefinitely.
+**Stages:** Cold / Nurture / Dispo Re-Engage | **Cadence:** SMS + Email same day, every 90 days | **Owner:** GHL auto only
+**Trigger:** WF-Long-Term-Quarterly fires after Cold Monthly or Nurture Monthly completes (or directly to skip monthly)
+**Rotation:** 4 unique quarters (Q1–Q4), plays twice (24 months total), then stops.
+**Note:** `Cold: Email Only` contacts skip all SMS steps. After Q4 plays the second time, no further automated touches — WF-Response-Handler still catches any future inbound reply.
 
 ---
 
-#### COLDQ-SMS-01 | Q1 SMS
+#### LTQ-SMS-01 | Q1 SMS
 
 > {{first_name}}, it's Bana Land — you ever decide what you wanted to do with that property?
 
 ---
 
-#### COLDQ-EMAIL-01 | Q1 Email
+#### LTQ-EMAIL-01 | Q1 Email
 
 **Subject:** Been a while
 
 Hey {{first_name}},
 
-It's been a few months since we connected. We're still actively buying land in your area and yours is still on my list.
+We're still buying land in your area and yours is still on my list.
 
 Worth a quick conversation, or should I hold off?
 
@@ -406,33 +403,33 @@ Worth a quick conversation, or should I hold off?
 
 ---
 
-#### COLDQ-SMS-02 | Q2 SMS
+#### LTQ-SMS-02 | Q2 SMS
 
 > {{first_name}}, we just picked up another property in your county. Yours still available? — {{agent_name}}, Bana Land
 
 ---
 
-#### COLDQ-EMAIL-02 | Q2 Email
+#### LTQ-EMAIL-02 | Q2 Email
 
 **Subject:** Sellers in your area
 
 Hey {{first_name}},
 
-We've been working with a few landowners in {{opportunity.property_county}} recently. Your name came back up.
+We've been working with a few landowners in {{opportunity.property_county}} recently. Your property came back up.
 
-Would you want to hear what we'd offer, or is this still not the right time?
+Would you want to hear what we'd offer, or is this not the right time?
 
 — {{agent_name}} | Bana Land
 
 ---
 
-#### COLDQ-SMS-03 | Q3 SMS
+#### LTQ-SMS-03 | Q3 SMS
 
 > {{first_name}}, figured you'd decided to keep your land — is that right, or is selling still on your radar? — Bana Land
 
 ---
 
-#### COLDQ-EMAIL-03 | Q3 Email
+#### LTQ-EMAIL-03 | Q3 Email
 
 **Subject:** Closing the loop
 
@@ -446,21 +443,21 @@ What would you say — is this worth a conversation?
 
 ---
 
-#### COLDQ-SMS-04 | Q4 SMS
+#### LTQ-SMS-04 | Q4 SMS
 
 > {{first_name}}, honest question — what's keeping you from selling that land? Curious if there's something we could help with. — {{agent_name}}, Bana Land
 
 ---
 
-#### COLDQ-EMAIL-04 | Q4 Email
+#### LTQ-EMAIL-04 | Q4 Email
 
 **Subject:** Quick question
 
 Hey {{first_name}},
 
-I've been reaching out periodically about your land and wanted to ask you straight up — should I keep your property on my list, or would you rather I stop reaching out?
+I've been reaching out periodically about your land and wanted to ask straight up — should I keep your property on my list, or would you rather I stop reaching out?
 
-Either way is totally fine.
+Either way is fine.
 
 — {{agent_name}} | Bana Land
 
@@ -498,95 +495,9 @@ I'm curious — has anything changed, or are you still in the same spot?
 
 > {{first_name}}, just circling back — where do things stand with your property these days? Would love to reconnect if it makes sense. — {{agent_name}}, Bana Land
 
-Trigger: WF-Nurture-Monthly enrolls contact in WF-Nurture-Quarterly at Month 3.
+Trigger: WF-Nurture-Monthly enrolls contact in WF-Long-Term-Quarterly at Month 3.
 
----
-
-## Nurture — Quarterly (Month 4+)
-
-**Stage:** Nurture | **Cadence:** SMS + Email same day, every 90 days | **Owner:** GHL auto only
-**Trigger:** WF-Nurture-Quarterly fires after monthly phase completes (or directly to skip monthly)
-**Rotation:** 4 unique quarters (Q1–Q4), then loops indefinitely.
-
----
-
-#### NURQ-SMS-01 | Q1 SMS
-
-> {{first_name}}, it's {{agent_name}} with Bana Land — been a while. Your property situation change at all?
-
----
-
-#### NURQ-EMAIL-01 | Q1 Email
-
-**Subject:** Picking back up
-
-Hey {{first_name}},
-
-We had a good conversation a while back about your property. Just wanted to see if things have shifted at all on your end.
-
-If you'd want to revisit, I'm around. If not, all good.
-
-— {{agent_name}} | Bana Land | [CALLBACK NUMBER]
-
----
-
-#### NURQ-SMS-02 | Q2 SMS
-
-> {{first_name}}, we've been doing a lot of deals lately and thought of you. Your property — still holding onto it? — {{agent_name}}, Bana Land
-
----
-
-#### NURQ-EMAIL-02 | Q2 Email
-
-**Subject:** Your property came to mind
-
-Hey {{first_name}},
-
-Was working on something in your area and your property came to mind. We had a good talk and I always wondered if things would line up eventually.
-
-Would it be worth another conversation?
-
-— {{agent_name}} | Bana Land
-
----
-
-#### NURQ-SMS-03 | Q3 SMS
-
-> Hey {{first_name}}, it's Bana Land — any updates on your property? Would love to reconnect if the timing's better now.
-
----
-
-#### NURQ-EMAIL-03 | Q3 Email
-
-**Subject:** Still have your info
-
-Hey {{first_name}},
-
-I still have your property info in my files from when we talked. Wanted to see if anything's changed on your end.
-
-If you'd want to revisit things, I can pull everything up quickly. Just say the word.
-
-— Bana Land | [CALLBACK NUMBER]
-
----
-
-#### NURQ-SMS-04 | Q4 SMS
-
-> {{first_name}}, honest question — if we could make the numbers work, would you still want to sell? — {{agent_name}}, Bana Land
-
----
-
-#### NURQ-EMAIL-04 | Q4 Email
-
-**Subject:** One more from me
-
-Hey {{first_name}},
-
-It's been a while since we connected. I wanted to reach out one more time and see where you're at with your property.
-
-If you ever want to pick things back up, you know where to find me.
-
-— {{agent_name}} | Bana Land
+After Nurture Monthly, leads enter the shared **Long-Term Quarterly Drip** (see LTQ templates above). Same templates as Cold leads — both are unresponsive at this point.
 
 ---
 
