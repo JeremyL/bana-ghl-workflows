@@ -354,8 +354,8 @@ Build each workflow in **Automation > Workflows**.
      - **Push notification** (GHL mobile app) to assigned owner: "NEW LEAD — {{first_name}} — call NOW"
      - **Internal SMS alert** to assigned owner's personal number: "NEW LEAD — {{first_name}} — call now: {{phone}}"
      - **B1 — Cold outbound (`Source: Cold Email` OR `Source: Cold SMS` OR `Source: Cold Call`):**
-       - Send SMS: NL-SMS-00 (Cold Outbound Speed to Lead) — fires after 120-second wait
-       - Wait: 1 hour → If no call logged → Send SMS: NL-SMS-00A (Missed Call)
+       - Send SMS: CO-SMS-00 (Cold Outbound Speed to Lead) — fires after 120-second wait
+       - Wait: 1 hour → If no call logged → Send SMS: CO-SMS-00A (Missed Call)
      - **B2 — Inbound (`Source: Website` OR `Source: VAPI AI Call` OR `Source: Referral`):**
        - Send SMS: IN-SMS-00 (Inbound Speed to Lead) — fires after 120-second wait
        - Wait: 1 hour → If no call logged → Send SMS: IN-SMS-00A (Inbound Missed Call)

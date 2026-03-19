@@ -36,7 +36,8 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 
 | Prefix | Stage                                       |
 | ------ | ------------------------------------------- |
-| NL     | New Leads (Day 0-30)                        |
+| NL     | New Leads (Day 1-30)                        |
+| CO     | Cold Outreach Day 0 (Cold Email, Cold SMS, Cold Call) |
 | NL-VM  | Voicemail Scripts (manual, with calls)      |
 | NL-RVM | Ringless Voicemail Drops (automated)        |
 | WR     | Cold Email Sub-Flow (get phone #)           |
@@ -56,8 +57,8 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 
 | ID             | Channel | Stage                       | Timing            | Workflow | Auto/Manual |
 | -------------- | ------- | --------------------------- | ----------------- | -------- | ----------- |
-| NL-SMS-00      | SMS     | New Leads — Day 0           | 120s wait         | WF-New-Lead-Entry    | Auto        |
-| NL-SMS-00A     | SMS     | New Leads — Day 0           | ~1hr post-call    | WF-New-Lead-Entry    | Auto        |
+| CO-SMS-00      | SMS     | New Leads — Day 0           | 120s wait         | WF-New-Lead-Entry    | Auto        |
+| CO-SMS-00A     | SMS     | New Leads — Day 0           | ~1hr post-call    | WF-New-Lead-Entry    | Auto        |
 | IN-SMS-00      | SMS     | New Leads — Day 0 (Inbound) | 120s wait         | WF-New-Lead-Entry    | Auto        |
 | IN-SMS-00A     | SMS     | New Leads — Day 0 (Inbound) | ~1hr post-call    | WF-New-Lead-Entry    | Auto        |
 | DM-SMS-00      | SMS     | New Leads — Day 0 (Direct Mail) | 120s wait     | WF-New-Lead-Entry    | Auto        |
@@ -122,17 +123,17 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 
 **Stage:** New Leads | **Cadence:** Immediate (speed to lead) | **Owner:** LM or AM (by source) + GHL auto
 
-Day 0 SMS varies by source: NL-SMS-00/00A (Cold Email, Cold SMS, Cold Call), IN-SMS-00/00A (Website, VAPI AI Call, Referral), DM-SMS-00/00A (Direct Mail). Rest of Day 1-30 sequence is identical across all sources.
+Day 0 SMS varies by source: CO-SMS-00/00A (Cold Email, Cold SMS, Cold Call), IN-SMS-00/00A (Website, VAPI AI Call, Referral), DM-SMS-00/00A (Direct Mail). Rest of Day 1-30 sequence is identical across all sources.
 
 ---
 
-#### NL-SMS-00 | Cold Outbound Speed to Lead (Day 0, 120s wait)
+#### CO-SMS-00 | Cold Outbound Speed to Lead (Day 0, 120s wait)
 
 > Hey {{first_name}}, it's {{agent_name}} with Bana Land — had a quick question about your property in {{opportunity.property_county}}. Mind if I give you a call?
 
 ---
 
-#### NL-SMS-00A | Missed Call (Day 0, ~1hr after call attempt)
+#### CO-SMS-00A | Missed Call (Day 0, ~1hr after call attempt)
 
 > Hey {{first_name}}, it's {{agent_name}} from Bana Land — just tried you on the phone. Call me back when you get a chance: [CALLBACK NUMBER]
 

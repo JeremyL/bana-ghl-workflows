@@ -9,12 +9,12 @@ Templates follow `PREFIX-CHANNEL-##` format. Owner = LM (Cold Email/SMS/Call) or
 [ALL SOURCES: Cold Email / Cold SMS / Cold Call / Direct Mail / VAPI / Referral / Website / Re-Submission]
   └─► NEW LEADS — Day 0: Speed to Lead (immediate on entry)
         │   SMS varies by source (120s wait):
-        │     Cold Email / Cold SMS / Cold Call ──► NL-SMS-00
+        │     Cold Email / Cold SMS / Cold Call ──► CO-SMS-00
         │     Website / VAPI / Referral ───────────► IN-SMS-00
         │     Direct Mail ─────────────────────────► DM-SMS-00
         │   After SMS ──► Call (manual)
         │   ~1hr later ──► Missed-call SMS if no call logged:
-        │     Cold Email / Cold SMS / Cold Call ──► NL-SMS-00A
+        │     Cold Email / Cold SMS / Cold Call ──► CO-SMS-00A
         │     Website / VAPI / Referral ───────────► IN-SMS-00A
         │     Direct Mail ─────────────────────────► DM-SMS-00A
         │   Totals: 2 SMS, 1 Call (per lead — template varies by source)
@@ -135,7 +135,7 @@ Missed inbound call ──► 2 min wait ──► SMS (MC-SMS-01)
 
 TEMPLATE TOTALS (58 unique templates)
 
-  SMS ········ 31   NL-SMS (11) · IN-SMS (2) · DM-SMS (2) · COLD-SMS (3) · COLDQ-SMS (4) · NUR-SMS (2) · NURQ-SMS (4)
+  SMS ········ 31   NL-SMS (9) · CO-SMS (2) · IN-SMS (2) · DM-SMS (2) · COLD-SMS (3) · COLDQ-SMS (4) · NUR-SMS (2) · NURQ-SMS (4)
                     WR-COLD-SMS (1) · NL-VMSMS (1) · MC-SMS (1)
   Email ······ 22   NL-EMAIL (5) · COLD-EMAIL (3) · COLDQ-EMAIL (4) · NUR-EMAIL (1) · NURQ-EMAIL (4)
                     WR-EMAIL (5)

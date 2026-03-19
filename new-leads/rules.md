@@ -234,10 +234,10 @@ If a lead becomes hostile, threatening, or legally threatening:
 
 WF-New-Lead-Entry fires the following on lead entry (Day 0):
 
-1. **Immediate (120 seconds) SMS** (NL-SMS-00) — warms the number before the call
+1. **Immediate (120 seconds) SMS** (CO-SMS-00) — warms the number before the call
 2. **Push notification** — GHL mobile app alert to assigned owner
 3. **SMS alert** — text to owner's personal number: "NEW LEAD — {{first_name}} — call now: {{phone}}"
-4. **1-hour check** — if no call logged, missed-call SMS (NL-SMS-00A) fires automatically
+4. **1-hour check** — if no call logged, missed-call SMS (CO-SMS-00A) fires automatically
 
 ### Team Responsibility
 
