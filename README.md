@@ -1,5 +1,5 @@
 # Bana Land — GHL Follow-Up System
-*Last edited: 2026-03-19 · Last reviewed: —*
+*Last edited: 2026-03-21 · Last reviewed: —*
 
 Documentation for Bana Land's multi-channel motivated seller follow-up system, built in Go High Level (GHL). Covers the full lead lifecycle — from first outreach response through deal close, disqualification, or long-term drip.
 
@@ -42,7 +42,8 @@ Single working account for all lead sources. Handles all leads from entry throug
 | [sequences.md](new-leads/sequences.md) | Cadence map: Day 1–30 + Cold Email sub-flow + Cold drip + Nurture + Qualified    |
 | [messaging.md](new-leads/messaging.md) | Message templates: NL-* + WR-EMAIL-* + COLD-* + NUR-* + LTQ-*                   |
 | [rules.md](new-leads/rules.md)         | Contact rules and compliance: hours, DNC, stage movement, response protocol, data hygiene |
-| [ghl-setup.md](new-leads/ghl-setup.md) | GHL build guide: 11 workflows (WF-Cold-Email-Subflow, WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback) |
+| [data-model.md](new-leads/data-model.md) | Account configuration: custom fields, tags, pipeline stages, lead entry rules, smart lists |
+| [workflows.md](new-leads/workflows.md) | 11 workflow definitions (WF-Cold-Email-Subflow, WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback) + checklists |
 
 
 ### Account: Prospect Data (`prospect-data/`)
