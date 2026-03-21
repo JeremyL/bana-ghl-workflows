@@ -13,7 +13,7 @@ All leads enter here and are worked through close, disqualification, or long-ter
 
 Pipeline stages track **Opportunities**, not Contacts. Each card in the pipeline IS an opportunity. A Contact will only ever have one active Opportunity at a time. Multiple Contacts can be linked to a single Opportunity (e.g., co-owners on one property).
 
-See [ghl-setup.md](ghl-setup.md) Step 3 for the full custom field definitions.
+See [data-model.md](data-model.md) for the full custom field definitions.
 
 ---
 
