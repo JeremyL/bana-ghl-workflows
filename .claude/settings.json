@@ -19,7 +19,8 @@
       "WebFetch(domain:howtohighlevel.com)",
       "WebFetch(domain:ghlbuilds.com)",
       "WebFetch(domain:gist.github.com)",
-      "WebFetch(domain:marketplace.gohighlevel.com)"
+      "WebFetch(domain:marketplace.gohighlevel.com)",
+      "Bash(ls -la \"c:\\\\Users\\\\J\\\\Projects\\\\Bana Follow Up\"/*.md)"
     ],
     "additionalDirectories": [
       "c:\\Users\\J\\.claude\\projects\\c--Users-J-Projects-Bana-Follow-Up\\memory",

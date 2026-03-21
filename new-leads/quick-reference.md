@@ -115,7 +115,7 @@ SMS + Email same day, every 90 days — Q1-Q4 plays twice (24 months), then stop
   │   Cold: Email Only contacts skip all SMS steps
   │   Totals: 4 SMS, 4 Emails (x2 = 8 SMS, 8 Emails over 24 months)
   │
-  └─► Re-engages (replies to drip) ───────────────────────────────► Owner reviews (7-day window)
+  └─► Re-engages (replies to drip) ───────────────────────────────► Owner reviews (3-day window)
   └─► DNC request ─────────────────────────────────────────────────► Dispo: DNC (zero contact)
 
 --- DISPO RE-ENGAGE ---

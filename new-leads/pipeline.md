@@ -1,5 +1,5 @@
 # Bana Land — New Leads Account: Pipeline Stage Definitions
-*Last edited: 2026-03-19 · Last reviewed: —*
+*Last edited: 2026-03-22 · Last reviewed: —*
 
 This is the pipeline reference for **New Leads** — the single working account for all lead sources.
 All leads enter here and are worked through close, disqualification, or long-term drip.
@@ -48,11 +48,11 @@ Same pipeline stages, different task assignment based on source tag.
 
 ## Cold Email Special Handling
 
-Cold Email leads may not have a phone number on entry. They get a special sub-flow that runs concurrently with the Day 1–30 sequence (triggers on Day 1-10 entry):
+Cold Email leads may not have a phone number on entry. They get a two-phase sub-flow that runs concurrently with the Day 1–30 sequence — one workflow per stage, matching the normal relay pattern:
 
-- **Phase 1 (no phone #):** Automated emails asking for phone number (WR-EMAIL templates). Runs alongside normal Day 1–30 stage progression (standard SMS, call, and email steps suppressed — WF-Cold-Email-Subflow is the sole communicator). LM monitors replies.
-- **Phase 2 (phone # received):** LM call tasks begin. Normal Day 1–30 cadence applies from this point.
-- **Day 30 with no phone # received:** One-time SMS blast to all skip-traced phone numbers on file (Phone 1–4) → move to Cold stage with `Cold: Email Only` tag (email-only drip, no further SMS).
+- **P1 — Day 1-10 (no phone #):** WF-Cold-Email-Subflow-P1 sends automated emails asking for phone number (WR-EMAIL-01 through 03). Standard WF-Day-1-10 steps suppressed. LM monitors replies.
+- **P2 — Day 11-30 (no phone #):** WF-Cold-Email-Subflow-P2 continues emails (WR-EMAIL-04, 05). Standard WF-Day-11-30 steps suppressed. Day 30: one-time SMS blast to all skip-traced phone numbers on file (Phone 1–4) → move to Cold stage with `Cold: Email Only` tag (email-only drip, no further SMS).
+- **Phone # received (any point):** Active sub-flow phase exits. LM call tasks begin. Normal Day 1–30 cadence applies from that point.
 
 If any skip-traced number responds to the one-time SMS blast, WF-Response-Handler fires and the LM reviews.
 
@@ -112,7 +112,7 @@ They have not yet been spoken to and qualified. Every lead starts here.
 | **Definition**    | 30+ days of contact attempts with no response or qualification.                                                       |
 | **Entry**         | No meaningful response by end of Day 30. Cold Email leads with no phone # get `Cold: Email Only` tag (email-only drip). |
 | **Exit**          | Lead responds and qualifies → Due Diligence. Lead opts out → DNC. Otherwise, stays in Cold indefinitely on drip.      |
-| **Re-Engagement** | Lead replies to drip → WF-Response-Handler: pause drip, owner reviews (LM for LM-sources, AM for AM-sources). 7-day auto-resume if no action. |
+| **Re-Engagement** | Lead replies to drip → WF-Response-Handler: pause drip, owner reviews (LM for LM-sources, AM for AM-sources). 3-day auto-resume if no action. |
 | **Re-Submission** | Lead enters from new external campaign → WF-New-Lead-Entry: stop drip, move to New Leads, full restart as new lead.               |
 | **Owner**         | GHL automation only (no manual call tasks unless lead re-engages).                                                     |
 | **Frequency**     | Months 1–3: Monthly (SMS + Email each month). Month 4+: Quarterly.                                                    |
@@ -174,7 +174,7 @@ Disqualified stages fall into two groups:
 
 **Re-entry applies to all four stages below:**
 
-- **Re-Engagement** (responds to our drip) → WF-Response-Handler: pause drip, owner reviews. Owner acts or drip auto-resumes after 7 days.
+- **Re-Engagement** (responds to our drip) → WF-Response-Handler: pause drip, owner reviews. Owner acts or drip auto-resumes after 3 days.
 - **Re-Submission** (new external campaign) → WF-New-Lead-Entry: stop drip, move to New Leads, full restart.
 
 #### Dispo: No Motivation
@@ -280,7 +280,7 @@ These leads have been spoken to and are actively progressing through the deal cy
 | **Definition**    | Qualified lead that couldn't be closed. Kept alive for a future deal opportunity.                                                 |
 | **Entry**         | Left any qualified stage without closing (team discretion — not every dead deal lands here).                                      |
 | **Exit**          | Lead re-engages → back to appropriate active stage. Lead opts out → DNC.                                                          |
-| **Re-Engagement** | Lead replies to nurture drip → WF-Response-Handler: pause drip, AM 7-day review. AM acts → qualified/dispo. AM does nothing → drip resumes.    |
+| **Re-Engagement** | Lead replies to nurture drip → WF-Response-Handler: pause drip, AM 3-day review. AM acts → qualified/dispo. AM does nothing → drip resumes.    |
 | **Re-Submission** | Lead enters from new external campaign → WF-New-Lead-Entry: stop drip, move to New Leads, full restart as new lead.                          |
 | **Owner**         | GHL automation (full automation — no manual tasks unless response received).                                                      |
 | **Frequency**     | Monthly for first 3 months → quarterly thereafter.                                                                                |
@@ -340,10 +340,10 @@ Any Qualified Stage (couldn't close) ──────────────�
 --- RE-ENTRY PATHS ---
 
 Cold / Nurture / Dispo Re-Engage (replies to our drip)
-  └─► WF-Response-Handler: Pause WFs Until set → owner 7-day review
+  └─► WF-Response-Handler: Pause WFs Until set → owner 3-day review
         └─► Owner moves to qualified stage ────────────────────► Due Diligence (or appropriate)
         └─► Owner moves to dispo ──────────────────────────────► Appropriate Dispo
-        └─► Owner does nothing (7 days expire) ────────────────► Drip resumes from where it stopped
+        └─► Owner does nothing (3 days expire) ────────────────► Drip resumes from where it stopped
 
 Any stage (new external campaign source detected by automation)
   └─► Re-Submitted → Move to NEW LEADS → Full restart (Day 1-10 → etc.)
