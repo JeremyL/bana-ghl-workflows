@@ -1,6 +1,6 @@
 # Bana Land — New Leads Account: Follow-Up Sequences
 
-*Last edited: 2026-03-20 · Last reviewed: —*
+*Last edited: 2026-03-22 · Last reviewed: —*
 
 This is the cadence document for **New Leads**. It defines exactly when to touch a lead,
 with which channel, and whether that touch is human-driven or automated.
@@ -8,7 +8,6 @@ with which channel, and whether that touch is human-driven or automated.
 All rules (time windows, DNC handling, etc.) are governed by [rules.md](rules.md).
 All message content lives in [messaging.md](messaging.md).  
 
-***** Considering bringing this up to me whenever you see it in the file AI, but it needs considering. Whenever things go into cold drips, do we just need to make that a stage so it's easy to know what automation is in? Also, for example, if it's in one automation, it's like, yeah, they said no again on the monthly. Let me go ahead and just push towards quarterly, just so it's less type things like, "Is that a good idea?" Let's consider it next time we start talking about this stuff.
 
 ### Diagrams
 
@@ -67,7 +66,7 @@ disqualify themselves, or land in the long-term Cold drip.
 - Missed-call SMS fires ~1 hour later only if no call was logged
 - Owner works the lead on Day 0 (calls, reviews any reply), then moves stage to Day 1-10 the same day
 - After moving to Day 1-10, WF-Day-1-10 fires but waits until the next business day to start automated touches
-- If lead responds to any Day 0 touch, WF-Response-Handler fires (pause + owner review)
+- If lead responds to any Day 0 touch, the owner sees the reply in GHL conversation (the owner is already working this lead via speed-to-lead). WF-Response-Handler does not fire for New Leads stage — there is no automated drip to pause.
 - **Speed-to-lead target: call within 10 minutes.** GHL sends push notification + SMS alert to owner's phone on entry. See rules.md Section 11.
 
 ---
@@ -155,13 +154,13 @@ disqualify themselves, or land in the long-term Cold drip.
 
 ## Cold Email Sub-Flow (Concurrent with Day 1–30)
 
-Cold Email leads may not have a phone number on entry. This sub-flow runs in parallel with the standard Day 1–30 sequence to obtain one. Managed by WF-Cold-Email-Subflow.
+Cold Email leads may not have a phone number on entry. This sub-flow runs in parallel with the standard Day 1–30 sequence to obtain one. Managed by two workflows that mirror the normal stage relay pattern: **WF-Cold-Email-Subflow-P1** (Day 1-10) and **WF-Cold-Email-Subflow-P2** (Day 11-30).
 
-**When this sub-flow is active (no phone #):** The standard Day 1–30 sequence skips ALL steps for this contact — SMS, call, and email are all suppressed. WF-Cold-Email-Subflow is the sole communicator until a phone number is received or Day 30 is reached. This avoids sending conflicting messages from two workflows simultaneously.
+**When a sub-flow phase is active (no phone #):** The standard sequence for that stage (WF-Day-1-10 or WF-Day-11-30) skips ALL steps for this contact — SMS, call, and email are all suppressed. The sub-flow phase is the sole communicator until a phone number is received or the stage transitions. This avoids sending conflicting messages from two workflows simultaneously.
 
-**When phone # is received:** Sub-flow stops. Standard Day 1–30 sequence resumes fully (calls, SMS, and emails all fire from the lead's current stage position). LM call tasks begin.
+**When phone # is received:** Active sub-flow phase exits. Standard sequence resumes fully (calls, SMS, and emails all fire from the lead's current stage position). LM call tasks begin.
 
-### Phase 1 — Get Phone Number (automated emails)
+### P1 — Day 1-10: Get Phone Number (WF-Cold-Email-Subflow-P1)
 
 
 | Touch # | Timing | Channel | Type | Message Ref              |
@@ -169,6 +168,14 @@ Cold Email leads may not have a phone number on entry. This sub-flow runs in par
 | 1       | Day 1  | Email   | Auto | WR-EMAIL-01 (ask for #)  |
 | 2       | Day 3  | Email   | Auto | WR-EMAIL-02 (follow-up)  |
 | 3       | Day 7  | Email   | Auto | WR-EMAIL-03 (check-in)   |
+
+When WF-Day-1-10 auto-advances the contact to Day 11-30 (~Day 11), P1 exits via its stage-change exit condition. P2 triggers on Day 11-30 entry.
+
+### P2 — Day 11-30: Continue + Day 30 Steps (WF-Cold-Email-Subflow-P2)
+
+
+| Touch # | Timing | Channel | Type | Message Ref              |
+| ------- | ------ | ------- | ---- | ------------------------ |
 | 4       | Day 14 | Email   | Auto | WR-EMAIL-04 (mid-window) |
 | 5       | Day 21 | Email   | Auto | WR-EMAIL-05 (soft close) |
 
@@ -177,11 +184,11 @@ Cold Email leads may not have a phone number on entry. This sub-flow runs in par
 
 - These emails specifically ask for a phone number — they are different from the standard NL-EMAIL templates
 - LM monitors replies for phone numbers
-- If phone # received at any point → sub-flow exits, standard cadence resumes in full
+- If phone # received at any point → active sub-flow phase exits, standard cadence resumes in full
 
-### Phase 2 — Day 30, No Phone Number Received
+### Day 30 — No Phone Number Received
 
-If no phone number is received by Day 30:
+If no phone number is received by Day 30 (handled by WF-Cold-Email-Subflow-P2):
 
 1. **One-time SMS blast** to all skip-traced phone numbers on file (Phone 1–4, if populated) using template WR-COLD-SMS-01
 2. Add tag: `Cold: Email Only` — flags contact for email-only drip (WF-Cold-Drip-Monthly/WF-Long-Term-Quarterly skip SMS steps)
@@ -340,7 +347,7 @@ When hitting a lead on the same day with multiple channels (Days 1-2 of Day 1-10
 
 | Event                                   | Action                                                                                                                       |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Lead re-engages (replies to drip)       | WF-Response-Handler: Set `Pause WFs Until` → owner review task → 7-day window. Owner acts or drip auto-resumes.              |
+| Lead re-engages (replies to drip)       | WF-Response-Handler: Set `Pause WFs Until` → owner review task → 3-day window. Owner acts or drip auto-resumes.              |
 | Lead re-submitted (new external source) | WF-New-Lead-Entry: Stop all drips → tag `Re-Submitted` → move to New Leads → full restart.                                   |
 | Lead says stop / opt-out                | Kill all workflows → move to Dispo: DNC immediately → DNC sync to Prospect Data.                                             |
 | Lead moves to qualified stage           | Stop uncontacted sequence → AM works lead directly (no automated workflow).                                                  |
@@ -357,12 +364,12 @@ When hitting a lead on the same day with multiple channels (Days 1-2 of Day 1-10
 
 A lead in Cold, Nurture, or Dispo Re-Engage replies to an automated message we sent.
 
-- **What happens:** WF-Response-Handler fires. `Pause WFs Until` field set to today+7 — active workflows hold in place at their next send step (position preserved). Owner gets a 7-day review window.
+- **What happens:** WF-Response-Handler fires. `Pause WFs Until` field set to today+3 — active workflows hold in place at their next send step (position preserved). Owner gets a 3-day review window.
 - **If owner moves to qualified stage:** Workflow exit triggers fire, drip killed. AM works lead directly (no automated workflow).
 - **If owner clears `Pause WFs Until` field manually:** Drip resumes from exactly where it stopped.
-- **If owner does nothing after 7 days:** `Pause WFs Until` date expires — drip resumes from where it stopped. No restart.
+- **If owner does nothing after 3 days:** `Pause WFs Until` date expires — drip resumes from where it stopped. No restart.
 - **Pipeline stage does NOT change** during re-engagement review — the lead stays in Cold / Nurture / Dispo Re-Engage unless owner explicitly moves them.
-- **Active stages (Day 1-10 / Day 11-30):** Same pause mechanic applies — automated sends hold. No 7-day auto-resume for these stages; owner manually clears `Pause WFs Until` field or moves stage.
+- **Active stages (Day 1-10 / Day 11-30):** Same pause mechanic applies — automated sends hold. No 3-day auto-resume for these stages; owner manually clears `Pause WFs Until` field or moves stage.
 - **Owner assignment for re-engagement review:** WF-Response-Handler assigns the review task to the original owner based on source tag (LM for Cold Email/SMS/Call sources, AM for Direct Mail/VAPI/Referral/Website sources).
 
 ### Re-Submission (new external campaign source)

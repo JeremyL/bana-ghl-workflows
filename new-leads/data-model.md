@@ -1,5 +1,5 @@
 # Bana Land — New Leads Account: Data Model
-*Last edited: 2026-03-21 · Last reviewed: —*
+*Last edited: 2026-03-22 · Last reviewed: —*
 
 Static configuration for the New Leads GHL sub-account — fields, tags, pipeline stages, smart lists, and lead entry rules. Build everything in this file before creating workflows.
 
@@ -60,14 +60,16 @@ Leads enter this account through one of three mechanisms. Once inside, WF-New-Le
 | Custom field: Latest Source Date | Today                                                                 |
 | Pipeline stage                   | New Leads                                                             |
 
-**Cold Email note:** Cold Email responders may not have a phone number on entry. WF-Cold-Email-Subflow (Cold Email Sub-Flow) runs concurrently to obtain one. See WF-Cold-Email-Subflow below.
+**Cold Email note:** Cold Email responders may not have a phone number on entry. WF-Cold-Email-Subflow-P1 (Day 1-10) and WF-Cold-Email-Subflow-P2 (Day 11-30) run concurrently with the standard sequences to obtain one. See workflows.md for details.
 
 ---
 
 ### Inbound (VAPI AI Call, Referral, Website)
 
 **Who:** Leads who contacted us directly — phone call-ins, referrals, website inquiries.
-**How:** Entered via automation flow or manual entry.
+**How:** Entered via GHL form/webhook (Website), VAPI call completion webhook, or manual entry (Referral).
+
+**Automation requirements:** The entry automation (GHL workflow or Zapier/Make) must create a Contact + Opportunity in New Leads with the fields below. If the contact already exists, treat as a Re-Submission (see below).
 
 **What must be set on entry:**
 
@@ -152,7 +154,7 @@ GHL contacts support multiple phone numbers natively:
 - **Phone 3** — third skip-traced number (if available)
 - **Phone 4** — fourth skip-traced number (if available)
 
-Used in WF-Cold-Email-Subflow's one-time SMS blast for `Cold: Email Only` contacts.
+Used in WF-Cold-Email-Subflow-P2's one-time SMS blast for `Cold: Email Only` contacts.
 
 ---
 
@@ -164,14 +166,12 @@ Go to **Settings > Custom Fields > Contacts** and create the following:
 | ----------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
 | Lead Entry Date   | Date     | Date lead was first added to the pipeline                                                                      |
 | Stage Entry Date  | Date     | Date lead entered their CURRENT stage                                                                          |
-| Days in Pipeline  | Number   | Calculated from Lead Entry Date (for reporting)                                                                |
+| Days in Pipeline  | Number   | Reporting-only — calculate at query time using GHL's date math from Lead Entry Date. No workflow updates this field. |
 | DNC Date          | Date     | Date lead was added to DNC                                                                                     |
-| Last Contact Date | Date     | Date of last successful outreach attempt                                                                       |
-| Last Contact Type | Text     | Call / SMS / Email                                                                                             |
 | Age               | Number   | Owner's age (from skip trace data)                                                                             |
 | Deceased          | Text     | Owner is deceased (from skip trace data). Values: Y / N / blank                                                |
 | Assigned To       | Text     | Lead Manager or Acquisition Manager name (set by WF-New-Lead-Entry based on source tag)                                    |
-| Pause WFs Until   | Date     | Pause all automated sends until this date. Workflows check: field is empty OR field < today → proceed to send. Set to today+7 by WF-Response-Handler. Owner clears manually to resume early. |
+| Pause WFs Until   | Date     | Pause all automated sends until this date. Workflows check: field is empty OR field ≤ today → proceed to send. Set to today+3 by WF-Response-Handler. Owner clears manually to resume early. |
 
 ---
 
@@ -270,7 +270,7 @@ Create these Smart Lists under Contacts for daily team use:
 | ------------------------ | -------------------------------------------------------- |
 | LM — Today's Call Tasks  | Open tasks, type = Call, due today, assigned to LM       |
 | AM — Today's Call Tasks  | Open tasks, type = Call, due today, assigned to AM       |
-| Cold — No Response 30d   | Stage = Cold, Last Contact Date > 30 days ago            |
+| Cold — No Response 30d   | Stage = Cold, GHL native "Last Activity" > 30 days ago   |
 | Cold Email — No Phone    | Tag = Source: Cold Email, Phone field is empty            |
 | Active Qualified Leads   | Stage is one of: Due Diligence, Make Offer, Negotiations |
 | Contracts in Progress    | Stage is one of: Contract Sent, Under Contract           |

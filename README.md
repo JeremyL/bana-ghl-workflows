@@ -43,7 +43,7 @@ Single working account for all lead sources. Handles all leads from entry throug
 | [messaging.md](new-leads/messaging.md) | Message templates: NL-* + WR-EMAIL-* + COLD-* + NUR-* + LTQ-*                   |
 | [rules.md](new-leads/rules.md)         | Contact rules and compliance: hours, DNC, stage movement, response protocol, data hygiene |
 | [data-model.md](new-leads/data-model.md) | Account configuration: custom fields, tags, pipeline stages, lead entry rules, smart lists |
-| [workflows.md](new-leads/workflows.md) | 11 workflow definitions (WF-Cold-Email-Subflow, WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback) + checklists |
+| [workflows.md](new-leads/workflows.md) | 12 workflow definitions (WF-Cold-Email-Subflow-P1, WF-Cold-Email-Subflow-P2, WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback) + checklists |
 
 
 ### Account: Prospect Data (`prospect-data/`)

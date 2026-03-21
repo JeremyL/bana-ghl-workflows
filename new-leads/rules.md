@@ -1,6 +1,6 @@
 # New Leads — Contact Rules & Compliance
 
-*Last edited: 2026-03-19 · Last reviewed: 2026-03-19*
+*Last edited: 2026-03-22 · Last reviewed: 2026-03-19*
 
 Operational rules that govern all outreach in **New Leads** (the single working account).
 Every GHL workflow, automation, and team member action must respect these rules.
@@ -116,7 +116,7 @@ Not answering calls, not replying to texts, and not opening emails does NOT cons
 
 There are two distinct re-entry events. Each has its own protocol.
 
-**Pause mechanic:** All drip and automated-send workflows include a **"Wait Until"** condition before each send step that checks: `**Pause WFs Until` is empty OR `Pause WFs Until` < today**. If the field is set to a future date, the contact is held in place — no messages go out, but position in the workflow is preserved. When the date passes naturally (auto-resume) or the field is cleared manually by the owner (early release), the contact continues from exactly where it stopped.
+**Pause mechanic:** All drip and automated-send workflows include a **"Wait Until"** condition before each send step that checks: `**Pause WFs Until` is empty OR `Pause WFs Until` ≤ today**. If the field is set to a future date, the contact is held in place — no messages go out, but position in the workflow is preserved. When the date passes naturally (auto-resume) or the field is cleared manually by the owner (early release), the contact continues from exactly where it stopped.
 
 ### 6A. Re-Engagement — Lead responds to our existing GHL follow-up
 
@@ -126,15 +126,15 @@ There are two distinct re-entry events. Each has its own protocol.
 
 **WF-Response-Handler only fires for contacts in:** Day 1-10, Day 11-30, Cold, Nurture, Dispo: No Motivation, Dispo: Wants Retail, Dispo: On MLS, or Dispo: Lead Declined — AND `Pause WFs Until` is empty (prevents duplicate triggers during an active review window).
 
-1. Set field: `Pause WFs Until` = today + 7 days — all active workflows hold at the next send condition
+1. Set field: `Pause WFs Until` = today + 3 days — all active workflows hold at the next send condition
 2. Create high-priority review task assigned to **lead owner** (LM for Cold Email/SMS/Call sources, AM for Direct Mail/VAPI/Referral/Website sources)
 3. Send internal notification & internal SMS to lead owner with contact link
 4. **Resolution — one of three outcomes:**
   - **Owner moves to a qualified stage** → workflow exit triggers fire, active workflows killed. Clear `Pause WFs Until`.
   - **Owner moves to a Dispo stage** → dispo workflows take over. Clear `Pause WFs Until`.
   - **Owner clears `Pause WFs Until` field early** (reply not actionable, lead stays in current stage) → drip resumes from where it stopped.
-5. **Auto-resume safety net (drip stages only):** If owner does nothing after **7 days**, `Pause WFs Until` date expires → drip resumes automatically. WF-Response-Handler clears the field.
-6. **Active stages (Day 1-10 / Day 11-30):** No 7-day auto-resume. Owner is already working this lead — they move the stage or manually clear `Pause WFs Until` when ready.
+5. **Auto-resume safety net (drip stages only):** If owner does nothing after **3 days**, `Pause WFs Until` date expires → drip resumes automatically. WF-Response-Handler clears the field.
+6. **Active stages (Day 1-10 / Day 11-30):** No 3-day auto-resume. Owner is already working this lead — they move the stage or manually clear `Pause WFs Until` when ready.
 7. **Soft opt-outs:** Replies like "not interested" or "leave me alone" without official opt-out keywords still trigger WF-Response-Handler normally. Owner reviews and decides case-by-case — may move to DNC or appropriate Dispo based on judgment.
 
 ### 6B. Re-Submission — Lead comes back from a new external campaign
@@ -179,7 +179,7 @@ When a lead enters any of these stages, WF-Dispo-Re-Engage automatically enrolls
 - **Emails:** Verify email addresses from skip trace data using a service before sending cold emails.
 - **Duplicate contacts:** Merge duplicates before enrolling in any sequence. GHL can trigger multiple workflows on dupes.
 - **Disconnected numbers:** If a call returns "not in service," tag the lead accordingly. Do not keep sending SMS to dead numbers.
-- **Stage date logging:** When a lead moves to a new stage, log the date. This is how GHL workflows know when to advance (Day 1-10 → Day 11-30 uses the "Date Entered Stage" field). *(Applies primarily to New Leads' time-bucket system.)*
+- **Stage date logging:** When a lead moves to a new stage, log the date. This is how GHL workflows know when to advance (Day 1-10 → Day 11-30 uses the "Date Entered Stage" field). Automated workflows update Stage Entry Date automatically for: New Leads, Day 1-10, Day 11-30, Cold, Nurture, Dispo Re-Engage, and Dispo: DNC. **For qualified stages (Due Diligence, Make Offer, Negotiations, Contract Sent, Under Contract):** Update Stage Entry Date manually when moving a lead to these stages — no workflow fires on these transitions.
 
 ---
 
@@ -206,7 +206,7 @@ If a lead becomes hostile, threatening, or legally threatening:
 | No response = opt-out?               | No — keep following up per cadence                            |
 | Who can qualify a lead?              | LM or AM (based on source) — no automation                    |
 | Who can dispo a lead?                | LM or AM — both can dispo directly                            |
-| Auto-resume after re-engagement      | 7 days (drip stages only)                                     |
+| Auto-resume after re-engagement      | 3 days (drip stages only)                                     |
 | SMS opt-out keywords handled by GHL? | Yes — verify configured                                       |
 | LM → AM handoff mechanism            | LM sets call appointment for AM at qualification              |
 | Speed to lead — new/inbound leads    | Call within 10 minutes (push + SMS alert to owner)            |
@@ -226,7 +226,7 @@ If a lead becomes hostile, threatening, or legally threatening:
 | Lead Type                                                 | Target                     | Owner                    |
 | --------------------------------------------------------- | -------------------------- | ------------------------ |
 | Cold SMS, Cold Call, Direct Mail, VAPI, Referral, Website | **Call within 10 minutes** | LM or AM (by source)     |
-| Cold Email (phone # just received via WF-Cold-Email-Subflow)             | **Call within 10 minutes** | LM                       |
+| Cold Email (phone # just received via WF-Cold-Email-Subflow-P1/P2)      | **Call within 10 minutes** | LM                       |
 | Re-submitted leads (any source)                           | **Call within 30 minutes** | LM or AM (by new source) |
 
 
