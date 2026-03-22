@@ -1,5 +1,5 @@
 # Bana Land — New Leads Account: Data Model
-*Last edited: 2026-03-22 · Last reviewed: —*
+*Last edited: 2026-03-22 · Last reviewed: 2026-03-22*
 
 Static configuration for the New Leads GHL sub-account — fields, tags, pipeline stages, smart lists, and lead entry rules. Build everything in this file before creating workflows.
 
@@ -259,6 +259,10 @@ Add the following stages **in this exact order:**
 16. Contract Sent
 17. Under Contract
 18. Nurture
+
+**Group: Follow-Up Complete**
+
+19. Exhausted
 
 ---
 

@@ -1,6 +1,6 @@
 # Bana Land — New Leads Account: Follow-Up Sequences
 
-*Last edited: 2026-03-22 · Last reviewed: —*
+*Last edited: 2026-03-22 · Last reviewed: 2026-03-22*
 
 This is the cadence document for **New Leads**. It defines exactly when to touch a lead,
 with which channel, and whether that touch is human-driven or automated.
@@ -241,7 +241,7 @@ Qualified leads that didn't close. Fully automated. Long game.
 | 3       | 3     | SMS     | Auto | NUR-SMS-02   |
 
 
-At Month 3 → WF-Nurture-Monthly enrolls contact in WF-Long-Term-Quarterly (see **Sequence — Long-Term Quarterly Drip** below).
+At Month 3 → WF-Nurture-Monthly enrolls contact in WF-Long-Term-Quarterly (see **Sequence — Long-Term Quarterly Drip** below). After 24 months of quarterly drip → moves to Exhausted.
 
 **If lead responds at any point (monthly or quarterly):**
 
@@ -273,7 +273,7 @@ At Month 3 → WF-Nurture-Monthly enrolls contact in WF-Long-Term-Quarterly (see
 | 3–4   | Day 100 | Email   | Auto | COLD-EMAIL-03 |
 
 
-At ~3.5 months (Day 100) → WF-Cold-Drip-Monthly enrolls contact in WF-Long-Term-Quarterly (shared quarterly phase)
+At ~3.5 months (Day 100) → WF-Cold-Drip-Monthly enrolls contact in WF-Long-Term-Quarterly (shared quarterly phase). After 24 months of quarterly drip → moves to Exhausted.
 
 **Note:** `Cold: Email Only` contacts (Cold Email leads with no confirmed phone number) receive email steps only — all SMS steps are skipped (in both WF-Cold-Drip-Monthly and WF-Long-Term-Quarterly).
 
@@ -304,10 +304,11 @@ At ~3.5 months (Day 100) → WF-Cold-Drip-Monthly enrolls contact in WF-Long-Ter
 
 **Notes:**
 
-- After Q4 plays the second time, no further automated touches. Lead stays in their current stage.
-- WF-Response-Handler still catches any future inbound reply — lead is never truly lost
+- After Q4 plays the second time, WF-Long-Term-Quarterly moves the opportunity to the **Exhausted** stage — a clear signal that all automated follow-up is complete.
+- WF-Response-Handler still catches any future inbound reply from the Exhausted stage — lead is never truly lost
 - `Cold: Email Only` contacts skip all SMS steps
-- If a lead responds at any point (including after the drip ends), standard re-engagement protocol applies — WF-Response-Handler pauses workflows, owner reviews the response and decides next step
+- If a lead responds at any point (including after moving to Exhausted), standard re-engagement protocol applies — WF-Response-Handler pauses workflows, owner reviews the response and decides next step
+- Re-submission via WF-New-Lead-Entry still works from Exhausted — full restart as a new lead
 
 ---
 
@@ -354,6 +355,7 @@ When hitting a lead on the same day with multiple channels (Days 1-2 of Day 1-10
 | Lead moves to Nurture                   | Stop active sequence → start Sequence — Nurture.                                                                             |
 | Lead moves to Dispo — Terminal          | Stop all sequences permanently.                                                                                              |
 | Lead moves to Dispo — Re-Engage         | Stop active sequence → WF-Dispo-Re-Engage fires → enroll in Sequence — Cold (WF-Cold-Drip-Monthly → WF-Long-Term-Quarterly). |
+| 24-month quarterly drip completes        | WF-Long-Term-Quarterly moves lead to Exhausted. All automated outreach finished.                                              |
 
 
 ---
@@ -362,13 +364,13 @@ When hitting a lead on the same day with multiple channels (Days 1-2 of Day 1-10
 
 ### Re-Engagement (responds to our GHL drip)
 
-A lead in Cold, Nurture, or Dispo Re-Engage replies to an automated message we sent.
+A lead in Cold, Nurture, Dispo Re-Engage, or Exhausted replies to an automated message we sent (or contacts us inbound).
 
 - **What happens:** WF-Response-Handler fires. `Pause WFs Until` field set to today+3 — active workflows hold in place at their next send step (position preserved). Owner gets a 3-day review window.
 - **If owner moves to qualified stage:** Workflow exit triggers fire, drip killed. AM works lead directly (no automated workflow).
 - **If owner clears `Pause WFs Until` field manually:** Drip resumes from exactly where it stopped.
 - **If owner does nothing after 3 days:** `Pause WFs Until` date expires — drip resumes from where it stopped. No restart.
-- **Pipeline stage does NOT change** during re-engagement review — the lead stays in Cold / Nurture / Dispo Re-Engage unless owner explicitly moves them.
+- **Pipeline stage does NOT change** during re-engagement review — the lead stays in Cold / Nurture / Dispo Re-Engage / Exhausted unless owner explicitly moves them.
 - **Active stages (Day 1-10 / Day 11-30):** Same pause mechanic applies — automated sends hold. No 3-day auto-resume for these stages; owner manually clears `Pause WFs Until` field or moves stage.
 - **Owner assignment for re-engagement review:** WF-Response-Handler assigns the review task to the original owner based on source tag (LM for Cold Email/SMS/Call sources, AM for Direct Mail/VAPI/Referral/Website sources).
 

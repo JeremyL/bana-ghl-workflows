@@ -1,6 +1,6 @@
 # New Leads — Contact Rules & Compliance
 
-*Last edited: 2026-03-22 · Last reviewed: 2026-03-19*
+*Last edited: 2026-03-22 · Last reviewed: 2026-03-22*
 
 Operational rules that govern all outreach in **New Leads** (the single working account).
 Every GHL workflow, automation, and team member action must respect these rules.
@@ -70,7 +70,7 @@ Not answering calls, not replying to texts, and not opening emails does NOT cons
 
 - Continue the cadence as defined in sequences.md
 - Only an explicit opt-out request triggers DNC status
-- Leads who have never responded can still receive follow-up indefinitely (Cold stage drip)
+- Leads who have never responded receive follow-up through the full 24-month quarterly cycle, then move to Exhausted (no further automated outreach)
 
 ---
 
@@ -124,7 +124,7 @@ There are two distinct re-entry events. Each has its own protocol.
 
 #### Protocol (WF-Response-Handler):
 
-**WF-Response-Handler only fires for contacts in:** Day 1-10, Day 11-30, Cold, Nurture, Dispo: No Motivation, Dispo: Wants Retail, Dispo: On MLS, or Dispo: Lead Declined — AND `Pause WFs Until` is empty (prevents duplicate triggers during an active review window).
+**WF-Response-Handler only fires for contacts in:** Day 1-10, Day 11-30, Cold, Nurture, Dispo: No Motivation, Dispo: Wants Retail, Dispo: On MLS, Dispo: Lead Declined, or Exhausted — AND `Pause WFs Until` is empty (prevents duplicate triggers during an active review window).
 
 1. Set field: `Pause WFs Until` = today + 3 days — all active workflows hold at the next send condition
 2. Create high-priority review task assigned to **lead owner** (LM for Cold Email/SMS/Call sources, AM for Direct Mail/VAPI/Referral/Website sources)
@@ -167,9 +167,10 @@ The four **Dispo — Re-Engage** stages are NOT completely dead leads:
 
 When a lead enters any of these stages, WF-Dispo-Re-Engage automatically enrolls them in **WF-Cold-Drip-Monthly → WF-Long-Term-Quarterly** — the same drip used for Cold stage leads (monthly first, then quarterly with a 24-month cap).
 
-- Drip continues indefinitely until opt-out — there is no automatic end date
-- If a Re-Engage lead responds positively at any point, move to the appropriate active stage (human decision)
+- After 24 months of quarterly drip (Q4×2), WF-Long-Term-Quarterly moves the lead to **Exhausted** — all automated outreach is complete
+- If a Re-Engage lead responds positively at any point (including from Exhausted), move to the appropriate active stage (human decision)
 - If they opt out at any point, move to Dispo: DNC immediately
+- Re-submission via WF-New-Lead-Entry still works from any stage including Exhausted — full restart
 
 ---
 
@@ -179,7 +180,7 @@ When a lead enters any of these stages, WF-Dispo-Re-Engage automatically enrolls
 - **Emails:** Verify email addresses from skip trace data using a service before sending cold emails.
 - **Duplicate contacts:** Merge duplicates before enrolling in any sequence. GHL can trigger multiple workflows on dupes.
 - **Disconnected numbers:** If a call returns "not in service," tag the lead accordingly. Do not keep sending SMS to dead numbers.
-- **Stage date logging:** When a lead moves to a new stage, log the date. This is how GHL workflows know when to advance (Day 1-10 → Day 11-30 uses the "Date Entered Stage" field). Automated workflows update Stage Entry Date automatically for: New Leads, Day 1-10, Day 11-30, Cold, Nurture, Dispo Re-Engage, and Dispo: DNC. **For qualified stages (Due Diligence, Make Offer, Negotiations, Contract Sent, Under Contract):** Update Stage Entry Date manually when moving a lead to these stages — no workflow fires on these transitions.
+- **Stage date logging:** When a lead moves to a new stage, log the date. This is how GHL workflows know when to advance (Day 1-10 → Day 11-30 uses the "Date Entered Stage" field). Automated workflows update Stage Entry Date automatically for: New Leads, Day 1-10, Day 11-30, Cold, Nurture, Dispo Re-Engage, Dispo: DNC, and Exhausted. **For qualified stages (Due Diligence, Make Offer, Negotiations, Contract Sent, Under Contract):** Update Stage Entry Date manually when moving a lead to these stages — no workflow fires on these transitions.
 
 ---
 
