@@ -1,5 +1,5 @@
 # Bana Land — New Leads Account: Pipeline Stage Definitions
-*Last edited: 2026-03-22 · Last reviewed: —*
+*Last edited: 2026-03-22 · Last reviewed: 2026-03-22*
 
 This is the pipeline reference for **New Leads** — the single working account for all lead sources.
 All leads enter here and are worked through close, disqualification, or long-term drip.
@@ -111,7 +111,7 @@ They have not yet been spoken to and qualified. Every lead starts here.
 | ----------------- | --------------------------------------------------------------------------------------------------------------------- |
 | **Definition**    | 30+ days of contact attempts with no response or qualification.                                                       |
 | **Entry**         | No meaningful response by end of Day 30. Cold Email leads with no phone # get `Cold: Email Only` tag (email-only drip). |
-| **Exit**          | Lead responds and qualifies → Due Diligence. Lead opts out → DNC. Otherwise, stays in Cold indefinitely on drip.      |
+| **Exit**          | Lead responds and qualifies → Due Diligence. Lead opts out → DNC. 24-month quarterly drip completes → Exhausted. |
 | **Re-Engagement** | Lead replies to drip → WF-Response-Handler: pause drip, owner reviews (LM for LM-sources, AM for AM-sources). 3-day auto-resume if no action. |
 | **Re-Submission** | Lead enters from new external campaign → WF-New-Lead-Entry: stop drip, move to New Leads, full restart as new lead.               |
 | **Owner**         | GHL automation only (no manual call tasks unless lead re-engages).                                                     |
@@ -126,7 +126,7 @@ They have not yet been spoken to and qualified. Every lead starts here.
 Disqualified stages fall into two groups:
 
 - **Dispo — Terminal** *(no future contact):* Not a Fit, No Longer Own, Purchased, DNC
-- **Dispo — Re-Engage** *(Long-Term Drip — same as Cold stage, indefinite):* No Motivation, Wants Retail, On MLS, Lead Declined
+- **Dispo — Re-Engage** *(Long-Term Drip — same as Cold stage, 24-month cap → Exhausted):* No Motivation, Wants Retail, On MLS, Lead Declined
 
 **Who can dispo:** Both LM and AM can move leads to any Dispo stage. LM can dispo leads directly during the Day 1–30 window without passing to AM first.
 
@@ -170,7 +170,7 @@ Disqualified stages fall into two groups:
 
 ---
 
-### RE-ENGAGE DISPOSITIONS (Long-Term Drip — Indefinite Until Opt-Out, Re-Engagement, or Re-Submission)
+### RE-ENGAGE DISPOSITIONS (Long-Term Drip — 24-Month Cap, Then Exhausted)
 
 **Re-entry applies to all four stages below:**
 
@@ -183,7 +183,7 @@ Disqualified stages fall into two groups:
 | -------------- | ------------------------------------------------------------------------------ |
 | **Definition** | Owner has no reason or urgency to sell at this time.                           |
 | **Entry**      | Conversation confirms owner is not motivated to sell.                           |
-| **Follow-Up**  | **Yes** — enroll in Long-Term Drip. Indefinite until opt-out or re-engagement. |
+| **Follow-Up**  | **Yes** — enroll in Long-Term Drip (monthly → quarterly, 24-month cap). Moves to Exhausted when drip completes. |
 
 #### Dispo: Wants Retail
 
@@ -191,7 +191,7 @@ Disqualified stages fall into two groups:
 | -------------- | ------------------------------------------------------------------------------ |
 | **Definition** | Owner wants full market value or has unrealistic price expectations.           |
 | **Entry**      | Price discussion reveals retail expectations.                                   |
-| **Follow-Up**  | **Yes** — enroll in Long-Term Drip. Indefinite until opt-out or re-engagement. |
+| **Follow-Up**  | **Yes** — enroll in Long-Term Drip (monthly → quarterly, 24-month cap). Moves to Exhausted when drip completes. |
 
 #### Dispo: On MLS
 
@@ -199,7 +199,7 @@ Disqualified stages fall into two groups:
 | -------------- | ------------------------------------------------------------------------------ |
 | **Definition** | Property is listed with a realtor or on the open market.                       |
 | **Entry**      | Confirmed listed status.                                                        |
-| **Follow-Up**  | **Yes** — enroll in Long-Term Drip. Indefinite until opt-out or re-engagement. |
+| **Follow-Up**  | **Yes** — enroll in Long-Term Drip (monthly → quarterly, 24-month cap). Moves to Exhausted when drip completes. |
 
 #### Dispo: Lead Declined
 
@@ -207,7 +207,7 @@ Disqualified stages fall into two groups:
 | -------------- | ------------------------------------------------------------------------------ |
 | **Definition** | Lead received an offer from Bana Land and declined.                            |
 | **Entry**      | Offer rejected without counter / negotiations ended.                            |
-| **Follow-Up**  | **Yes** — enroll in Long-Term Drip. Indefinite until opt-out or re-engagement. |
+| **Follow-Up**  | **Yes** — enroll in Long-Term Drip (monthly → quarterly, 24-month cap). Moves to Exhausted when drip completes. |
 
 ---
 
@@ -279,13 +279,31 @@ These leads have been spoken to and are actively progressing through the deal cy
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | **Definition**    | Qualified lead that couldn't be closed. Kept alive for a future deal opportunity.                                                 |
 | **Entry**         | Left any qualified stage without closing (team discretion — not every dead deal lands here).                                      |
-| **Exit**          | Lead re-engages → back to appropriate active stage. Lead opts out → DNC.                                                          |
+| **Exit**          | Lead re-engages → back to appropriate active stage. Lead opts out → DNC. 24-month quarterly drip completes → Exhausted.           |
 | **Re-Engagement** | Lead replies to nurture drip → WF-Response-Handler: pause drip, AM 3-day review. AM acts → qualified/dispo. AM does nothing → drip resumes.    |
 | **Re-Submission** | Lead enters from new external campaign → WF-New-Lead-Entry: stop drip, move to New Leads, full restart as new lead.                          |
 | **Owner**         | GHL automation (full automation — no manual tasks unless response received).                                                      |
 | **Frequency**     | Monthly for first 3 months → quarterly thereafter.                                                                                |
 | **Channels**      | SMS + Email (rotating).                                                                                                           |
 | **Actions**       | Automated "checking in" messages. If response received, WF-Response-Handler fires (see Re-Engagement above).                                   |
+
+---
+
+## Stage Group 4: Follow-Up Complete
+
+### Exhausted
+
+| Field             | Detail                                                                                                                           |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Definition**    | Lead has completed the full 24-month quarterly follow-up cycle (WF-Long-Term-Quarterly Q4×2) with no conversion. All automated outreach is finished. |
+| **Entry**         | WF-Long-Term-Quarterly moves the opportunity here after its final touch (Year 2, Q4). This is the only path into Exhausted.       |
+| **Exit**          | Lead responds inbound → WF-Response-Handler fires (pause + owner review). Re-submission → WF-New-Lead-Entry full restart. Lead opts out → DNC. |
+| **Re-Engagement** | Lead replies inbound → WF-Response-Handler: owner gets 3-day review window. No drip to resume — owner decides next step (move to Due Diligence, dispo, or leave in Exhausted). |
+| **Re-Submission** | Lead enters from new external campaign → WF-New-Lead-Entry: move to New Leads, full restart as new lead.                          |
+| **Owner**         | None — no automated outreach, no manual tasks. Lead is parked unless they reach out or are re-submitted.                          |
+| **Frequency**     | None.                                                                                                                             |
+| **Channels**      | None (automated outreach complete). Inbound responses still handled by WF-Response-Handler.                                       |
+| **Actions**       | None. If response received, WF-Response-Handler fires (see Re-Engagement above).                                                  |
 
 ---
 
@@ -330,10 +348,10 @@ Due Diligence ──► Make Offer ──► Negotiations ──► Contract Sen
 
 --- DISPO RE-ENGAGE (Long-Term Drip) ---
 
-Dispo: No Motivation ───────────────────────────────────────────► Long-Term Drip (indefinite)
-Dispo: Wants Retail ────────────────────────────────────────────► Long-Term Drip (indefinite)
-Dispo: On MLS ──────────────────────────────────────────────────► Long-Term Drip (indefinite)
-Dispo: Lead Declined ───────────────────────────────────────────► Long-Term Drip (indefinite)
+Dispo: No Motivation ───────────────────────────────────────────► Long-Term Drip (24-mo cap) ──► Exhausted
+Dispo: Wants Retail ────────────────────────────────────────────► Long-Term Drip (24-mo cap) ──► Exhausted
+Dispo: On MLS ──────────────────────────────────────────────────► Long-Term Drip (24-mo cap) ──► Exhausted
+Dispo: Lead Declined ───────────────────────────────────────────► Long-Term Drip (24-mo cap) ──► Exhausted
 
 Any Qualified Stage (couldn't close) ───────────────────────────► Nurture or appropriate Dispo
 
@@ -344,6 +362,14 @@ Cold / Nurture / Dispo Re-Engage (replies to our drip)
         └─► Owner moves to qualified stage ────────────────────► Due Diligence (or appropriate)
         └─► Owner moves to dispo ──────────────────────────────► Appropriate Dispo
         └─► Owner does nothing (3 days expire) ────────────────► Drip resumes from where it stopped
+
+Cold / Nurture / Dispo Re-Engage (24-month quarterly drip completes)
+  └─► WF-Long-Term-Quarterly final step ──────────────────────► Exhausted (no further automated outreach)
+
+Exhausted (replies inbound)
+  └─► WF-Response-Handler: owner 3-day review (no drip to resume)
+        └─► Owner moves to qualified stage or dispo ───────────► Appropriate stage
+        └─► Owner does nothing ────────────────────────────────► Stays in Exhausted
 
 Any stage (new external campaign source detected by automation)
   └─► Re-Submitted → Move to NEW LEADS → Full restart (Day 1-10 → etc.)

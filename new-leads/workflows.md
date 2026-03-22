@@ -1,5 +1,5 @@
 # Bana Land — New Leads Account: Workflows
-*Last edited: 2026-03-22 · Last reviewed: —*
+*Last edited: 2026-03-22 · Last reviewed: 2026-03-22*
 
 All 12 workflows for the New Leads GHL sub-account. Build these in **Automation > Workflows** after completing the account configuration in [data-model.md](data-model.md).
 
@@ -315,7 +315,12 @@ Workflow waits for remaining Day 1-10 time. WF-Day-1-10 auto-advances contact to
 23. **If NOT tagged `Cold: Email Only`:** Send SMS: LTQ-SMS-04
 24. Send Email: LTQ-EMAIL-04
 
-Workflow ends. No re-enrollment. Lead stays in their current stage. WF-Response-Handler still catches any future inbound reply.
+**End of 24-month cycle:**
+25. Move opportunity to pipeline stage: **Exhausted**
+26. Update custom field: Stage Entry Date = Today
+27. Send internal notification to team: "{{first_name}} — 24-month follow-up complete. Moved to Exhausted. No further automated outreach. [Contact Link]"
+
+Workflow ends. No re-enrollment. WF-Response-Handler still catches any future inbound reply from the Exhausted stage.
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` ≤ today" condition before each send step.
 
@@ -366,7 +371,7 @@ That's it. All re-engage dispo leads flow into the same Long-Term Drip as Cold s
 
 1. Move to pipeline stage: Dispo: DNC (ensures correct stage regardless of trigger source)
 2. Update custom field: Stage Entry Date = Today
-3. Remove from ALL active workflow enrollments (use "Remove from Workflow" action for each active WF: WF-Cold-Email-Subflow-P1, WF-Cold-Email-Subflow-P2, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-Response-Handler, WF-Missed-Call-Textback)
+3. Remove from ALL active workflow enrollments (use "Remove from Workflow" action for each active WF: WF-Cold-Email-Subflow-P1, WF-Cold-Email-Subflow-P2, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-Response-Handler, WF-Missed-Call-Textback) — Note: contacts in Exhausted have no active workflows, but this list is defensive.
 4. Add tag: DNC
 5. Update custom field: DNC Date = Today
 6. Cancel all pending tasks for this contact
@@ -382,7 +387,7 @@ That's it. All re-engage dispo leads flow into the same Long-Term Drip as Cold s
 ### WF-Response-Handler | Inbound Response Handler (Re-Engagement)
 
 **Trigger:** Inbound SMS received OR Email reply received
-**Stage filter:** Contact is in pipeline stage: Day 1-10, Day 11-30, Cold, Nurture, Dispo: No Motivation, Dispo: Wants Retail, Dispo: On MLS, OR Dispo: Lead Declined
+**Stage filter:** Contact is in pipeline stage: Day 1-10, Day 11-30, Cold, Nurture, Dispo: No Motivation, Dispo: Wants Retail, Dispo: On MLS, Dispo: Lead Declined, OR Exhausted
 **Enrollment conditions:**
 - Lead NOT tagged DNC
 - `Pause WFs Until` field is empty OR `Pause WFs Until` ≤ today (prevents re-trigger during an active review window, but allows re-trigger after a prior pause has expired)
@@ -419,6 +424,8 @@ That's it. All re-engage dispo leads flow into the same Long-Term Drip as Cold s
    - Send internal notification to owner: "{{first_name}} — 3-day review window expired with no action. Drip resumed automatically."
 
 **Note for active stages (Day 1-10 / Day 11-30):** There is no 3-day auto-resume for these contacts. The owner is already actively working them. Resolution is: owner moves stage (kills workflow) or clears the `Pause WFs Until` field.
+
+**Note for Exhausted stage:** There is no drip to resume — all automated outreach is complete. The 3-day window is a review-only period. If owner does nothing after 3 days, `Pause WFs Until` is cleared and the lead stays in Exhausted. Owner can move to Due Diligence, a Dispo stage, or leave in Exhausted.
 
 **Soft opt-outs:** Replies like "not interested" or "leave me alone" without official opt-out keywords (STOP/CANCEL/etc.) still trigger WF-Response-Handler normally. Owner reviews and decides — may move to DNC or appropriate Dispo based on judgment. See rules.md §6A for guidance.
 
