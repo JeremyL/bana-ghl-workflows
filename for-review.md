@@ -1,5 +1,5 @@
 #  file.Bana Land — For Review
-*Last edited: 2026-03-22 · Last reviewed: 2026-03-22*
+*Last edited: 2026-03-23 · Last reviewed: 2026-03-22*
 
 Catch-all for items that need attention before or after go-live: pre-launch verifications, cross-file consistency checks, improvement ideas, and open decisions.
 
@@ -32,7 +32,8 @@ Last full re-run: 2026-03-22 (data model & workflow conflict audit — pre-imple
 
 ### Open Notes
 
-No open notes.
+- **O1:** Owner 2 and Owner 3 custom fields not yet created in Prospect Data GHL account. Same fields as Owner 1 (now 24 fields including Phone 5, Phone 5 Type, Phone 6, Phone 6 Type), prefixed accordingly. Not needed for initial testing — create before go-live.
+- **O2:** FUB export contains a "Listing Price" column with data. Meaning is unclear — determine what it represents before finalizing the FUB → GHL import mapping. May need a new field added to the Properties custom object.
 
 ---
 

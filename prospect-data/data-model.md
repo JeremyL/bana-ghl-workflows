@@ -1,5 +1,5 @@
 # Prospect Data — Data Model
-*Last edited: 2026-03-18 · Last reviewed: —*
+*Last edited: 2026-03-23 · Last reviewed: —*
 
 Prospect Data in the Bana Land GHL system. Stores all raw property and skip trace data in a single flat Custom Object. No contacts, no opportunities, no pipeline.
 
@@ -26,7 +26,7 @@ One row = one property. All owner/skip trace data lives as columns on the same r
 | Offer Price %     | Number     | `offer_price_pct`    | Offer as a percentage of market value (e.g., 35 for 35%). Manually entered or calculated from Offer Price / Market Price. |
 | Legal Description | Large Text | `legal_description`  | Full legal description                           |
 | FUB ID            | Text       | `fub_id`             | Follow Up Boss ID — links back to the FUB record for cross-reference |
-| Lat/Long          | Text       | `gps`                | Latitude and longitude as a single comma-separated value (e.g., `35.1234, -97.5678`). |
+| Lat/Long          | Text       | `gps`                | Latitude and longitude as a single comma-separated value (e.g., `35.1234, -97.5678`). Label: "Lat/Long", key: `gps`. |
 | Map Link          | Text       | `map_link`           | URL to property map (Google Maps, onX, ParcelFact, etc.)             |
 
 
@@ -62,10 +62,14 @@ One row = one property. All owner/skip trace data lives as columns on the same r
 | Owner 1 Phone 3 Type    | Text   | `phone3 type`     | Raw value from skip trace provider |
 | Owner 1 Phone 4         | Phone  | `phone4`          | Fourth phone                       |
 | Owner 1 Phone 4 Type    | Text   | `phone4 type`     | Raw value from skip trace provider |
-| Owner 1 Email 1         | Email  | `email1`          | Primary email                      |
-| Owner 1 Email 2         | Email  | `email2`          | Second email                       |
-| Owner 1 Email 3         | Email  | `email3`          | Third email                        |
-| Owner 1 Email 4         | Email  | `email4`          | Fourth email                       |
+| Owner 1 Phone 5         | Phone  | `phone5`          | Fifth phone                        |
+| Owner 1 Phone 5 Type    | Text   | `phone5 type`     | Raw value from skip trace provider |
+| Owner 1 Phone 6         | Phone  | `phone6`          | Sixth phone                        |
+| Owner 1 Phone 6 Type    | Text   | `phone6 type`     | Raw value from skip trace provider |
+| Owner 1 Email 1         | Text   | `email1`          | Primary email                      |
+| Owner 1 Email 2         | Text   | `email2`          | Second email                       |
+| Owner 1 Email 3         | Text   | `email3`          | Third email                        |
+| Owner 1 Email 4         | Text   | `email4`          | Fourth email                       |
 | Owner 1 Age             | Number | `Age`             | Age from skip trace (0 = unknown)  |
 | Owner 1 Deceased        | Text   | `Deceased`        | Raw value from skip trace provider |
 
@@ -87,9 +91,9 @@ Same 20 fields as Owner 1, prefixed with `Owner 3`.
 | Skip Trace Date   | Date         | Date skip trace was completed                    |
 | DNC               | Checkbox     | Any owner on this property requested DNC         |
 | DNC Date          | Date         | Date DNC was flagged                             |
-| Pushed to New Leads | Checkbox   | Whether this property has been pushed to the New Leads account |
+| Account Push        | Checkbox   | Whether this property has been pushed to the New Leads account |
 | Account Push Date | Date         | Date property was last pushed to another account |
-| Date Added        | Date         | Date this property record was created            |
+| Date Added        | Date         | Date this property record was created (GHL default field) |
 | Notes             | Large Text   | Free-form notes                                  |
 
 
@@ -163,21 +167,20 @@ When a property is pushed to New Leads, automation splits the flat row into the 
 **Property → Contact (one per owner with valid contact info):**
 
 
-| Properties Field (Prospect Data) | Contact Field (New Leads) |
-| ---------------------------- | ------------------------------ |
-| Owner N First Name           | First Name                     |
-| Owner N Last Name            | Last Name                      |
-| Owner N Phone 1              | Phone                          |
-| Owner N Phone 2              | Phone 2                        |
-| Owner N Phone 3              | Phone 3                        |
-| Owner N Phone 4              | Phone 4                        |
-| Owner N Email 1              | Email                          |
-| Owner N Mailing Address      | Address                        |
-| Owner N Mailing City         | City                           |
-| Owner N Mailing State        | State                          |
-| Owner N Mailing Zip          | Postal Code                    |
-| Owner N Age                  | Age                            |
-| Owner N Deceased             | Deceased                       |
+| Properties Field (Prospect Data) | Contact Field (New Leads)         | Notes                        |
+| -------------------------------- | --------------------------------- | ---------------------------- |
+| Owner N First Name               | First Name                        |                              |
+| Owner N Last Name                | Last Name                         |                              |
+| (confirmed phone from campaign)  | Phone                             | Native — confirmed only      |
+| Owner N Phone 1–6                | Unconfirmed Phones (Large Text)   | All skip trace phones, one per line |
+| (confirmed email from campaign)  | Email                             | Native — confirmed only      |
+| Owner N Email 1–4                | Unconfirmed Emails (Large Text)   | All skip trace emails, one per line |
+| Owner N Mailing Address          | Address                           |                              |
+| Owner N Mailing City             | City                              |                              |
+| Owner N Mailing State            | State                             |                              |
+| Owner N Mailing Zip              | Postal Code                       |                              |
+| Owner N Age                      | Age                               |                              |
+| Owner N Deceased                 | Deceased                          |                              |
 
 
 **Property → Opportunity:**
@@ -203,5 +206,4 @@ When a property is pushed to New Leads, automation splits the flat row into the 
 | (today's date)               | Latest Source Date                 |
 
 
-**Note:** GHL Contacts natively support only 1 email field. Only Email 1 maps to the
-Contact; Emails 2–4 remain in Prospect Data for reference. All 4 phones map over.
+**Note:** The confirmed phone/email (from the campaign interaction — the number they called from, the email they replied from) goes into the native Phone/Email fields. All skip trace phones and emails from Prospect Data go into two Large Text fields (Unconfirmed Phones, Unconfirmed Emails) as reference data. Native Phone 2–4 are reserved for additional numbers confirmed during follow-up conversations.
