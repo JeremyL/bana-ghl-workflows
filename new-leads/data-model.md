@@ -1,5 +1,5 @@
 # Bana Land — New Leads Account: Data Model
-*Last edited: 2026-03-22 · Last reviewed: 2026-03-22*
+*Last edited: 2026-03-23 · Last reviewed: 2026-03-22*
 
 Static configuration for the New Leads GHL sub-account — fields, tags, pipeline stages, smart lists, and lead entry rules. Build everything in this file before creating workflows.
 
@@ -138,21 +138,27 @@ When any new contact enters this account, create an **Opportunity** linked to th
 
 ### Data Model: Contacts vs Opportunities
 
-- **Contacts** = people (property owners). One person has one email address and up to four phone numbers. Personal info lives here.
+- **Contacts** = people (property owners). Confirmed phone/email in native fields. Unconfirmed skip trace data in two Large Text fields. Personal info lives here.
 - **Opportunities** = properties/deals. Each property is a separate opportunity inside the pipeline. Property data, pricing, and deal-specific fields live here.
 
 Pipeline stages track **Opportunities**, not Contacts. Each pipeline card IS an opportunity.
 
 ---
 
-### Multiple Phone Numbers per Contact
+### Confirmed vs. Unconfirmed Contact Data
 
-GHL contacts support multiple phone numbers natively:
+**Confirmed** = the phone number or email the lead actually used (called from, texted from, replied from, answered on). Goes in GHL's native fields:
 
-- **Phone** (primary) — first/best skip-traced number
-- **Phone 2** — second skip-traced number (if available)
-- **Phone 3** — third skip-traced number (if available)
-- **Phone 4** — fourth skip-traced number (if available)
+- **Phone** (native) — confirmed phone number
+- **Phone 2–4** (native) — additional confirmed numbers (verified during follow-up conversations)
+- **Email** (native) — confirmed email address
+
+**Unconfirmed** = skip trace data pulled from Prospect Data when the lead enters New Leads. Stored in two Large Text custom fields (one per line):
+
+- **Unconfirmed Phones** — all skip trace phone numbers
+- **Unconfirmed Emails** — all skip trace email addresses
+
+If the confirmed phone/email matches one from skip trace, it still goes in the native field. The unconfirmed fields hold everything from skip trace for reference — if a primary bounces or goes dead, the team can manually try an alternate.
 
 Used in WF-Cold-Email-Subflow-P2's one-time SMS blast for `Cold: Email Only` contacts.
 
@@ -171,7 +177,9 @@ Go to **Settings > Custom Fields > Contacts** and create the following:
 | Age               | Number   | Owner's age (from skip trace data)                                                                             |
 | Deceased          | Text     | Owner is deceased (from skip trace data). Values: Y / N / blank                                                |
 | Assigned To       | Text     | Lead Manager or Acquisition Manager name (set by WF-New-Lead-Entry based on source tag)                                    |
-| Pause WFs Until   | Date     | Pause all automated sends until this date. Workflows check: field is empty OR field ≤ today → proceed to send. Set to today+3 by WF-Response-Handler. Owner clears manually to resume early. |
+| Pause WFs Until      | Date       | Pause all automated sends until this date. Workflows check: field is empty OR field ≤ today → proceed to send. Set to today+3 by WF-Response-Handler. Owner clears manually to resume early. |
+| Unconfirmed Phones   | Large Text | All skip trace phone numbers (one per line). Not verified — for reference and manual use. |
+| Unconfirmed Emails   | Large Text | All skip trace email addresses (one per line). Not verified — for reference and manual use. |
 
 ---
 
