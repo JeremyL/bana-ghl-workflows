@@ -308,8 +308,8 @@ Bana Land | [CALLBACK NUMBER]
 
 ## Cold — Monthly Drip (Months 1–3)
 
-**Stage:** LT FU: Cold / Nurture / Lost | **Cadence:** 30-day wait on entry, then SMS + Email each month, ~2 weeks apart | **Owner:** GHL auto only
-**Applies to:** LT FU: Cold leads (no response), LT FU: Nurture leads (stalled deals), and LT FU: Lost leads (non-terminal Lost status)
+**Stage:** LT FU: Cold / Lost | **Cadence:** 30-day wait on entry, then SMS + Email each month, ~2 weeks apart | **Owner:** GHL auto only
+**Applies to:** LT FU: Cold leads (no response) and LT FU: Lost leads (non-terminal Lost status)
 **Trigger:** WF-Cold-Drip-Monthly fires on LT FU: Cold/Lost stage entry or enrollment by WF-Dispo-Re-Engage
 
 ---

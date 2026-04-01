@@ -80,7 +80,7 @@ Workflow waits for remaining Day 1-10 time. WF-Day-1-10 auto-advances contact to
 1. Wait: 3 days (spacing from WR-EMAIL-03 sent in P1)
 2. **Check: Phone number populated?** If yes → exit workflow (WF-Day-11-30 standard steps now fire normally).
 3. Send Email: WR-EMAIL-04
-4. Wait: 3 days
+4. Wait: 7 days
 5. **Check: Phone number populated?** If yes → exit workflow.
 6. Send Email: WR-EMAIL-05
 7. Wait: 9 days (brings us to approximately Day 30)
@@ -249,7 +249,7 @@ Workflow waits for remaining Day 1-10 time. WF-Day-1-10 auto-advances contact to
 ### WF-Cold-Drip-Monthly | Cold Drip — Monthly (Months 1–3)
 
 **Trigger:** Contact moved to LT FU pipeline stage "Cold" OR "Lost" OR enrolled directly by WF-Dispo-Re-Engage
-**Applies to:** LT FU: Cold leads (no response after Day 30), LT FU: Nurture leads (stalled deals), and LT FU: Lost leads (enrolled via WF-Dispo-Re-Engage)
+**Applies to:** LT FU: Cold leads (no response after Day 30) and LT FU: Lost leads (enrolled via WF-Dispo-Re-Engage)
 **Enrollment condition:** Lead NOT tagged `dnc`
 
 **Note — `cold: email only` contacts:** Skip all SMS steps — send email steps only.

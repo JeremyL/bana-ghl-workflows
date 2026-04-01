@@ -23,7 +23,7 @@ One row = one property. All owner/skip trace data lives as columns on the same r
 | Property State    | Text       | `state`              | State (all US states)                            |
 | Acres             | Number     | `property_acreage`   | Property acreage                                 |
 | Offer Price       | Text       | `offer price`        | Offer amount or percentage for this property — Text type to support dollar amounts, percentages, or both (e.g., "$45,000" or "35%" or "$45k / 32%") |
-| Offer Price %     | Number     | `offer_price_pct`    | Offer as a percentage of market value (e.g., 35 for 35%). Manually entered or calculated from Offer Price / Market Price. |
+| Offer Price %     | Text       | `offer_price_pct`    | Offer as a percentage of market value (e.g., "35%"). Text type to match GHL field. Manually entered or calculated from Offer Price / Market Price. |
 | Legal Description | Large Text | `legal_description`  | Full legal description                           |
 | FUB ID            | Text       | `fub_id`             | Follow Up Boss ID — links back to the FUB record for cross-reference |
 | Lat/Long          | Text       | `gps`                | Latitude and longitude as a single comma-separated value (e.g., `35.1234, -97.5678`). Label: "Lat/Long", key: `gps`. |
@@ -76,11 +76,11 @@ One row = one property. All owner/skip trace data lives as columns on the same r
 
 ### Owner 2 Fields
 
-Same 20 fields as Owner 1, prefixed with `Owner 2`. CSV columns for future uploads will follow the pattern: `owner2_first_name`, `owner2_phone1`, etc.
+Same 24 fields as Owner 1, prefixed with `Owner 2`. Created via API 2026-04-01. CSV columns for future uploads will follow the pattern: `owner2_first_name`, `owner2_phone1`, etc.
 
 ### Owner 3 Fields
 
-Same 20 fields as Owner 1, prefixed with `Owner 3`.
+Same 24 fields as Owner 1, prefixed with `Owner 3`. Created via API 2026-04-01.
 
 ### Status & Tracking Fields
 

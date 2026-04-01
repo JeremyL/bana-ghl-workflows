@@ -1,5 +1,5 @@
 # AI Role & Project Context — Bana Land Follow-Up System
-*Last edited: 2026-03-30 · Last reviewed: —*
+*Last edited: 2026-04-02 · Last reviewed: —*
 
 ## Who I Am in This Project
 
@@ -123,7 +123,7 @@ See [new-leads/pipeline.md](new-leads/pipeline.md) and [prospect-data/data-model
 - **Status-maintained:** We're the buyer with options, not a desperate investor
 - **Rural-appropriate:** Plain language, respectful, no industry jargon to the seller
 - **First name** where available
-- **Banned phrases:** "just following up," "checking in," "still interested," "no pressure," "no rush," "no obligation," "whenever you're ready," "keeping the door open," "just wanted to make sure you saw it," "we're still here"
+- **Banned phrases:** "just following up" / "following up," "checking in" / "check-in," "still interested," "no pressure" / "no rush" / "no obligation," "whenever you're ready," "keeping the door open," "just wanted to make sure you saw it," "we're still here"
 
 **What this sounds like:**
 

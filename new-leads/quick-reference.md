@@ -131,9 +131,9 @@ Missed inbound call ──► 2 min wait ──► SMS (MC-SMS-01)
 
 ═══════════════════════════════════════════════════════════════════
 
-TEMPLATE TOTALS (50 unique templates)
+TEMPLATE TOTALS (51 unique templates)
 
-  SMS ········ 27   NL-SMS (9) · CO-SMS (2) · IN-SMS (2) · DM-SMS (2) · COLD-SMS (3) · LTQ-SMS (4) · NUR-SMS (2)
+  SMS ········ 28   NL-SMS (10) · CO-SMS (2) · IN-SMS (2) · DM-SMS (2) · COLD-SMS (3) · LTQ-SMS (4) · NUR-SMS (2)
                     WR-COLD-SMS (1) · NL-VMSMS (1) · MC-SMS (1)
   Email ······ 18   NL-EMAIL (5) · COLD-EMAIL (3) · LTQ-EMAIL (4) · NUR-EMAIL (1)
                     WR-EMAIL (5)

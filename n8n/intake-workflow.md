@@ -1,5 +1,5 @@
 # n8n Intake Workflow (Baseline)
-*Last edited: 2026-04-01 · Last reviewed: —*
+*Last edited: 2026-04-02 · Last reviewed: —*
 
 Baseline n8n workflow that proves the Prospect Data → New Leads pipeline. Receives a new lead via webhook, searches Prospect Data for a matching Property record, enriches the lead if found, and creates a Contact + Opportunity in New Leads.
 
@@ -128,7 +128,9 @@ Search the Properties Custom Object in the Prospect Data GHL sub-account. Stop a
 
 **When:** `email` is present in the webhook payload AND Steps 2A + 2B found no match.
 
-**Query:** Same `query` search as 2A, using the email as the search term. This matches against the `All Emails` searchable TEXT field on the Property record (a space-separated concatenation of all 12 email fields across all owners).
+**Normalize:** Lowercase the `email` value from the webhook before searching. Prospect Data stores emails in original case from skip trace (often uppercase), so case-insensitive matching requires normalizing the search term.
+
+**Query:** Same `query` search as 2A, using the lowercased email as the search term. This matches against the `All Emails` searchable TEXT field on the Property record (a space-separated concatenation of all 12 email fields across all owners).
 
 - **Match found** → record the Property record. Determine which owner matched by checking the record's individual email fields. Set `matched_by` = `email`. Go to Step 2D.
 - **Multiple matches** → use the first result. Set `multi_match` = `true`. Go to Step 2D.
@@ -167,10 +169,12 @@ Record the owner number (1, 2, or 3) as `primary_owner` for field mapping in Ste
 
 Map the primary owner's fields from the Property record to Contact fields. Webhook data takes precedence for confirmed phone/email.
 
+**Normalize emails:** Before mapping, lowercase all email values — both the webhook `email` (confirmed) and all Owner N Email 1–4 values from the Property record (unconfirmed). GHL lowercases emails on contact creation, but normalizing here ensures consistency for email comparisons, dedup, and workflow conditions before the data reaches GHL.
+
 | Source | Contact Field | Value |
 | --- | --- | --- |
 | Webhook | Phone (native) | `phone` from webhook (confirmed) |
-| Webhook | Email (native) | `email` from webhook (confirmed) |
+| Webhook | Email (native) | `email` from webhook (confirmed, lowercased) |
 | Property | First Name | Owner N First Name (use webhook `first_name` if provided, else Property) |
 | Property | Last Name | Owner N Last Name (use webhook `last_name` if provided, else Property) |
 | Property | Address | Owner N Mailing Address |
@@ -180,7 +184,7 @@ Map the primary owner's fields from the Property record to Contact fields. Webho
 | Property | Age | Owner N Age |
 | Property | Deceased | Owner N Deceased |
 | Property | Unconfirmed Phones | All non-empty Owner N Phone 1–6 values, one per line |
-| Property | Unconfirmed Emails | All non-empty Owner N Email 1–4 values, one per line |
+| Property | Unconfirmed Emails | All non-empty Owner N Email 1–4 values, lowercased, one per line |
 
 **Unconfirmed Phones** — concatenate all non-empty phone fields for the primary owner, one per line:
 ```
@@ -189,14 +193,16 @@ Map the primary owner's fields from the Property record to Contact fields. Webho
 5125553333
 ```
 
-**Unconfirmed Emails** — same pattern for email fields.
+**Unconfirmed Emails** — same pattern for email fields. Lowercase each value before concatenating.
 
 #### 4B: No Match — Webhook Data Only
+
+**Normalize emails:** Lowercase the webhook `email` before mapping (same reason as 4A).
 
 | Contact Field | Value |
 | --- | --- |
 | Phone (native) | `phone` from webhook (if present) |
-| Email (native) | `email` from webhook (if present) |
+| Email (native) | `email` from webhook (if present, lowercased) |
 | First Name | `first_name` from webhook (if present) |
 | Last Name | `last_name` from webhook (if present) |
 | Unconfirmed Phones | Empty |
@@ -437,7 +443,7 @@ Docs: https://marketplace.gohighlevel.com/docs/Authorization/PrivateIntegrations
 
 ### Rate Limits
 
-GHL API v2 rate limits vary by plan. Typical: 100 requests/minute per sub-account. At per-lead volume, this workflow stays well within limits. The phone search cascade (up to 18 sequential queries) is the highest-volume step — still under 20 requests per lead.
+GHL API v2 rate limits vary by plan. Typical: 100 requests/minute per sub-account. At per-lead volume, this workflow stays well within limits. The dedup search uses concatenated `All Phones` and `All Emails` fields — 3 queries max per lead (ref → phone → email).
 
 ---
 
@@ -480,6 +486,6 @@ All errors should be logged to n8n's execution log. Critical failures (Contact/O
 ## Future Enhancements
 
 - **Multi-owner Contact creation:** Create Contacts for all owners with valid contact info, not just the primary. Link all to the same Opportunity.
-- **Concatenated search field:** Add a single text field on the Property record containing all phone numbers (and another for emails) to replace sequential 18-query phone search with a single contains query.
+- ~~**Concatenated search field:**~~ ✅ Implemented — `All Phones` and `All Emails` fields exist on Properties custom object and are used in Steps 2B/2C.
 - **Batch webhook support:** Accept an array of leads in a single webhook call for cold calling session imports.
 - **Manual push trigger:** Listen for `Push to CRM` checkbox change on Property records via GHL webhook → fire this same pipeline.

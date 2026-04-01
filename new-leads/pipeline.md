@@ -399,7 +399,7 @@ LM qualifies lead (Cold Email/SMS/Call sources)
 AM qualifies lead (Direct Mail/VAPI/Referral/Website sources)
   └─► AM moves to [02 : Qualified] Comps/Pricing → continues through close
 
-=== 02 : ACQUISITIONS (AM owns all) ===
+=== 02 : QUALIFIED (AM owns all) ===
 
 Comps/Pricing ──► Make Offer ──► Negotiations ──► Contract Sent ──► Contract Signed
                        │               │                │                  │
