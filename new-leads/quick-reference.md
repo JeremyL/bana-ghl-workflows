@@ -1,6 +1,6 @@
 # Quick Reference — New Leads Outreach
 
-*Last edited: 2026-03-20 · Last reviewed: —*
+*Last edited: 2026-04-01 · Last reviewed: —*
 
 Every outreach touch across the New Leads pipeline — stage by stage, with template IDs and message counts.
 Templates follow `PREFIX-CHANNEL-##` format. Owner = LM (Cold Email/SMS/Call) or AM (Direct Mail/VAPI/Referral/Website).
@@ -38,7 +38,7 @@ Templates follow `PREFIX-CHANNEL-##` format. Owner = LM (Cold Email/SMS/Call) or
               │   Voicemail: leave NL-VM-01 script, then send NL-VMSMS-01 combo SMS
               │   Totals: 6 SMS, 3 Emails, 5 Calls, 1 VM script, 1 VM combo SMS
               │
-              └─► Qualifies ────────────────────────────────────────► Due Diligence (AM takes over)
+              └─► Qualifies ────────────────────────────────────────► [02 : Qualified] Comps/Pricing (AM takes over)
               └─► No response by Day 11 ────────────────────────────► DAY 11-30
                     │
                     │   Day 11-30 — Winding Down (every 2-3 days, 11 touches over 20 days)
@@ -57,9 +57,9 @@ Templates follow `PREFIX-CHANNEL-##` format. Owner = LM (Cold Email/SMS/Call) or
                     │   Voicemail: leave NL-VM-02 script, then send NL-VMSMS-01 combo SMS
                     │   Totals: 4 SMS, 2 Emails, 2 Calls, 3 RVM, 1 VM script, 1 VM combo SMS
                     │
-                    └─► Qualifies ──────────────────────────────────► Due Diligence (AM takes over)
-                    └─► No response by Day 30 ──────────────────────► COLD MONTHLY
-                    └─► DNC request ────────────────────────────────► Dispo: DNC (zero contact)
+                    └─► Qualifies ──────────────────────────────────► [02 : Qualified] Comps/Pricing (AM takes over)
+                    └─► No response by Day 30 ──────────────────────► [05 : LT FU] Cold → COLD MONTHLY
+                    └─► DNC request ────────────────────────────────► Abandoned + `abandoned: dnc` (zero contact)
 
 --- COLD EMAIL SPECIAL HANDLING (runs concurrently with Day 1-30) ---
 
@@ -73,7 +73,7 @@ Cold Email (no confirmed phone #) enters New Leads → all standard SMS/call/ema
         │
         └─► Phone # received at any point ──────────────────────────► Sub-flow stops, standard Day 1-30 resumes
         └─► Day 30, no phone # ─────────────────────────────────────► One-time SMS blast (WR-COLD-SMS-01)
-              └─► Tag: Cold: Email Only → Cold (email-only drip)
+              └─► Tag: cold: email only → [05 : LT FU] Cold (email-only drip)
   Totals: 5 Emails, 1 SMS
 
 --- COLD MONTHLY (Months 1-3 — fully automated) ---
@@ -86,7 +86,7 @@ COLD MONTHLY (SMS + Email alternating every ~14 days)
   │     Day 86:  SMS (COLD-SMS-03)
   │     Day 100: Email (COLD-EMAIL-03)
   │
-  │   Cold: Email Only contacts skip all SMS steps
+  │   cold: email only contacts skip all SMS steps
   │   Totals: 3 SMS, 3 Emails
   │
   └─► After Month 3 ──────────────────────────────────────────────► Long-Term Quarterly
@@ -103,7 +103,7 @@ NURTURE MONTHLY (alternating SMS + Email)
 
 --- LONG-TERM QUARTERLY (Month 4-28 — shared, fully automated) ---
 
-Fed by: Cold Monthly, Nurture Monthly, and Dispo Re-Engage
+Fed by: Cold Monthly, Nurture Monthly, and Lost (via WF-Dispo-Re-Engage)
 SMS + Email same day, every 90 days — Q1-Q4 plays twice (24 months), then stops
 
   │     Q1: SMS (LTQ-SMS-01) + Email (LTQ-EMAIL-01)
@@ -112,18 +112,18 @@ SMS + Email same day, every 90 days — Q1-Q4 plays twice (24 months), then stop
   │     Q4: SMS (LTQ-SMS-04) + Email (LTQ-EMAIL-04)
   │     ↻ plays Q1-Q4 twice (24 months), then stops
   │
-  │   Cold: Email Only contacts skip all SMS steps
+  │   cold: email only contacts skip all SMS steps
   │   Totals: 4 SMS, 4 Emails (x2 = 8 SMS, 8 Emails over 24 months)
   │
   └─► Re-engages (replies to drip) ───────────────────────────────► Owner reviews (3-day window)
-  └─► DNC request ─────────────────────────────────────────────────► Dispo: DNC (zero contact)
+  └─► DNC request ─────────────────────────────────────────────────► Abandoned + `abandoned: dnc` (zero contact)
 
---- DISPO RE-ENGAGE ---
+--- LOST (Status + Lost Reason → Long-Term Drip) ---
 
-Dispo: No Motivation ──────────────────────────────────────────────► Cold Monthly → Long-Term Quarterly (same drip)
-Dispo: Wants Retail ───────────────────────────────────────────────► Cold Monthly → Long-Term Quarterly (same drip)
-Dispo: On MLS ─────────────────────────────────────────────────────► Cold Monthly → Long-Term Quarterly (same drip)
-Dispo: Lead Declined ──────────────────────────────────────────────► Cold Monthly → Long-Term Quarterly (same drip)
+Lost (No Motivation) ─────────────────────────────────────────────► Cold Monthly → Long-Term Quarterly (same drip)
+Lost (Wants Retail) ──────────────────────────────────────────────► Cold Monthly → Long-Term Quarterly (same drip)
+Lost (On MLS) ────────────────────────────────────────────────────► Cold Monthly → Long-Term Quarterly (same drip)
+Lost (Lead Declined) ─────────────────────────────────────────────► Cold Monthly → Long-Term Quarterly (same drip)
 
 --- MISSED CALL TEXT-BACK (any stage) ---
 

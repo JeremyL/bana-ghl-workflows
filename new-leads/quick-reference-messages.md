@@ -1,6 +1,6 @@
 # Bana Land — Quick Reference: Automated Messages
 
-*Last edited: 2026-03-20 · Last reviewed: —*
+*Last edited: 2026-04-01 · Last reviewed: —*
 
 One-pager for tonality planning. Shows every automated message by segment with its concept/angle. No actual copy — just what each message is doing.
 
@@ -22,7 +22,7 @@ One-pager for tonality planning. Shows every automated message by segment with i
       - Cold intro — this is AGENT NAME, lets know call is coming
     - ~1hr later > Missed-call SMS if no call logged · SMS · CO-SMS-00A
       - Missed call notice — says we tried calling, leaves callback number, need to verify some things about property
-  - **Inbound** (Website / VAPI AI Call / Referral)
+  - **Inbound** (Website / VAPI / Referral)
     - 120s after entry · SMS · IN-SMS-00
       - Inbound acknowledgment — references that their info just came through, lets know call is coming
     - ~1hr later > Missed-call SMS if no call logged · SMS · IN-SMS-00A
@@ -78,7 +78,7 @@ One-pager for tonality planning. Shows every automated message by segment with i
 
 - **Section guide:**
   - Fully automated.
-  - Lead didn't respond in 30 days or was dispo'd.
+  - Lead didn't respond in 30 days or was marked Lost (with reason).
   - Tone is low-pressure, curious, and spaced out.
   - Goal is to catch them when timing changes.
   - After Month 3, leads enter the Long-Term Quarterly drip.

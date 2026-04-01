@@ -1,6 +1,6 @@
 # New Leads — Contact Rules & Compliance
 
-*Last edited: 2026-03-22 · Last reviewed: 2026-03-22*
+*Last edited: 2026-04-01 · Last reviewed: 2026-04-01*
 
 Operational rules that govern all outreach in **New Leads** (the single working account).
 Every GHL workflow, automation, and team member action must respect these rules.
@@ -31,12 +31,13 @@ Every GHL workflow, automation, and team member action must respect these rules.
 
 ### Immediate actions when DNC is triggered:
 
-1. Change lead stage to **Dispo: DNC** immediately
-2. GHL workflow auto-pauses / kills all active sequences for this contact
-3. Tag the lead with **"DNC"** and log the date opted out
-4. Remove from all active workflow enrollments
-5. Zero contact from that point forward — calls, texts, email, all stopped
-6. **DNC Sync:** WF-DNC-Handler fires a sync webhook via automation:
+1. Change opportunity status to **Abandoned** + add tag `abandoned: dnc` immediately
+2. **Set native DND for ALL channels** (SMS, Call, Email) — platform-level hard block that prevents sends regardless of workflow configuration
+3. Tag the lead with **"dnc"**
+4. GHL workflow auto-pauses / kills all active sequences for this contact
+5. Remove from all active workflow enrollments
+6. Zero contact from that point forward — calls, texts, email, all stopped
+7. **DNC Sync:** WF-DNC-Handler fires on status → Abandoned + `abandoned: dnc` tag → sync webhook via automation:
   - automation updates the Property record in Prospect Data (DNC = checked, DNC Date = today, Status = DNC)
 
 ### Team responsibility:
@@ -89,25 +90,26 @@ Not answering calls, not replying to texts, and not opening emails does NOT cons
 
 ---
 
-## 5. Stage Movement Rules
+## 5. Stage & Status Movement Rules
 
-**Who can change a lead's stage:**
+**Who can change a lead's stage or status:**
 
-- **Lead Manager (LM):** Can move LM-sourced leads (Cold Email/SMS/Call) through any stage, including dispo stages. Can also qualify and move to Due Diligence.
-- **Acquisition Manager (AM):** Can move AM-sourced leads (Direct Mail/VAPI/Referral/Website) through any stage. Owns all qualified stages regardless of source.
-- **GHL automation:** Can advance uncontacted leads based on time elapsed (Day 1-10 → Day 11-30 → Cold)
-- **Automation cannot:** Qualify a lead (move to Due Diligence or beyond) — that requires human confirmation
+- **Lead Manager (LM):** Can move LM-sourced leads (Cold Email/SMS/Call) through Leads pipeline stages. Can change status to Lost (with reason) or Abandoned (with tag). Can qualify and move to Qualified: Comps/Pricing.
+- **Acquisition Manager (AM):** Can move AM-sourced leads (Direct Mail/VAPI/Referral/Website) through any stage in any pipeline. Can change status. Owns all Qualified stages regardless of source.
+- **GHL automation:** Can advance leads within Leads pipeline (Day 1-10 → Day 11-30). Can auto-move to LT FU: Cold after Day 11-30. Can auto-move Qualified: Nurture → LT FU: Nurture. Can move Lost status → LT FU: Lost. Can change status to Abandoned (exhausted) after 24-month drip completes.
+- **Automation cannot:** Qualify a lead (move to Qualified or beyond) — that requires human confirmation
 
 
 | Trigger                        | Action                                                                                  |
 | ------------------------------ | --------------------------------------------------------------------------------------- |
-| Lead responds and is qualified | Owner manually moves to Due Diligence. For LM-sourced: LM sets call appointment for AM. |
-| X days pass with no response   | GHL auto-advances to next time bucket                                                   |
-| Lead says stop / opt-out       | GHL or human moves to Dispo: DNC immediately                                            |
-| Disqualifying info gathered    | Owner moves to appropriate Dispo stage                                                  |
-| Offer declined, deal dead      | AM moves to Dispo: Lead Declined                                                        |
-| Offer declined, could revisit  | AM moves to Nurture or Negotiations                                                     |
-| Re-submitted from new campaign | WF-New-Lead-Entry fires → full restart in New Leads                                                 |
+| Lead responds and is qualified | Owner manually moves to Qualified: Comps/Pricing. For LM-sourced: LM sets call appointment for AM. |
+| X days pass with no response   | GHL auto-advances to next stage (within Leads) or cross-pipeline to LT FU: Cold         |
+| Lead says stop / opt-out       | Status → Abandoned + tag `abandoned: dnc` immediately                                   |
+| Disqualifying info gathered    | Status → Lost (with reason) or Abandoned (with tag) depending on type                   |
+| Offer declined, deal dead      | Status → Lost, lost reason = Lead Declined                                               |
+| Offer declined, could revisit  | AM moves to Nurture or Negotiations (stays Open)                                        |
+| Not a fit / no longer owns     | Status → Abandoned + appropriate tag                                                    |
+| Re-submitted from new campaign | WF-New-Lead-Entry fires → clear lost reason / strip abandoned tag → Open → New Leads    |
 
 
 ---
@@ -124,18 +126,18 @@ There are two distinct re-entry events. Each has its own protocol.
 
 #### Protocol (WF-Response-Handler):
 
-**WF-Response-Handler only fires for contacts in:** Day 1-10, Day 11-30, Cold, Nurture, Dispo: No Motivation, Dispo: Wants Retail, Dispo: On MLS, Dispo: Lead Declined, or Exhausted — AND `Pause WFs Until` is empty (prevents duplicate triggers during an active review window).
+**WF-Response-Handler only fires for contacts in:** Leads: Day 1-10, Leads: Day 11-30, LT FU: Cold, LT FU: Nurture, LT FU: Lost (status = Open), or Abandoned (non-DNC) — AND `Pause WFs Until` is empty (prevents duplicate triggers during an active review window).
 
 1. Set field: `Pause WFs Until` = today + 3 days — all active workflows hold at the next send condition
 2. Create high-priority review task assigned to **lead owner** (LM for Cold Email/SMS/Call sources, AM for Direct Mail/VAPI/Referral/Website sources)
 3. Send internal notification & internal SMS to lead owner with contact link
 4. **Resolution — one of three outcomes:**
-  - **Owner moves to a qualified stage** → workflow exit triggers fire, active workflows killed. Clear `Pause WFs Until`.
-  - **Owner moves to a Dispo stage** → dispo workflows take over. Clear `Pause WFs Until`.
-  - **Owner clears `Pause WFs Until` field early** (reply not actionable, lead stays in current stage) → drip resumes from where it stopped.
-5. **Auto-resume safety net (drip stages only):** If owner does nothing after **3 days**, `Pause WFs Until` date expires → drip resumes automatically. WF-Response-Handler clears the field.
+  - **Owner moves to a qualified stage** (flip to Open if currently Lost) → workflow exit triggers fire, active workflows killed. Clear `Pause WFs Until`.
+  - **Owner changes status to Lost** (with reason) or **Abandoned** (with tag) → appropriate workflows take over. Clear `Pause WFs Until`.
+  - **Owner clears `Pause WFs Until` field early** (reply not actionable, lead stays in current stage/status) → drip resumes from where it stopped.
+5. **Auto-resume safety net (drip stages and Lost status only):** If owner does nothing after **3 days**, `Pause WFs Until` date expires → drip resumes automatically. WF-Response-Handler clears the field.
 6. **Active stages (Day 1-10 / Day 11-30):** No 3-day auto-resume. Owner is already working this lead — they move the stage or manually clear `Pause WFs Until` when ready.
-7. **Soft opt-outs:** Replies like "not interested" or "leave me alone" without official opt-out keywords still trigger WF-Response-Handler normally. Owner reviews and decides case-by-case — may move to DNC or appropriate Dispo based on judgment.
+7. **Soft opt-outs:** Replies like "not interested" or "leave me alone" without official opt-out keywords still trigger WF-Response-Handler normally. Owner reviews and decides case-by-case — may move to Abandoned (DNC) or Lost (with reason) based on judgment.
 
 ### 6B. Re-Submission — Lead comes back from a new external campaign
 
@@ -145,32 +147,32 @@ There are two distinct re-entry events. Each has its own protocol.
 
 1. automation detects duplicate contact with a new campaign source
 2. automation adds a new Source tag (stacks on existing), updates Latest Source field + Latest Source Date
-3. automation adds tag: `Re-Submitted` and moves contact to **New Leads** stage
+3. automation adds tag: `re-submitted` and moves contact to **New Leads** stage
 4. WF-New-Lead-Entry fires: cleans up all active drips, assigns to owner based on new source tag, creates task
 5. Lead is worked from scratch — full Day 1-10 sequence, identical to a brand-new lead
-6. Original Source field is never overwritten — first-touch attribution preserved
+6. Native Opportunity Source is never overwritten — first-touch attribution preserved
 
 **Key distinction:** Re-engagement = responding to *our* outreach (pause and review). Re-submission = entering from a *new external source* (full reset to New Leads).
 
 ---
 
-## 7. Dispo Re-Engage — Long-Term Drip
+## 7. Lost Status — Long-Term Drip
 
 *(New Leads account)*
 
-The four **Dispo — Re-Engage** stages are NOT completely dead leads:
+Leads marked **Lost** are NOT completely dead — they had a real conversation but didn't convert. The four lost reasons are:
 
 - No Motivation
 - Wants Retail
 - On MLS
 - Lead Declined
 
-When a lead enters any of these stages, WF-Dispo-Re-Engage automatically enrolls them in **WF-Cold-Drip-Monthly → WF-Long-Term-Quarterly** — the same drip used for Cold stage leads (monthly first, then quarterly with a 24-month cap).
+When a lead's status changes to Lost (any reason), WF-Dispo-Re-Engage triggers and enrolls them in **WF-Cold-Drip-Monthly → WF-Long-Term-Quarterly** — the same drip used for LT FU: Cold leads (monthly first, then quarterly with a 24-month cap).
 
-- After 24 months of quarterly drip (Q4×2), WF-Long-Term-Quarterly moves the lead to **Exhausted** — all automated outreach is complete
-- If a Re-Engage lead responds positively at any point (including from Exhausted), move to the appropriate active stage (human decision)
-- If they opt out at any point, move to Dispo: DNC immediately
-- Re-submission via WF-New-Lead-Entry still works from any stage including Exhausted — full restart
+- After 24 months of quarterly drip (Q4×2), WF-Long-Term-Quarterly changes status to **Abandoned** + adds tag `abandoned: exhausted` — all automated outreach is complete
+- If a Lost lead responds positively at any point (including from Abandoned), flip to Open + move to the appropriate active stage (human decision)
+- If they opt out at any point, status → Abandoned + tag `abandoned: dnc` immediately
+- Re-submission via WF-New-Lead-Entry still works from any status — clear lost reason / strip abandoned tag, flip to Open, full restart (except DNC — blocked)
 
 ---
 
@@ -180,7 +182,7 @@ When a lead enters any of these stages, WF-Dispo-Re-Engage automatically enrolls
 - **Emails:** Verify email addresses from skip trace data using a service before sending cold emails.
 - **Duplicate contacts:** Merge duplicates before enrolling in any sequence. GHL can trigger multiple workflows on dupes.
 - **Disconnected numbers:** If a call returns "not in service," tag the lead accordingly. Do not keep sending SMS to dead numbers.
-- **Stage date logging:** When a lead moves to a new stage, log the date. This is how GHL workflows know when to advance (Day 1-10 → Day 11-30 uses the "Date Entered Stage" field). Automated workflows update Stage Entry Date automatically for: New Leads, Day 1-10, Day 11-30, Cold, Nurture, Dispo Re-Engage, Dispo: DNC, and Exhausted. **For qualified stages (Due Diligence, Make Offer, Negotiations, Contract Sent, Under Contract):** Update Stage Entry Date manually when moving a lead to these stages — no workflow fires on these transitions.
+- **Stage date tracking:** GHL's native `lastStageChangeAt` field on Opportunities updates automatically whenever an opportunity moves to any pipeline stage — no manual updates or workflow steps needed. This covers all stages across all pipelines, including cross-pipeline moves. Used by the Stale New Leads Smart List to detect leads sitting in New Leads > 24 hours.
 
 ---
 
@@ -188,7 +190,7 @@ When a lead enters any of these stages, WF-Dispo-Re-Engage automatically enrolls
 
 If a lead becomes hostile, threatening, or legally threatening:
 
-1. Immediately move to Dispo: DNC (+ DNC sync to Prospect Data)
+1. Immediately change status to Abandoned + tag `abandoned: dnc` (+ DNC sync to Prospect Data)
 2. Flag for manager review
 3. Document the interaction with full notes in GHL contact record
 4. Do not re-engage under any circumstances
@@ -201,12 +203,12 @@ If a lead becomes hostile, threatening, or legally threatening:
 | Rule                                 | Detail                                                        |
 | ------------------------------------ | ------------------------------------------------------------- |
 | Contact hours                        | 9am–7pm local time only                                       |
-| DNC opt-out response time            | Immediate                                                     |
+| DNC opt-out response time            | Immediate — status → Abandoned + `abandoned: dnc`             |
 | DNC re-contact                       | Never                                                         |
 | DNC sync                             | Bi-directional (NL → PD via WF-DNC-Handler; PD → NL via automation)    |
 | No response = opt-out?               | No — keep following up per cadence                            |
 | Who can qualify a lead?              | LM or AM (based on source) — no automation                    |
-| Who can dispo a lead?                | LM or AM — both can dispo directly                            |
+| Who can change status?               | LM or AM — both can mark Lost or Abandoned directly           |
 | Auto-resume after re-engagement      | 3 days (drip stages only)                                     |
 | SMS opt-out keywords handled by GHL? | Yes — verify configured                                       |
 | LM → AM handoff mechanism            | LM sets call appointment for AM at qualification              |

@@ -1,9 +1,9 @@
 # Bana Land — GHL Follow-Up System
-*Last edited: 2026-03-21 · Last reviewed: —*
+*Last edited: 2026-03-30 · Last reviewed: —*
 
 Documentation for Bana Land's multi-channel motivated seller follow-up system, built in Go High Level (GHL). Covers the full lead lifecycle — from first outreach response through deal close, disqualification, or long-term drip.
 
-**CRM:** Go High Level  |  **Niche:** Rural land, all US states  |  **Lead sources:** Cold call, cold email, cold SMS, direct mail, VAPI AI call, referral, website
+**CRM:** Go High Level  |  **Niche:** Rural land, all US states  |  **Lead sources:** Cold call, cold email, cold SMS, direct mail, VAPI, referral, website
 
 ---
 
@@ -38,7 +38,7 @@ Single working account for all lead sources. Handles all leads from entry throug
 | File                                   | Purpose                                                                          |
 | -------------------------------------- | -------------------------------------------------------------------------------- |
 | [quick-reference.md](new-leads/quick-reference.md) | Copywriter-friendly quick reference: every outreach touch by stage with template IDs and counts |
-| [pipeline.md](new-leads/pipeline.md)   | Stage definitions: New Leads → Cold, all Dispo stages, Qualified stages, Nurture |
+| [pipeline.md](new-leads/pipeline.md)   | 5 pipelines (Leads, Qualified, Due Diligence, Value Add, Long Term FU) + stage definitions + Opportunity Statuses |
 | [sequences.md](new-leads/sequences.md) | Cadence map: Day 1–30 + Cold Email sub-flow + Cold drip + Nurture + Qualified    |
 | [messaging.md](new-leads/messaging.md) | Message templates: NL-* + WR-EMAIL-* + COLD-* + NUR-* + LTQ-*                   |
 | [rules.md](new-leads/rules.md)         | Contact rules and compliance: hours, DNC, stage movement, response protocol, data hygiene |
@@ -55,3 +55,13 @@ Stores all raw property and skip trace data in GHL Custom Objects. No contacts, 
 | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | [data-model.md](prospect-data/data-model.md) | Custom Object schemas (Properties + Campaigns), field definitions, associations, field mapping to New Leads                 |
 | [rules.md](prospect-data/rules.md)           | Data upload standards, campaign rules, status management, push-to-account rules                                             |
+
+
+### Automation: n8n (`n8n/`)
+
+n8n workflows that connect the two GHL sub-accounts. Handles lead intake, data enrichment from Prospect Data, and Contact + Opportunity creation in New Leads.
+
+
+| File                                           | Purpose                                                                                     |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [intake-workflow.md](n8n/intake-workflow.md)   | Baseline intake workflow: webhook → Prospect Data lookup → Contact + Opportunity in New Leads |

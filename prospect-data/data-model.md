@@ -1,9 +1,9 @@
 # Prospect Data — Data Model
-*Last edited: 2026-03-23 · Last reviewed: —*
+*Last edited: 2026-04-01 · Last reviewed: —*
 
 Prospect Data in the Bana Land GHL system. Stores all raw property and skip trace data in a single flat Custom Object. No contacts, no opportunities, no pipeline.
 
-Automations push data from here into New Leads for campaigns and lead follow-up.
+Automations push data from here into New Leads for lead follow-up.
 
 ---
 
@@ -91,8 +91,9 @@ Same 20 fields as Owner 1, prefixed with `Owner 3`.
 | Skip Trace Date   | Date         | Date skip trace was completed                    |
 | DNC               | Checkbox     | Any owner on this property requested DNC         |
 | DNC Date          | Date         | Date DNC was flagged                             |
-| Account Push        | Checkbox   | Whether this property has been pushed to the New Leads account |
-| Account Push Date | Date         | Date property was last pushed to another account |
+| Push to CRM         | Checkbox     | Trigger to push this property to New Leads. Checked to request push; unchecked by automation after completion. |
+| CRM Pushed          | Checkbox     | Whether this property has been pushed to New Leads. Permanent — never unchecked. |
+| CRM Push Date       | Date         | Date property was last pushed to New Leads       |
 | Date Added        | Date         | Date this property record was created (GHL default field) |
 | Notes             | Large Text   | Free-form notes                                  |
 
@@ -107,6 +108,19 @@ Same 20 fields as Owner 1, prefixed with `Owner 3`.
 | DNC         | At least one owner requested Do Not Contact. No further outreach.           |
 | Removed     | Off the table — bad data, duplicate, sold, purchased, or disqualified.      |
 
+
+### Search Fields
+
+GHL Custom Objects only support `query` search on fields listed in `searchableProperties` (max 3). Phone and Email fields use PHONE/TEXT types that aren't matched by generic query search. These two concatenated TEXT fields solve that — they combine all owner phone/email data into single searchable strings.
+
+| Field      | Type | Searchable | Purpose                                                        |
+| ---------- | ---- | ---------- | -------------------------------------------------------------- |
+| All Phones | Text | Yes        | All phones across all owners, space-separated. Populated on import and by automation. Enables phone cascade search from n8n intake workflow. |
+| All Emails | Text | Yes        | All emails across all owners, space-separated. Populated on import and by automation. Enables email cascade search from n8n intake workflow. |
+
+**Searchable Properties (3 of 3 slots used):** Reference ID, All Phones, All Emails
+
+**Format:** Space-separated values (e.g., `+16104767077 +16104896566 +16105172894`). Must be populated whenever phone/email data is added or updated — on CSV import and on any automation that writes phone/email fields.
 
 ### Data Cleaning Rules (on upload)
 
@@ -127,7 +141,7 @@ One row = one marketing campaign. Linked to Properties via campaign tags.
 | Field         | Type       | Purpose                                         |
 | ------------- | ---------- | ----------------------------------------------- |
 | Campaign Name | Text       | Unique name for the campaign                                    |
-| Campaign Tag  | Text       | Exact tag applied to Properties (e.g. `Campaign: CE-TX-Travis-2026-03`) |
+| Campaign Tag  | Text       | Exact tag applied to Properties (e.g. `campaign: ce-tx-travis-2026-03`) |
 | Campaign Type | Dropdown   | Cold Email / Cold SMS / Cold Call / Direct Mail                 |
 | Status        | Dropdown   | Planning / Active / Completed / Paused                          |
 | Start Date    | Date       | Campaign launch date                                            |
@@ -144,7 +158,7 @@ Properties are linked to Campaigns using tags:
 
 1. **Campaign tags** on the Property record — one tag per campaign the property has been
   included in. Tags stack over time to preserve full campaign history.
-   Format: `Campaign: [Campaign Name]`
+   Format: `campaign: [campaign name]`
 
 Native GHL associations between Properties and Campaigns can be created via automation if needed for reporting, but the tag approach is the primary link because it works with bulk CSV uploads.
 
@@ -201,7 +215,7 @@ When a property is pushed to New Leads, automation splits the flat row into the 
 | Offer Price %                | Offer Price %                      |
 | Lat/Long                     | Lat/Long                           |
 | Map Link                     | Map Link                           |
-| Campaign Type                | Original Source                    |
+| Campaign Type                | Source (native Opportunity field)   |
 | Campaign Type                | Latest Source                      |
 | (today's date)               | Latest Source Date                 |
 

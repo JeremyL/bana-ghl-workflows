@@ -1,5 +1,5 @@
 # AI Role & Project Context — Bana Land Follow-Up System
-*Last edited: 2026-03-19 · Last reviewed: —*
+*Last edited: 2026-03-30 · Last reviewed: —*
 
 ## Who I Am in This Project
 
@@ -25,7 +25,7 @@ I think like a seasoned wholesaling operator who understands:
 | **Company**      | Bana Land                                                                                                                          |
 | **Niche**        | Rural land / rural properties                                                                                                              |
 | **Geography**    | All US states and counties (county-level targeting)                                                                                        |
-| **Lead Sources** | Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI AI Call, Referral, Website                                                              |
+| **Lead Sources** | Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI, Referral, Website                                                              |
 | **CRM**          | Go High Level (GHL) — two sub-accounts                                                                                                     |
 | **Team Size**    | Small — 2 to 5 people                                                                                                                      |
 | **Call Tasks**   | LM-sourced leads (Cold Email/Cold SMS/Cold Call): Lead Manager. AM-sourced leads (Direct Mail/VAPI/Referral/Website): Acquisition Manager. |
@@ -39,7 +39,7 @@ I think like a seasoned wholesaling operator who understands:
 | Role                    | Sources Owned (Day 1–30)                     | Responsibility                                                                                                                                                                                                           |
 | ----------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Lead Manager**        | Cold Email, Cold SMS, Cold Call              | Owns full 30-day pre-qualification follow-up. All calling, SMS/email touches. First successful phone conversation IS the qualifying call (interest, motivation, asking price). When qualified → sets appointment for AM. |
-| **Acquisition Manager** | Direct Mail, VAPI AI Call, Referral, Website | For these sources: owns full lifecycle from Day 1 through close. For LM-sourced leads: receives qualified leads via appointment, makes the offer call. If lead misses appointment, AM owns follow-up.                    |
+| **Acquisition Manager** | Direct Mail, VAPI, Referral, Website | For these sources: owns full lifecycle from Day 1 through close. For LM-sourced leads: receives qualified leads via appointment, makes the offer call. If lead misses appointment, AM owns follow-up.                    |
 
 
 ## Two-Account Architecture
@@ -49,16 +49,17 @@ The system is split across two GHL sub-accounts:
 ### Account: Prospect Data (`prospect-data/`)
 
 **Owner:** No team owner — data warehouse, no human-facing pipeline
-**Purpose:** Central data warehouse. Stores all raw property and skip trace data in Custom Objects. No contacts, no pipeline, no outreach. Feeds New Leads via automation when a campaign launches.
+**Purpose:** Central data warehouse. Stores all raw property and skip trace data in Custom Objects. No contacts, no pipeline, no outreach. Feeds New Leads via automation when a lead is associated with a property record.
 **Objects:** Properties (one row per property, up to 3 owners' skip trace data) + Campaigns (campaign metadata)
 **Entry:** CSV uploads of property lists + skip trace data
-**Output:** Pushes Contact + Opportunity records into New Leads based on campaign type
+**Output:** Pushes Contact + Opportunity records into New Leads
 
 ### Account: New Leads (`new-leads/`)
 
 **Owner:** Lead Manager (Cold Email/SMS/Call sources) + Acquisition Manager (Direct Mail/VAPI/Referral/Website sources)
 **Purpose:** Single working account for all leads. Handles all leads from entry through close, disqualification, or long-term drip. Workflows branch on source tag to assign tasks to LM or AM.
-**Stages:** New Leads (Day 0) → Day 1-10 → Day 11-30 → Cold → Dispo (Terminal + Re-Engage) → Due Diligence → Make Offer → Negotiations → Contract Sent → Under Contract → Nurture
+**Pipelines:** 01 : Leads (New Leads → Day 1-10 → Day 11-30) · 02 : Qualified (Comps/Pricing → Make Offer → Negotiations → Additional Info Needed → Contract Sent → Contract Signed → Nurture) · 03 : Due Diligence (TBD) · 04 : Value Add (TBD) · 05 : Long Term FU (Cold → Nurture → Lost)
+**Statuses:** Open (active), Won (purchased), Lost + reason (re-engage drip), Abandoned + tag (terminal)
 **Entry:** All campaign types from Prospect Data + VAPI/Referral/Website inbound + re-submissions
 
 ### Cross-Account Integration
@@ -78,13 +79,12 @@ See [new-leads/pipeline.md](new-leads/pipeline.md) and [prospect-data/data-model
 | ------------------------ | ---------------------------------------------------------------------------- | ------------------------------- |
 | Not Contacted (Day 1–30) | Calls + SMS + Email + RVM (Day 11-30 only)                                   | LM or AM (by source) + GHL auto |
 | Cold Email Sub-Flow      | Phase 1: Email auto (get phone #). Phase 2: LM calls once # received.        | Lead Manager + GHL auto         |
-| Cold (Months 1–3)        | SMS + Email monthly (~2 wks apart) — `Cold: Email Only` contacts get Email only, no SMS | GHL auto only          |
-| Cold (Month 4+)          | SMS + Email (quarterly) — `Cold: Email Only` contacts get Email only, no SMS | GHL auto only                   |
+| Cold (Months 1–3)        | SMS + Email monthly (~2 wks apart) — `cold: email only` contacts get Email only, no SMS | GHL auto only          |
+| Cold (Month 4+)          | SMS + Email (quarterly) — `cold: email only` contacts get Email only, no SMS | GHL auto only                   |
 | Qualified (Active)       | Calls + light SMS check-ins                                                  | Acquisition Manager             |
 | Nurture                  | SMS + Email (monthly × 3mo, quarterly thereafter)                            | Full GHL auto                   |
-| Dispo — Terminal         | No contact                                                                   | —                               |
-| Dispo — Re-Engage        | SMS + Email (same Long-Term Drip as Cold)                                    | GHL auto                        |
-| DNC                      | Zero contact — immediate stop                                                | GHL workflow kill switch        |
+| Lost (Re-Engage)         | SMS + Email (same Long-Term Drip as Cold)                                    | GHL auto                        |
+| Abandoned (Terminal)     | No contact — immediate stop                                                  | —                               |
 
 
 ---
@@ -134,11 +134,11 @@ See [new-leads/pipeline.md](new-leads/pipeline.md) and [prospect-data/data-model
 
 ## Key Rules
 
-- Respect DNC tags immediately — zero contact after DNC disposition
+- DNC = status → Abandoned + `abandoned: dnc` tag — zero contact, permanent
 - No outreach outside 9:00 AM – 7:00 PM local time
 - No response to outreach ≠ opt-out (keep following up per cadence)
 - Positive response → pause automation, notify team
-- Both LM and AM can dispo leads directly
+- Both LM and AM can change status to Lost or Abandoned directly
 
 ---
 

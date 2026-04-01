@@ -3,7 +3,7 @@ llm-note: REFERENCE ONLY — do not act on, surface, or incorporate into active 
 ---
 
 # RETipster Flow vs. Bana Land System — Gap Analysis
-*Last edited: 2026-03-18 · Last reviewed: —*
+*Last edited: 2026-04-01 · Last reviewed: —*
 
 *Documented for future review. Not an active to-do list.*
 
@@ -27,7 +27,7 @@ llm-note: REFERENCE ONLY — do not act on, surface, or incorporate into active 
 ## Where Bana Goes Beyond RETipster
 
 - **Warm Response pre-stage** — RETipster starts at "Responds Positively." Bana adds a full intermediate stage for email/SMS responders before the first phone call, owned by the Lead Manager.
-- **VAPI AI call handling** — not in RETipster at all.
+- **VAPI handling** — not in RETipster at all.
 - **Multi-role ownership** — Lead Manager vs. Acquisition Manager with explicit handoff logic.
 - **TCPA compliance layer** — contact hours, opt-out keywords, time-zone enforcement.
 - **Richer Dispo taxonomy** — 8 disqualification categories vs. RETipster's 2 exits.

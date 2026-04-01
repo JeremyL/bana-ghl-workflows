@@ -1,6 +1,6 @@
 # Bana Land — New Leads Account: Follow-Up Sequences
 
-*Last edited: 2026-03-22 · Last reviewed: 2026-03-22*
+*Last edited: 2026-04-01 · Last reviewed: 2026-04-01*
 
 This is the cadence document for **New Leads**. It defines exactly when to touch a lead,
 with which channel, and whether that touch is human-driven or automated.
@@ -24,23 +24,23 @@ All sources follow the same Day 1–30 cadence (same timing, same channels). The
 
 | Source Tag             | Call Tasks Assigned To |
 | ---------------------- | ---------------------- |
-| `Source: Cold Email`   | Lead Manager           |
-| `Source: Cold SMS`     | Lead Manager           |
-| `Source: Cold Call`    | Lead Manager           |
-| `Source: Direct Mail`  | Acquisition Manager    |
-| `Source: VAPI AI Call` | Acquisition Manager    |
-| `Source: Referral`     | Acquisition Manager    |
-| `Source: Website`      | Acquisition Manager    |
+| `source: cold email`   | Lead Manager           |
+| `source: cold sms`     | Lead Manager           |
+| `source: cold call`    | Lead Manager           |
+| `source: direct mail`  | Acquisition Manager    |
+| `source: vapi` | Acquisition Manager    |
+| `source: referral`     | Acquisition Manager    |
+| `source: website`      | Acquisition Manager    |
 
 
 GHL workflows branch on source tag at each call task creation step to assign to the correct team member. Automated SMS and email steps fire identically regardless of source.
 
 ---
 
-## Sequence — New Leads (New → Cold)
+## Sequence — New Leads (New → LT FU: Cold)
 
 This sequence runs from the moment a lead enters the pipeline until they either qualify,
-disqualify themselves, or land in the long-term Cold drip.
+disqualify themselves, or land in the long-term drip (LT FU: Cold).
 
 **Exception — Cold Email leads with no phone number:** SMS and call steps are skipped until a phone number is received. The Cold Email Sub-Flow (below) runs concurrently to obtain the phone number. Once received, the full cadence applies from the lead's current stage position.
 
@@ -61,7 +61,7 @@ disqualify themselves, or land in the long-term Cold drip.
 **Notes:**
 
 - Fires automatically via WF-New-Lead-Entry the moment a lead enters the New Leads stage
-- **Day 0 SMS varies by source:** CO-SMS-00/00A for Cold Email, Cold SMS, Cold Call (cold outbound opener). IN-SMS-00/00A for Website, VAPI AI Call, Referral (inbound acknowledgment). DM-SMS-00/00A for Direct Mail (letter reference). Rest of Day 1-30 sequence is identical across all sources.
+- **Day 0 SMS varies by source:** CO-SMS-00/00A for Cold Email, Cold SMS, Cold Call (cold outbound opener). IN-SMS-00/00A for Website, VAPI, Referral (inbound acknowledgment). DM-SMS-00/00A for Direct Mail (letter reference). Rest of Day 1-30 sequence is identical across all sources.
 - Speed-to-lead SMS sends before the call task — warms the number and signals we're reaching out
 - Missed-call SMS fires ~1 hour later only if no call was logged
 - Owner works the lead on Day 0 (calls, reviews any reply), then moves stage to Day 1-10 the same day
@@ -114,7 +114,7 @@ disqualify themselves, or land in the long-term Cold drip.
 - **Voicemail combo:** When a manual call goes to voicemail, leave script NL-VM-01 then immediately send NL-VMSMS-01 (combo SMS) via GHL conversation
 - If lead responds to any touch, WF-Response-Handler fires (pause + owner review)
 - Manual call tasks appear in LM or AM's GHL task queue based on source tag
-- After Day 10 with no response: auto-advance to Day 11-30, enroll in WF-Day-11-30
+- After Day 10 with no response: auto-advance to Day 11-30 (within Leads pipeline), enroll in WF-Day-11-30
 
 ---
 
@@ -147,8 +147,8 @@ disqualify themselves, or land in the long-term Cold drip.
 - **Voicemail combo:** When a manual call goes to voicemail, leave script NL-VM-02 then immediately send NL-VMSMS-01 (combo SMS) via GHL conversation
 - **RVM drops** are automated via GHL's ringless voicemail feature — delivered directly to voicemail without ringing. They fill gaps between existing touches to maintain presence without adding more SMS/email
 - If lead calls back after an RVM, WF-Response-Handler fires as usual (pause + owner review)
-- After Day 30 with no response, lead moves to Cold stage → enters Sequence — Cold
-- GHL automation handles stage advancement via WF-Day-11-30 final step
+- After Day 30 with no response, lead auto-moves to LT FU: Cold (cross-pipeline) → enters Sequence — Cold
+- GHL automation handles cross-pipeline move via WF-Day-11-30 final step
 
 ---
 
@@ -191,42 +191,43 @@ When WF-Day-1-10 auto-advances the contact to Day 11-30 (~Day 11), P1 exits via 
 If no phone number is received by Day 30 (handled by WF-Cold-Email-Subflow-P2):
 
 1. **One-time SMS blast** to all skip-traced phone numbers on file (Phone 1–4, if populated) using template WR-COLD-SMS-01
-2. Add tag: `Cold: Email Only` — flags contact for email-only drip (WF-Cold-Drip-Monthly/WF-Long-Term-Quarterly skip SMS steps)
-3. Move to Cold stage (WF-Cold-Drip-Monthly fires automatically on Cold stage entry)
+2. Add tag: `cold: email only` — flags contact for email-only drip (WF-Cold-Drip-Monthly/WF-Long-Term-Quarterly skip SMS steps)
+3. Move to LT FU: Cold (cross-pipeline move — WF-Cold-Drip-Monthly fires automatically on LT FU: Cold stage entry)
 
 If any skip-traced number responds to the one-time SMS blast, WF-Response-Handler fires and LM reviews.
 
 ---
 
-## Qualified Leads (Due Diligence → Under Contract)
+## Qualified Leads (02 : Qualified)
 
-These are active deals. **Fully human-led — no automated workflows.**
+These are active deals in the Qualified pipeline. **Fully human-led — no automated workflows.**
 AM monitors qualified leads via GHL smart lists. No automated SMS or task generation.
 
 **Cadence:** Every 1-2 days
-**Owner:** Acquisition Manager — AM owns all qualified stages regardless of original source.
+**Owner:** Acquisition Manager — AM owns all Qualified stages regardless of original source.
 
 
-| Stage          | Action                                                                     |
-| -------------- | -------------------------------------------------------------------------- |
-| Due Diligence  | Call every 1-2 days to maintain relationship. SMS check-ins. No hard sell. |
-| Make Offer     | Call to present offer. Follow up with SMS same day if no answer.           |
-| Negotiations   | Call every 1-2 days. SMS "just checking in" between calls.                 |
-| Contract Sent  | Call to check on signing. SMS gentle reminders every 1-2 days.             |
-| Under Contract | Regular deal management calls. SMS for quick updates.                      |
+| Stage               | Action                                                                     |
+| ------------------- | -------------------------------------------------------------------------- |
+| Comps/Pricing       | Call every 1-2 days to maintain relationship. SMS check-ins. No hard sell. |
+| Make Offer          | Call to present offer. Follow up with SMS same day if no answer.           |
+| Negotiations        | Call every 1-2 days. SMS "just checking in" between calls.                 |
+| Additional Info Needed | Follow up on outstanding info. Internal research.                       |
+| Contract Sent       | Call to check on signing. SMS gentle reminders every 1-2 days.             |
+| Contract Signed     | Regular deal management calls. SMS for quick updates.                      |
 
 
-**For LM-sourced leads:** AM's first call on Due Diligence entry is the scheduled appointment set by LM. This is the offer conversation. If the lead misses the appointment, AM owns follow-up from that point.
+**For LM-sourced leads:** AM's first call on Comps/Pricing entry is the scheduled appointment set by LM. This is the offer conversation. If the lead misses the appointment, AM owns follow-up from that point.
 
 ---
 
-## Sequence — Nurture (Stalled Qualified Leads)
+## Sequence — Nurture (LT FU: Nurture — Stalled Qualified Leads)
 
-Qualified leads that didn't close. Fully automated. Long game.
+Qualified leads that didn't close. AM parks the deal in Qualified: Nurture (trigger stage) → auto-moves to LT FU: Nurture. Fully automated from there. Long game.
 
 **Owner:** GHL automation — no manual call tasks unless lead responds
 **Channels:** SMS + Email (rotating).
-**Trigger:** WF-Nurture-Monthly fires on Nurture stage entry. WF-Long-Term-Quarterly fires after monthly phase completes.
+**Trigger:** WF-Nurture-Monthly fires on LT FU: Nurture stage entry. WF-Long-Term-Quarterly fires after monthly phase completes.
 
 ### Nurture Monthly (Months 1–3)
 
@@ -241,26 +242,26 @@ Qualified leads that didn't close. Fully automated. Long game.
 | 3       | 3     | SMS     | Auto | NUR-SMS-02   |
 
 
-At Month 3 → WF-Nurture-Monthly enrolls contact in WF-Long-Term-Quarterly (see **Sequence — Long-Term Quarterly Drip** below). After 24 months of quarterly drip → moves to Exhausted.
+At Month 3 → WF-Nurture-Monthly enrolls contact in WF-Long-Term-Quarterly (see **Sequence — Long-Term Quarterly Drip** below). After 24 months of quarterly drip → status changes to Abandoned (`abandoned: exhausted`).
 
 **If lead responds at any point (monthly or quarterly):**
 
 - Immediately pause Nurture automation
 - Create manual call task for acquisition manager — high priority
-- Move lead to Due Diligence if they want to revisit
+- Move lead to Qualified: Comps/Pricing if they want to revisit
 
 ---
 
-## Sequence — Cold (Leads Not Qualified Drip)
+## Sequence — Cold (LT FU: Cold / Nurture / Lost — Long-Term Drip)
 
-**Applies to:** Cold stage leads AND all Dispo Re-Engage leads (No Motivation, Wants Retail, On MLS, Lead Declined)
+**Applies to:** LT FU: Cold leads (no response after Day 30), LT FU: Nurture leads (stalled deals), and LT FU: Lost leads (non-terminal Lost status)
 **Owner:** GHL automation only — no manual call tasks unless lead responds
 
 ### Cold Monthly (Months 1–3)
 
 **Goal:** Stay alive in their mind. Rural sellers often take months or years to decide to sell.
 **Cadence:** 30-day wait on entry, then SMS + Email each month, spaced ~2 weeks apart
-**Workflow:** WF-Cold-Drip-Monthly — fires automatically when contact enters Cold stage (or any Dispo Re-Engage stage via WF-Dispo-Re-Engage).
+**Workflow:** WF-Cold-Drip-Monthly — fires automatically when contact enters LT FU: Cold, LT FU: Lost, or is enrolled by WF-Dispo-Re-Engage.
 
 
 | Month | Timing  | Channel | Type | Message Ref   |
@@ -273,15 +274,15 @@ At Month 3 → WF-Nurture-Monthly enrolls contact in WF-Long-Term-Quarterly (see
 | 3–4   | Day 100 | Email   | Auto | COLD-EMAIL-03 |
 
 
-At ~3.5 months (Day 100) → WF-Cold-Drip-Monthly enrolls contact in WF-Long-Term-Quarterly (shared quarterly phase). After 24 months of quarterly drip → moves to Exhausted.
+At ~3.5 months (Day 100) → WF-Cold-Drip-Monthly enrolls contact in WF-Long-Term-Quarterly (shared quarterly phase). After 24 months of quarterly drip → status changes to Abandoned (`abandoned: exhausted`).
 
-**Note:** `Cold: Email Only` contacts (Cold Email leads with no confirmed phone number) receive email steps only — all SMS steps are skipped (in both WF-Cold-Drip-Monthly and WF-Long-Term-Quarterly).
+**Note:** `cold: email only` contacts (Cold Email leads with no confirmed phone number) receive email steps only — all SMS steps are skipped (in both WF-Cold-Drip-Monthly and WF-Long-Term-Quarterly).
 
 ---
 
 ## Sequence — Long-Term Quarterly Drip (Month 4–28)
 
-**Applies to:** Cold, Nurture, and Dispo Re-Engage leads — all feed into this shared quarterly drip after their monthly phase
+**Applies to:** Cold, Nurture, and Lost leads — all feed into this shared quarterly drip after their monthly phase
 **Goal:** Extremely light touch. Keep the lead warm with almost zero cost or effort. Cap at 24 months.
 **Cadence:** SMS + Email same day, every 90 days
 **Workflow:** WF-Long-Term-Quarterly — enrolled from WF-Cold-Drip-Monthly, WF-Nurture-Monthly, or directly
@@ -304,19 +305,19 @@ At ~3.5 months (Day 100) → WF-Cold-Drip-Monthly enrolls contact in WF-Long-Ter
 
 **Notes:**
 
-- After Q4 plays the second time, WF-Long-Term-Quarterly moves the opportunity to the **Exhausted** stage — a clear signal that all automated follow-up is complete.
-- WF-Response-Handler still catches any future inbound reply from the Exhausted stage — lead is never truly lost
-- `Cold: Email Only` contacts skip all SMS steps
-- If a lead responds at any point (including after moving to Exhausted), standard re-engagement protocol applies — WF-Response-Handler pauses workflows, owner reviews the response and decides next step
-- Re-submission via WF-New-Lead-Entry still works from Exhausted — full restart as a new lead
+- After Q4 plays the second time, WF-Long-Term-Quarterly changes the opportunity status to **Abandoned** + adds tag `abandoned: exhausted` — a clear signal that all automated follow-up is complete.
+- WF-Response-Handler still catches any future inbound reply from Abandoned (non-DNC) contacts — lead is never truly lost
+- `cold: email only` contacts skip all SMS steps
+- If a lead responds at any point (including after moving to Abandoned), standard re-engagement protocol applies — WF-Response-Handler pauses workflows, owner reviews the response and decides next step
+- Re-submission via WF-New-Lead-Entry still works from Abandoned (non-DNC) — flip to Open, full restart as a new lead
 
 ---
 
-## Dispo Re-Engage — All Stages
+## Lost Status — All Lost Reasons
 
-No Motivation, Wants Retail, On MLS, and Lead Declined all enroll in **Sequence — Cold** (same long-term drip as Cold stage leads).
+No Motivation, Wants Retail, On MLS, and Lead Declined all move to **LT FU: Lost** stage and enroll in the same long-term drip as Cold and Nurture leads.
 
-No separate sequence. WF-Dispo-Re-Engage fires on Dispo Re-Engage stage entry and enrolls the contact in WF-Cold-Drip-Monthly (monthly first, then WF-Long-Term-Quarterly).
+WF-Dispo-Re-Engage fires on status change to Lost (any lost reason), moves the opportunity to LT FU: Lost (cross-pipeline), and enrolls in WF-Cold-Drip-Monthly (monthly first, then WF-Long-Term-Quarterly).
 
 ---
 
@@ -349,13 +350,13 @@ When hitting a lead on the same day with multiple channels (Days 1-2 of Day 1-10
 | Event                                   | Action                                                                                                                       |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Lead re-engages (replies to drip)       | WF-Response-Handler: Set `Pause WFs Until` → owner review task → 3-day window. Owner acts or drip auto-resumes.              |
-| Lead re-submitted (new external source) | WF-New-Lead-Entry: Stop all drips → tag `Re-Submitted` → move to New Leads → full restart.                                   |
-| Lead says stop / opt-out                | Kill all workflows → move to Dispo: DNC immediately → DNC sync to Prospect Data.                                             |
-| Lead moves to qualified stage           | Stop uncontacted sequence → AM works lead directly (no automated workflow).                                                  |
-| Lead moves to Nurture                   | Stop active sequence → start Sequence — Nurture.                                                                             |
-| Lead moves to Dispo — Terminal          | Stop all sequences permanently.                                                                                              |
-| Lead moves to Dispo — Re-Engage         | Stop active sequence → WF-Dispo-Re-Engage fires → enroll in Sequence — Cold (WF-Cold-Drip-Monthly → WF-Long-Term-Quarterly). |
-| 24-month quarterly drip completes        | WF-Long-Term-Quarterly moves lead to Exhausted. All automated outreach finished.                                              |
+| Lead re-submitted (new external source) | WF-New-Lead-Entry: Stop all drips → tag `re-submitted` → move to New Leads → full restart.                                   |
+| Lead says stop / opt-out                | Kill all workflows → status → Abandoned + `abandoned: dnc` → DNC sync to Prospect Data.                                      |
+| Lead moves to Qualified stage        | Stop Leads sequence → AM works lead directly (no automated workflow).                                                        |
+| AM moves to Qualified: Nurture       | Trigger stage → auto-move to LT FU: Nurture → start Sequence — Nurture.                                                     |
+| Status changed to Abandoned             | Stop all sequences permanently. Tag with `abandoned:` reason.                                                                |
+| Status changed to Lost                  | Stop active sequence → WF-Dispo-Re-Engage fires → move to LT FU: Lost → enroll in Sequence — Cold (WF-Cold-Drip-Monthly → WF-Long-Term-Quarterly). |
+| 24-month quarterly drip completes        | WF-Long-Term-Quarterly changes status to Abandoned (`abandoned: exhausted`). All automated outreach finished.                 |
 
 
 ---
@@ -364,13 +365,13 @@ When hitting a lead on the same day with multiple channels (Days 1-2 of Day 1-10
 
 ### Re-Engagement (responds to our GHL drip)
 
-A lead in Cold, Nurture, Dispo Re-Engage, or Exhausted replies to an automated message we sent (or contacts us inbound).
+A lead in LT FU: Cold, LT FU: Nurture, LT FU: Lost (status = Open), or Abandoned (non-DNC) replies to an automated message we sent (or contacts us inbound). Also applies to leads in Leads: Day 1-10 or Day 11-30.
 
 - **What happens:** WF-Response-Handler fires. `Pause WFs Until` field set to today+3 — active workflows hold in place at their next send step (position preserved). Owner gets a 3-day review window.
-- **If owner moves to qualified stage:** Workflow exit triggers fire, drip killed. AM works lead directly (no automated workflow).
+- **If owner moves to qualified stage** (flips to Open if previously Lost): Workflow exit triggers fire, drip killed. AM works lead directly (no automated workflow).
 - **If owner clears `Pause WFs Until` field manually:** Drip resumes from exactly where it stopped.
-- **If owner does nothing after 3 days:** `Pause WFs Until` date expires — drip resumes from where it stopped. No restart.
-- **Pipeline stage does NOT change** during re-engagement review — the lead stays in Cold / Nurture / Dispo Re-Engage / Exhausted unless owner explicitly moves them.
+- **If owner does nothing after 3 days:** `Pause WFs Until` date expires — drip resumes from where it stopped (drip stages and Lost only). For Abandoned contacts, lead simply stays Abandoned.
+- **Stage/status does NOT change** during re-engagement review — the lead stays in their current stage/status unless owner explicitly changes it.
 - **Active stages (Day 1-10 / Day 11-30):** Same pause mechanic applies — automated sends hold. No 3-day auto-resume for these stages; owner manually clears `Pause WFs Until` field or moves stage.
 - **Owner assignment for re-engagement review:** WF-Response-Handler assigns the review task to the original owner based on source tag (LM for Cold Email/SMS/Call sources, AM for Direct Mail/VAPI/Referral/Website sources).
 
@@ -378,8 +379,8 @@ A lead in Cold, Nurture, Dispo Re-Engage, or Exhausted replies to an automated m
 
 A contact already in GHL is reached by a separate marketing campaign outside GHL and responds.
 
-- **What happens:** automation detects duplicate, updates Latest Source + adds new Source tag + tags `Re-Submitted` + moves to New Leads.
+- **What happens:** automation detects duplicate, updates Latest Source + adds new Source tag + tags `re-submitted` + moves to New Leads.
 - **WF-New-Lead-Entry fires:** Cleans up all active drips, assigns to owner based on new source tag, creates task.
 - **Lead is worked from scratch:** Full Day 1-10 → Day 11-30 → Cold sequence, identical to a brand-new lead.
-- **Original Source field preserved:** First-touch attribution never overwritten. Tags stack all sources.
+- **Native Opportunity Source preserved:** First-touch attribution never overwritten. Tags stack all sources.
 

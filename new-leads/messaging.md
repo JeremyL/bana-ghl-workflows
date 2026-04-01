@@ -1,5 +1,5 @@
 # Bana Land — New Leads Account: Message Templates
-*Last edited: 2026-03-22 · Last reviewed: —*
+*Last edited: 2026-04-01 · Last reviewed: 2026-04-01*
 
 ## Voice & Principles
 
@@ -44,7 +44,7 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 | COLD   | Cold Monthly Drip (Months 1–3)              |
 | NUR    | Nurture Monthly (Months 1–3)                |
 | LTQ    | Long-Term Quarterly Drip (Month 4–28)       |
-| IN     | Inbound Day 0 (Website, VAPI AI Call, Referral) |
+| IN     | Inbound Day 0 (Website, VAPI, Referral) |
 | DM     | Direct Mail Day 0                           |
 | MC     | Missed Call Text-Back                       |
 
@@ -115,7 +115,7 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 
 **Stage:** New Leads | **Cadence:** Immediate (speed to lead) | **Owner:** LM or AM (by source) + GHL auto
 
-Day 0 SMS varies by source: CO-SMS-00/00A (Cold Email, Cold SMS, Cold Call), IN-SMS-00/00A (Website, VAPI AI Call, Referral), DM-SMS-00/00A (Direct Mail). Rest of Day 1-30 sequence is identical across all sources.
+Day 0 SMS varies by source: CO-SMS-00/00A (Cold Email, Cold SMS, Cold Call), IN-SMS-00/00A (Website, VAPI, Referral), DM-SMS-00/00A (Direct Mail). Rest of Day 1-30 sequence is identical across all sources.
 
 ---
 
@@ -308,9 +308,9 @@ Bana Land | [CALLBACK NUMBER]
 
 ## Cold — Monthly Drip (Months 1–3)
 
-**Stage:** Cold | **Cadence:** 30-day wait on entry, then SMS + Email each month, ~2 weeks apart | **Owner:** GHL auto only
-**Applies to:** Cold stage leads AND all Dispo Re-Engage leads (No Motivation, Wants Retail, On MLS, Lead Declined)
-**Trigger:** WF-Cold-Drip-Monthly fires on Cold stage entry
+**Stage:** LT FU: Cold / Nurture / Lost | **Cadence:** 30-day wait on entry, then SMS + Email each month, ~2 weeks apart | **Owner:** GHL auto only
+**Applies to:** LT FU: Cold leads (no response), LT FU: Nurture leads (stalled deals), and LT FU: Lost leads (non-terminal Lost status)
+**Trigger:** WF-Cold-Drip-Monthly fires on LT FU: Cold/Lost stage entry or enrollment by WF-Dispo-Re-Engage
 
 ---
 
@@ -376,10 +376,10 @@ Either way is fine. Just want to know where we stand.
 
 ## Long-Term Quarterly Drip (Month 4–28)
 
-**Stages:** Cold / Nurture / Dispo Re-Engage | **Cadence:** SMS + Email same day, every 90 days | **Owner:** GHL auto only
+**Applies to:** Cold / Nurture / Lost | **Cadence:** SMS + Email same day, every 90 days | **Owner:** GHL auto only
 **Trigger:** WF-Long-Term-Quarterly fires after Cold Monthly or Nurture Monthly completes (or directly to skip monthly)
 **Rotation:** 4 unique quarters (Q1–Q4), plays twice (24 months total), then stops.
-**Note:** `Cold: Email Only` contacts skip all SMS steps. After Q4 plays the second time, no further automated touches — WF-Response-Handler still catches any future inbound reply.
+**Note:** `cold: email only` contacts skip all SMS steps. After Q4 plays the second time, no further automated touches — WF-Response-Handler still catches any future inbound reply.
 
 ---
 
@@ -465,8 +465,8 @@ Either way is fine.
 
 ## Nurture — Monthly (Months 1–3)
 
-**Stage:** Nurture | **Cadence:** Every 30 days (30-day wait before first touch) | **Owner:** GHL auto only
-**Trigger:** WF-Nurture-Monthly fires on Nurture stage entry
+**Stage:** LT FU: Nurture | **Cadence:** Every 30 days (30-day wait before first touch) | **Owner:** GHL auto only
+**Trigger:** WF-Nurture-Monthly fires on LT FU: Nurture stage entry
 **Channels:** SMS + Email only
 
 ---

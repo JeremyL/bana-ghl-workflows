@@ -1,5 +1,6 @@
 # Bana Land — New Leads Account: Data Model
-*Last edited: 2026-03-23 · Last reviewed: 2026-03-22*
+
+*Last edited: 2026-04-01 · Last reviewed: 2026-04-01*
 
 Static configuration for the New Leads GHL sub-account — fields, tags, pipeline stages, smart lists, and lead entry rules. Build everything in this file before creating workflows.
 
@@ -7,7 +8,7 @@ This is the single working account for all lead sources. All leads enter here an
 
 Reference files:
 
-- [workflows.md](workflows.md) — all 11 workflow definitions
+- [workflows.md](workflows.md) — all 12 workflow definitions
 - [pipeline.md](pipeline.md) — stage definitions
 - [sequences.md](sequences.md) — cadence map
 - [messaging.md](messaging.md) — message templates
@@ -20,7 +21,7 @@ Reference files:
 1. Log into GHL and create the New Leads sub-account
 2. Set the **business name** to: `Bana Land — New Leads`
 3. Set the **time zone** to: `Eastern Time` (default safe zone for compliance)
-   - Note: Workflows should use per-contact local time where possible
+  - Note: Workflows should use per-contact local time where possible
 4. Configure **company phone number** — this will be used for SMS and caller ID
 5. Set **reply-to email address** for all outgoing emails
 
@@ -28,11 +29,13 @@ Reference files:
 
 ## Integrations
 
+
 | Service        | Purpose                            | GHL Location                              |
 | -------------- | ---------------------------------- | ----------------------------------------- |
 | SMS Provider   | Outbound/inbound texts             | Settings > Phone Numbers > LC Phone       |
 | Email Provider | Outbound emails                    | Settings > Email Services > Mailgun or LC |
 | Calendar       | Optional — for appointment setting | Settings > Calendars                      |
+
 
 ---
 
@@ -42,29 +45,31 @@ Leads enter this account through one of three mechanisms. Once inside, WF-New-Le
 
 ---
 
-### Campaign Push (from Prospect Data)
+### Push from Prospect Data
 
 **Who:** All outbound campaign contacts — Cold Email, Cold SMS, Cold Call, Direct Mail.
-**How:** Prospect Data automation pushes contacts into this account when a campaign launches.
+**How:** Prospect Data automation pushes contacts into this account when a lead comes in that is associated with a property record.
 
 **What automation must send:**
 
-| Field                            | Value                                                                 |
-| -------------------------------- | --------------------------------------------------------------------- |
-| First name, last name            | From campaign data / skip trace                                       |
-| Email address                    | From campaign data (required for Cold Email; may be absent for others) |
-| All phone numbers (Phone 1–4)    | From skip trace data (may be absent for Cold Email responders)        |
-| Tag                              | `Source: Cold Email`, `Source: Cold SMS`, `Source: Cold Call`, or `Source: Direct Mail` |
-| Custom field: Original Source    | Matching source value (set once, never overwritten)                   |
-| Custom field: Latest Source      | Same as Original Source on first entry                                |
-| Custom field: Latest Source Date | Today                                                                 |
-| Pipeline stage                   | New Leads                                                             |
+
+| Field                            | Value                                                                                   |
+| -------------------------------- | --------------------------------------------------------------------------------------- |
+| First name, last name            | From campaign data / skip trace                                                         |
+| Email address                    | From campaign data (required for Cold Email; may be absent for others)                  |
+| All phone numbers (Phone 1–4)    | From skip trace data (may be absent for Cold Email responders)                          |
+| Tag                              | `source: cold email`, `source: cold sms`, `source: cold call`, or `source: direct mail` |
+| Native Source (Opportunity)      | Matching source value (set once, never overwritten — first-touch attribution)            |
+| Custom field: Latest Source      | Same as native Source on first entry                                                    |
+| Custom field: Latest Source Date | Today                                                                                   |
+| Pipeline stage                   | New Leads                                                                               |
+
 
 **Cold Email note:** Cold Email responders may not have a phone number on entry. WF-Cold-Email-Subflow-P1 (Day 1-10) and WF-Cold-Email-Subflow-P2 (Day 11-30) run concurrently with the standard sequences to obtain one. See workflows.md for details.
 
 ---
 
-### Inbound (VAPI AI Call, Referral, Website)
+### Inbound (VAPI, Referral, Website)
 
 **Who:** Leads who contacted us directly — phone call-ins, referrals, website inquiries.
 **How:** Entered via GHL form/webhook (Website), VAPI call completion webhook, or manual entry (Referral).
@@ -73,15 +78,17 @@ Leads enter this account through one of three mechanisms. Once inside, WF-New-Le
 
 **What must be set on entry:**
 
-| Field                            | Value                                                                 |
-| -------------------------------- | --------------------------------------------------------------------- |
-| Tag                              | `Source: VAPI AI Call`, `Source: Referral`, or `Source: Website`      |
-| Custom field: Original Source    | Matching source value (set once, never overwritten)                   |
-| Custom field: Latest Source      | Same as Original Source on first entry                                |
-| Custom field: Latest Source Date | Today                                                                 |
-| Pipeline stage                   | New Leads                                                             |
 
-**VAPI note:** The AI note taker determines the actual marketing source before entry. If the caller responded to a direct mail piece, the lead enters with `Source: Direct Mail` (not `Source: VAPI AI Call`). `Source: VAPI AI Call` is only used when there is no known campaign trigger. No separate channel tracking needed — the source tag reflects the marketing trigger, not the entry channel.
+| Field                            | Value                                                            |
+| -------------------------------- | ---------------------------------------------------------------- |
+| Tag                              | `source: vapi`, `source: referral`, or `source: website` |
+| Native Source (Opportunity)      | Matching source value (set once, never overwritten — first-touch attribution) |
+| Custom field: Latest Source      | Same as native Source on first entry                                         |
+| Custom field: Latest Source Date | Today                                                                        |
+| Pipeline stage                   | New Leads                                                        |
+
+
+**VAPI note:** The AI note taker determines the actual marketing source before entry. If the caller responded to a direct mail piece, the lead enters with `source: direct mail` (not `source: vapi`). `source: vapi` is only used when there is no known campaign trigger. No separate channel tracking needed — the source tag reflects the marketing trigger, not the entry channel.
 
 ---
 
@@ -93,15 +100,15 @@ Leads enter this account through one of three mechanisms. Once inside, WF-New-Le
 **What automation must do:**
 
 1. Detect the contact already exists in this account (duplicate match)
-2. Stack a new Source tag on the existing contact (e.g., `Source: Direct Mail` added on top of existing `Source: Cold Call`)
+2. Stack a new source tag on the existing contact (e.g., `source: direct mail` added on top of existing `source: cold call`)
 3. Update custom field: Latest Source = new source value
 4. Update custom field: Latest Source Date = Today
-5. Add tag: `Re-Submitted`
+5. Add tag: `re-submitted`
 6. Move Opportunity to New Leads (same property) or create a new Opportunity (new property)
 
 **Rules:**
 
-- Do NOT overwrite Original Source — first-touch attribution is permanent
+- Do NOT overwrite native Opportunity Source — first-touch attribution is permanent
 - WF-New-Lead-Entry fires automatically on the New Leads stage move → cleans up active drips and creates owner task
 
 ---
@@ -110,17 +117,19 @@ Leads enter this account through one of three mechanisms. Once inside, WF-New-Le
 
 After entry, WF-New-Lead-Entry assigns the owner and fires the Day 0 speed-to-lead SMS based on source:
 
-| Source           | Entry Mechanism | Day 1–30 Owner | Day 0 SMS |
-| ---------------- | --------------- | -------------- | --------- |
-| Cold Email       | Campaign Push   | LM             | CO-SMS-00 |
-| Cold SMS         | Campaign Push   | LM             | CO-SMS-00 |
-| Cold Call        | Campaign Push   | LM             | CO-SMS-00 |
-| Direct Mail      | Campaign Push   | AM             | DM-SMS-00 |
-| VAPI AI Call     | Inbound         | AM             | IN-SMS-00 |
-| Referral         | Inbound         | AM             | IN-SMS-00 |
-| Website          | Inbound         | AM             | IN-SMS-00 |
 
-After Day 0, all sources follow the same cadence (Day 1–10 → Day 11–30 → Cold). The only ongoing difference is owner assignment (LM vs AM).
+| Source       | Entry Mechanism | Day 1–30 Owner | Day 0 SMS |
+| ------------ | --------------- | -------------- | --------- |
+| Cold Email   | Campaign Push   | LM             | CO-SMS-00 |
+| Cold SMS     | Campaign Push   | LM             | CO-SMS-00 |
+| Cold Call    | Campaign Push   | LM             | CO-SMS-00 |
+| Direct Mail  | Campaign Push   | AM             | DM-SMS-00 |
+| VAPI | Inbound         | AM             | IN-SMS-00 |
+| Referral     | Inbound         | AM             | IN-SMS-00 |
+| Website      | Inbound         | AM             | IN-SMS-00 |
+
+
+After Day 0, all sources follow the same cadence (Day 1–10 → Day 11–30 → LT FU: Cold). The only ongoing difference is owner assignment (LM vs AM).
 
 ---
 
@@ -160,7 +169,7 @@ Pipeline stages track **Opportunities**, not Contacts. Each pipeline card IS an 
 
 If the confirmed phone/email matches one from skip trace, it still goes in the native field. The unconfirmed fields hold everything from skip trace for reference — if a primary bounces or goes dead, the team can manually try an alternate.
 
-Used in WF-Cold-Email-Subflow-P2's one-time SMS blast for `Cold: Email Only` contacts.
+Used in WF-Cold-Email-Subflow-P2's one-time SMS blast for `cold: email only` contacts.
 
 ---
 
@@ -168,18 +177,25 @@ Used in WF-Cold-Email-Subflow-P2's one-time SMS blast for `Cold: Email Only` con
 
 Go to **Settings > Custom Fields > Contacts** and create the following:
 
-| Field Name        | Type     | Purpose                                                                                                        |
-| ----------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
-| Lead Entry Date   | Date     | Date lead was first added to the pipeline                                                                      |
-| Stage Entry Date  | Date     | Date lead entered their CURRENT stage                                                                          |
-| Days in Pipeline  | Number   | Reporting-only — calculate at query time using GHL's date math from Lead Entry Date. No workflow updates this field. |
-| DNC Date          | Date     | Date lead was added to DNC                                                                                     |
-| Age               | Number   | Owner's age (from skip trace data)                                                                             |
-| Deceased          | Text     | Owner is deceased (from skip trace data). Values: Y / N / blank                                                |
-| Assigned To       | Text     | Lead Manager or Acquisition Manager name (set by WF-New-Lead-Entry based on source tag)                                    |
-| Pause WFs Until      | Date       | Pause all automated sends until this date. Workflows check: field is empty OR field ≤ today → proceed to send. Set to today+3 by WF-Response-Handler. Owner clears manually to resume early. |
-| Unconfirmed Phones   | Large Text | All skip trace phone numbers (one per line). Not verified — for reference and manual use. |
-| Unconfirmed Emails   | Large Text | All skip trace email addresses (one per line). Not verified — for reference and manual use. |
+
+| Field Name         | Type       | Purpose                                                                                                                                                                                      |
+| ------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Age                | Number     | Owner's age (from skip trace data)                                                                                                                                                           |
+| Deceased           | Text       | Owner is deceased (from skip trace data). Values: Y / N / blank                                                                                                                              |
+| Pause WFs Until    | Date       | Pause all automated sends until this date. Workflows check: field is empty OR field ≤ today → proceed to send. Set to today+3 by WF-Response-Handler. Owner clears manually to resume early. |
+| Unconfirmed Phones | Large Text | All skip trace phone numbers (one per line). Not verified — for reference and manual use.                                                                                                    |
+| Unconfirmed Emails | Large Text | All skip trace email addresses (one per line). Not verified — for reference and manual use.                                                                                                  |
+
+> **Lead assignment** uses GHL's native Assigned User (Contact Owner) field — not a custom field. WF-New-Lead-Entry sets it via the "Assign To User" workflow action based on source tag. The native field appears on contact cards, supports If/Else workflow conditions, Smart List filters, and provides merge fields (`{{user.name}}`, `{{user.first_name}}`, etc.). Contact and Opportunity owners are coupled by default (changing one changes the other).
+
+> **Stage date tracking** uses GHL's native `lastStageChangeAt` field on Opportunities — not a custom field. GHL updates this automatically whenever an opportunity moves to a new pipeline stage. No workflow step needed. Used by the Stale New Leads Smart List to detect leads sitting in New Leads > 24 hours. **Edge case:** `lastStageChangeAt` does not update when an opportunity is re-submitted to the same stage it's already in (see for-review.md re-sub test item).
+
+> **DNC enforcement** uses GHL's native DND (Do Not Disturb) in addition to the `dnc` tag. WF-DNC-Handler sets DND for ALL channels (SMS, Call, Email) via the "Set Contact DND" workflow action — this is the platform-level hard block that prevents sends regardless of workflow configuration. The `dnc` tag is kept as the workflow-visible marker for enrollment gates and n8n intake DNC checks.
+
+> **Lead entry tracking** uses GHL's native `dateAdded` field on Contacts — not a custom field. GHL sets this automatically when the contact is created. In this system, contacts are only created on pipeline entry, so `dateAdded` = first entry date. On re-submissions the contact already exists and `dateAdded` does not change — preserving first-touch timing.
+
+> **Source attribution** uses GHL's native Source field on both Contacts and Opportunities for first-touch attribution — not a custom field. WF-New-Lead-Entry sets both once on first entry (skip if already set). Not updated on re-submission — the Latest Source custom field on the Opportunity tracks that. This keeps GHL's built-in reporting populated without a custom field for original source.
+
 
 ---
 
@@ -187,90 +203,121 @@ Go to **Settings > Custom Fields > Contacts** and create the following:
 
 Go to **Settings > Custom Fields > Opportunities** and create the following:
 
-| Field Name          | Type       | Purpose                                                                                                                                                                                          |
-| ------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Reference ID        | Text       | Internal reference/tracking ID for the property                                                                                                                                                  |
-| Property County     | Text       | County where the property is located                                                                                                                                                             |
-| Property State      | Text       | State where the property is located                                                                                                                                                              |
-| Acres               | Number     | Property acreage                                                                                                                                                                                 |
-| APN                 | Text       | Assessor's Parcel Number                                                                                                                                                                         |
-| Tier 1 Market Price | Currency   | Market price estimate — Tier 1 valuation                                                                                                                                                         |
-| Tier 2 Market Price | Currency   | Market price estimate — Tier 2 valuation                                                                                                                                                         |
-| Blind Offer         | Currency   | Blind offer amount (used in direct mail)                                                                                                                                                         |
-| Offer Price %       | Number     | Offer as a percentage of market value                                                                                                                                                            |
-| Legal Description   | Large Text | Full legal description of the property                                                                                                                                                           |
-| Map Link            | Text       | URL to property map (Google Maps, ParcelFact, etc.)                                                                                                                                              |
-| Lat/Long            | Text       | Latitude and longitude as a single comma-separated value (e.g., `35.1234, -97.5678`).                                                                                                           |
-| Offer Price         | Text       | Offer amount or percentage for this property (e.g., "$45,000" or "35%" or "$45k / 32%"). Populated from Prospect Data on push.                                                                   |
-| Contract Date       | Date       | Date contract was signed for this deal                                                                                                                                                           |
-| Original Source     | Dropdown   | First channel that brought this lead into GHL. Set once on first entry, never overwritten. Values: Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI AI Call, Referral, Website |
-| Latest Source       | Dropdown   | Most recent channel that brought this lead in. Same dropdown values as Original Source.                                                                                                          |
-| Latest Source Date  | Date       | Date the Latest Source field was last updated                                                                                                                                                     |
+
+| Field Name          | Type       | Purpose                                                                                                                                                                          |
+| ------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Reference ID        | Text       | Internal reference/tracking ID for the property                                                                                                                                  |
+| Property County     | Text       | County where the property is located                                                                                                                                             |
+| Property State      | Text       | State where the property is located                                                                                                                                              |
+| Acres               | Number     | Property acreage                                                                                                                                                                 |
+| APN                 | Text       | Assessor's Parcel Number                                                                                                                                                         |
+| Tier 1 Market Price | Currency   | Market price estimate — Tier 1 valuation                                                                                                                                         |
+| Tier 2 Market Price | Currency   | Market price estimate — Tier 2 valuation                                                                                                                                         |
+| Blind Offer         | Currency   | Blind offer amount (used in direct mail)                                                                                                                                         |
+| Offer Price %       | Text       | Offer as a percentage of market value                                                                                                                                            |
+| Legal Description   | Large Text | Full legal description of the property                                                                                                                                           |
+| Map Link            | Text       | URL to property map (Google Maps, ParcelFact, etc.)                                                                                                                              |
+| Lat/Long            | Text       | Latitude and longitude as a single comma-separated value (e.g., `35.1234, -97.5678`).                                                                                            |
+| Offer Price         | Text       | Offer amount or percentage for this property (e.g., "$45,000" or "35%" or "$45k / 32%"). Populated from Prospect Data on push.                                                   |
+| Contract Date       | Date       | Date contract was signed for this deal                                                                                                                                           |
+| Latest Source       | Text       | Most recent channel that brought this lead in. Updated on re-submission. Values: Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI, Referral, Website.                          |
+| Latest Source Date  | Date       | Date the Latest Source field was last updated                                                                                                                                    |
+
 
 ---
 
 ## Tags
 
-**Tag naming convention:** All tags follow `Category: Value` format with title case. Simple high-priority tags (DNC) are kept short.
+**Tag naming convention:** All tags are stored lowercase by GHL. Use `category: value` format. Simple high-priority tags (`dnc`) are kept short.
 
 Go to **Settings > Tags** and create these tags:
 
-| Tag Name                | Use                                                                                                                     |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| DNC                     | Do Not Contact — blocks all outreach. Triggers DNC sync to Prospect Data.                                               |
-| Re-Submitted            | Lead came back in from a new external campaign (different source). Resets to New Leads.                                  |
-| Cold: Email Only        | Cold Email lead with no confirmed phone number. Email-only drip (WF-Cold-Drip-Monthly/WF-Long-Term-Quarterly skip SMS steps).                     |
-| Source: Cold Call        | Lead came from cold calling.                                                                                             |
-| Source: Cold Email       | Lead came from cold email campaign.                                                                                      |
-| Source: Cold SMS         | Lead came from SMS blast campaign.                                                                                       |
-| Source: Direct Mail      | Lead came from direct mail.                                                                                              |
-| Source: VAPI AI Call     | Lead called Bana Land number; AI agent answered.                                                                         |
-| Source: Referral         | Lead came via referral.                                                                                                  |
-| Source: Website          | Lead came via website inquiry.                                                                                           |
-| Bounced                  | Email address bounced — do not email until corrected.                                                                   |
-| Caller: [Agent Name]     | Name of the third-party cold caller who generated the lead (paired with Source: Cold Call).                             |
+
+| Tag Name               | Use                                                                                                                           |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| dnc                    | Do Not Contact — blocks all outreach. Triggers DNC sync to Prospect Data.                                                     |
+| re-submitted           | Lead came back in from a new external campaign (different source). Resets to New Leads.                                       |
+| cold: email only       | Cold Email lead with no confirmed phone number. Email-only drip (WF-Cold-Drip-Monthly/WF-Long-Term-Quarterly skip SMS steps). |
+| source: cold call      | Lead came from cold calling.                                                                                                  |
+| source: cold email     | Lead came from cold email campaign.                                                                                           |
+| source: cold sms       | Lead came from SMS blast campaign.                                                                                            |
+| source: direct mail    | Lead came from direct mail.                                                                                                   |
+| source: vapi   | Lead called Bana Land number; AI agent answered.                                                                              |
+| source: referral       | Lead came via referral.                                                                                                       |
+| source: website        | Lead came via website inquiry.                                                                                                |
+| abandoned: dnc         | Abandoned status — lead opted out. Permanent, blocks re-entry.                                                                |
+| abandoned: not a fit   | Abandoned status — property/owner doesn't meet Bana Land's criteria.                                                          |
+| abandoned: no longer own | Abandoned status — lead already sold the property.                                                                           |
+| abandoned: exhausted   | Abandoned status — completed 24-month drip cycle with no conversion.                                                          |
+| bounced                | Email address bounced — do not email until corrected.                                                                         |
+| caller: [agent name]   | Name of the third-party cold caller who generated the lead (paired with `source: cold call`).                                 |
+
 
 ---
 
 ## Pipeline Setup
 
-Go to **CRM > Pipelines > Add Pipeline** and create: `Bana Land — Seller Pipeline`
+Go to **CRM > Pipelines** and create the following 5 pipelines with stages in exact order:
 
-Add the following stages **in this exact order:**
-
-**Group: Not Contacted / Not Qualified** *(LM or AM based on source)*
+### 01 : Leads *(LM or AM based on source)*
 
 1. New Leads
 2. Day 1-10
 3. Day 11-30
-4. Cold
 
-**Group: Dispo — Terminal** *(no future contact)*
+### 02 : Qualified *(AM owns all)*
 
-5. Dispo: Not a Fit
-6. Dispo: No Longer Own
-7. Dispo: Purchased
-8. Dispo: DNC
+1. Comps/Pricing
+2. Make Offer
+3. Negotiations
+4. Additional Info Needed
+5. Contract Sent
+6. Contract Signed
+7. Nurture
 
-**Group: Dispo — Re-Engage** *(light long-term drip)*
+### 03 : Due Diligence *(manual, TBD stages)*
 
-9. Dispo: No Motivation
-10. Dispo: Wants Retail
-11. Dispo: On MLS
-12. Dispo: Lead Declined
+Post-contract, pre-close. Stages TBD.
 
-**Group: Qualified** *(AM owns all)*
+### 04 : Value Add *(manual, TBD stages)*
 
-13. Due Diligence
-14. Make Offer
-15. Negotiations
-16. Contract Sent
-17. Under Contract
-18. Nurture
+Pre-close, complex deals with property improvements. Stages TBD.
 
-**Group: Follow-Up Complete**
+### 05 : Long Term FU *(automated drip)*
 
-19. Exhausted
+1. Cold
+2. Nurture
+3. Lost
+
+All stages use **Open** status. Deal outcomes use native GHL statuses — no dispo stages in the pipeline. See [pipeline.md](pipeline.md) for full stage definitions and cross-pipeline movement rules.
+
+---
+
+## Opportunity Statuses & Lost Reasons
+
+GHL has four fixed statuses: **Open, Won, Lost, Abandoned.** These replace our former dispo stages. See [pipeline.md](pipeline.md) for full definitions and re-entry paths.
+
+**Status → Won:** Deal closed and funded (replaces former "Dispo: Purchased" stage).
+
+**Status → Lost** — configure these custom lost reasons under **Settings > Custom Fields > Lost Reason:**
+
+| Lost Reason      | Former Stage          |
+| ---------------- | --------------------- |
+| No Motivation    | Dispo: No Motivation  |
+| Wants Retail     | Dispo: Wants Retail   |
+| On MLS           | Dispo: On MLS         |
+| Lead Declined    | Dispo: Lead Declined  |
+
+Lost triggers WF-Dispo-Re-Engage → 24-month long-term drip. After drip completes → Abandoned + `abandoned: exhausted`.
+
+**Status → Abandoned** — reason tracked via `abandoned:` tags (see Tags section above). No further outreach.
+
+| Tag                        | Former Stage           |
+| -------------------------- | ---------------------- |
+| `abandoned: dnc`           | Dispo: DNC             |
+| `abandoned: not a fit`     | Dispo: Not a Fit       |
+| `abandoned: no longer own` | Dispo: No Longer Own   |
+| `abandoned: exhausted`     | Exhausted              |
 
 ---
 
@@ -278,15 +325,17 @@ Add the following stages **in this exact order:**
 
 Create these Smart Lists under Contacts for daily team use:
 
-| Smart List Name          | Filter Criteria                                          |
-| ------------------------ | -------------------------------------------------------- |
-| LM — Today's Call Tasks  | Open tasks, type = Call, due today, assigned to LM       |
-| AM — Today's Call Tasks  | Open tasks, type = Call, due today, assigned to AM       |
-| Cold — No Response 30d   | Stage = Cold, GHL native "Last Activity" > 30 days ago   |
-| Cold Email — No Phone    | Tag = Source: Cold Email, Phone field is empty            |
-| Active Qualified Leads   | Stage is one of: Due Diligence, Make Offer, Negotiations |
-| Contracts in Progress    | Stage is one of: Contract Sent, Under Contract           |
-| DNC Contacts             | Tag = DNC                                                |
-| Stale New Leads          | Stage = New Leads, Stage Entry Date > 24 hours ago       |
+
+| Smart List Name         | Filter Criteria                                          |
+| ----------------------- | -------------------------------------------------------- |
+| LM — Today's Call Tasks | Open tasks, type = Call, due today, assigned to LM       |
+| AM — Today's Call Tasks | Open tasks, type = Call, due today, assigned to AM       |
+| Cold — No Response 30d  | Pipeline = LT FU, Stage = Cold, GHL native "Last Activity" > 30 days ago |
+| Cold Email — No Phone   | Tag = `source: cold email`, Phone field is empty         |
+| Active Qualified Leads  | Pipeline = Qualified, Stage is one of: Comps/Pricing, Make Offer, Negotiations |
+| Contracts in Progress   | Pipeline = Qualified, Stage is one of: Contract Sent, Contract Signed |
+| DNC Contacts            | Status = Abandoned, Tag = `abandoned: dnc`               |
+| Stale New Leads         | Stage = New Leads, native `lastStageChangeAt` > 24 hours ago |
+
 
 **Stale New Leads — daily notification:** Set up a daily internal notification (9 AM) to the assigned owner for any contacts on the Stale New Leads list. Message: "{{count}} lead(s) still in New Leads for 24+ hours — move to Day 1-10 or take action. [Smart List Link]". This catches leads that didn't get moved to Day 1-10 after Day 0 speed-to-lead.

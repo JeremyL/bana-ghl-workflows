@@ -1,5 +1,5 @@
 #  file.Bana Land — For Review
-*Last edited: 2026-03-23 · Last reviewed: 2026-03-22*
+*Last edited: 2026-04-01 · Last reviewed: 2026-04-01*
 
 Catch-all for items that need attention before or after go-live: pre-launch verifications, cross-file consistency checks, improvement ideas, and open decisions.
 
@@ -13,29 +13,73 @@ Items that require hands-on GHL testing before go-live. Cannot be verified from 
 | Item                           | Account       | Workflow            | What to Verify                                                                                                                                                                |
 | ------------------------------ | ------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Conditional SMS by phone field | New Leads     | WF-Cold-Email-Subflow-P2 Step 9    | GHL can send SMS to Phone 1–4 individually, skipping empty fields                                                                                                             |
-| Conditional SMS skip by tag    | New Leads     | WF-Cold-Drip-Monthly, WF-Long-Term-Quarterly       | GHL can branch on `Cold: Email Only` tag to skip SMS steps                                                                                                                    |
+| Conditional SMS skip by tag    | New Leads     | WF-Cold-Drip-Monthly, WF-Long-Term-Quarterly       | GHL can branch on `cold: email only` tag to skip SMS steps                                                                                                                    |
 | WF-Cold-Email-Subflow conditional suppression | New Leads     | WF-Day-1-10 / WF-Day-11-30 | Standard workflow steps are correctly skipped while contact is enrolled in WF-Cold-Email-Subflow-P1 (Day 1-10) or WF-Cold-Email-Subflow-P2 (Day 11-30)                                       |
 | DNC sync to Prospect Data      | New Leads     | WF-DNC-Handler               | Automation webhook updates Property record in Prospect Data on DNC                                                                                                            |
 | Prospect Data push automation  | Prospect Data | Automation          | Field mapping from Properties to Contact + Opportunity works correctly                                                                                                        |
 | Source-based task assignment   | New Leads     | WF-New-Lead-Entry             | Workflow correctly branches on source tag to assign tasks to LM vs AM                                                                                                          |
-| Manual stage move workflow exit | New Leads     | All drip workflows | Test manual stage moves between all drip stages (Cold ↔ Nurture ↔ Dispo Re-Engage ↔ Qualified) and verify the prior workflow exits cleanly. Defensive removal steps in WF-Cold-Drip-Monthly, WF-Nurture-Monthly, and WF-Dispo-Re-Engage should also fire as belt-and-suspenders. |
+| Manual stage move workflow exit | New Leads     | All drip workflows | Test manual stage moves between LT FU stages (Cold ↔ Nurture ↔ Lost) and cross-pipeline moves (Leads → Qualified, Qualified: Nurture → LT FU: Nurture) and status changes (Open → Lost → Open). Verify the prior workflow exits cleanly. Defensive removal steps in WF-Cold-Drip-Monthly, WF-Nurture-Monthly, and WF-Dispo-Re-Engage should also fire as belt-and-suspenders. |
+| Status change to Lost triggers | New Leads     | WF-Dispo-Re-Engage | Verify "Opportunity Status Changed → Lost" trigger fires WF-Dispo-Re-Engage correctly, with lost reason filter working for all 4 reasons. |
+| Status change to Abandoned     | New Leads     | WF-DNC-Handler      | Verify Abandoned + `abandoned: dnc` tag triggers WF-DNC-Handler correctly. Test that Abandoned + other tags (not a fit, no longer own, exhausted) do NOT trigger DNC handler. |
+| Lost → Open status flip        | New Leads     | WF-New-Lead-Entry   | On re-submission of a Lost lead, verify: lost reason clears, status flips to Open, WF-New-Lead-Entry fires normally. |
+| Abandoned → Open status flip   | New Leads     | WF-New-Lead-Entry   | On re-submission of an Abandoned (non-DNC) lead, verify: abandoned tag removed, status flips to Open, WF-New-Lead-Entry fires normally. DNC leads must be blocked. |
 | P1 → P2 stage handoff         | New Leads     | WF-Cold-Email-Subflow-P1/P2 | When WF-Day-1-10 auto-advances to Day 11-30, P1 exits cleanly and P2 triggers on Day 11-30 entry. No gap, no duplicate enrollment.                                            |
 | Pause ≤ today check           | New Leads     | All drip workflows  | GHL supports `Pause WFs Until` ≤ today (less than or equal) in Wait Until conditions. If not, fall back to setting pause to today+2 instead of today+3.                        |
-| Stale New Leads Smart List     | New Leads     | N/A                 | Smart List "Stale New Leads" correctly filters contacts in New Leads stage where Stage Entry Date > 24 hours ago. Daily notification fires to assigned owner. |
+| Stale New Leads Smart List     | New Leads     | N/A                 | Smart List "Stale New Leads" correctly filters contacts in New Leads stage where native `lastStageChangeAt` > 24 hours ago. Verify Smart Lists can filter on this native Opportunity field. Daily notification fires to assigned owner. |
+| ~~Missing contact custom fields~~ | ~~New Leads~~     | ~~N/A~~                 | **RESOLVED 2026-04-01.** All contact custom fields either created or replaced by native GHL fields (Assigned User, `lastStageChangeAt`, DND, `dateAdded`). See Resolved Notes H8, M9 below. |
+| ~~Tag casing — lowercase all docs~~ | ~~New Leads~~     | ~~All workflows~~       | **RESOLVED 2026-04-01.** All tag references across all docs lowercased to match GHL storage behavior. Convention statements updated from "title case" to "lowercase". See Resolved Notes below. |
+| Opportunity name UTF-8 encoding | New Leads     | n8n intake          | Em dash (—) in opportunity name shows as `\u00e2\u20ac\u201d` in API response. Likely renders correctly in GHL UI — verify. If garbled, switch to a plain dash or add UTF-8 charset header to n8n API calls. |
+| Re-sub stage change timestamp   | New Leads     | n8n intake          | On re-submission, `lastStageChangeAt` was NOT updated when opportunity was already in New Leads stage. Test re-sub after manually moving a lead to a later stage (e.g. Day 1-10) to confirm GHL registers the stage reset back to New Leads. Now using native `lastStageChangeAt` as sole stage date source — this edge case matters more. If same-stage re-sub doesn't update the timestamp, Stale New Leads Smart List may immediately flag re-submitted leads. |
+| Duplicate phone/email search results | Prospect Data | n8n intake     | Test what happens when multiple Property records share the same phone or email (e.g. two properties with the same owner). Unlikely but possible. Current behavior: uses first result and sets `multi_match=true`. Verify this works correctly and the right record is selected. May need operator review flag or selection logic. |
+| Email casing — normalize to lowercase | Both          | Import / n8n intake | GHL lowercases emails on contact creation (e.g. `CGORSKI@GORSKIENGINEERING.COM` → `cgorski@gorskiengineering.com`). Prospect Data stores emails in original case from skip trace (often uppercase). Need a normalization step — either lowercase on CSV import, in the n8n intake workflow before creating contacts, or both — so email comparisons and workflow conditions are uniform. Without this, email matching and dedup could be inconsistent. |
+| ~~Source dropdown value mismatch~~ | ~~New Leads~~     | ~~N/A~~                 | **RESOLVED 2026-04-01.** Original Source dropdown replaced by native Opportunity Source (text). Latest Source changed from dropdown to text. No more dropdown values to validate. Delete the old Original Source and Latest Source dropdown fields from GHL and recreate Latest Source as text. See Resolved Notes M10, M11 below. |
+| ~~DNC — tag vs built-in GHL feature~~ | ~~New Leads~~ | ~~n8n intake / workflows~~ | **RESOLVED 2026-04-01.** Hybrid approach: native DND (all channels) added to WF-DNC-Handler as platform-level hard block. `dnc` tag kept for workflow enrollment gates and n8n intake DNC checks. DNC Date custom field dropped — native DND timestamp + Abandoned status change date serve as audit trail. All-or-nothing policy: any opt-out = full DNC across all channels. See Resolved Notes below. |
 
 
 ---
 
 ## Cross-File Consistency Log
 
-Last full re-run: 2026-03-22 (data model & workflow conflict audit — pre-implementation).
+Last full re-run: 2026-04-01 (full file-by-file cross-file audit — all files compared against all other files).
 
 ### Open Notes
 
 - **O1:** Owner 2 and Owner 3 custom fields not yet created in Prospect Data GHL account. Same fields as Owner 1 (now 24 fields including Phone 5, Phone 5 Type, Phone 6, Phone 6 Type), prefixed accordingly. Not needed for initial testing — create before go-live.
 - **O2:** FUB export contains a "Listing Price" column with data. Meaning is unclear — determine what it represents before finalizing the FUB → GHL import mapping. May need a new field added to the Properties custom object.
+- **O3:** WF-Cold-Email-Subflow-P2 wait duration mismatch. workflows.md Step 4 says "Wait: 3 days" between WR-EMAIL-04 and WR-EMAIL-05, but sequences.md places them at Day 14 and Day 21 (7-day gap). With a 3-day wait, WR-EMAIL-05 fires at Day 17 and the Day 30 steps land at Day 26. **Fix:** workflows.md Step 4 → "Wait: 7 days". File: workflows.md ~line 84.
+- **O4:** Owner 2/3 field count wrong in prospect-data/data-model.md. Both say "Same 20 fields as Owner 1" but Owner 1 has 24 fields (6 phones + 6 phone types + 4 emails + name/address/age/deceased). O1 above correctly says 24. **Fix:** "20" → "24". File: prospect-data/data-model.md ~lines 79, 83.
+- **O5:** Template count wrong in quick-reference.md. Says "NL-SMS (9)" but there are 10 (NL-SMS-01 through NL-SMS-10). Total says "50 unique templates" → should be 51. **Fix:** NL-SMS (9) → (10), total 50 → 51. File: quick-reference.md lines 134, 136.
+- **O6:** Pipeline name in ASCII art. pipeline.md ~line 402 says "02 : ACQUISITIONS (AM owns all)" but the pipeline is named "02 : Qualified" everywhere else. **Fix:** "ACQUISITIONS" → "QUALIFIED". File: pipeline.md ~line 402.
+- **O7:** WF-Cold-Drip-Monthly "Applies to" in workflows.md includes "LT FU: Nurture leads" but Nurture leads go through WF-Nurture-Monthly (NUR-* templates), not WF-Cold-Drip-Monthly (COLD-* templates). The workflow's own trigger correctly lists only Cold and Lost stages — the Applies to text contradicts its trigger. **Fix:** Remove Nurture from Applies to. File: workflows.md ~line 252.
+- **O8:** Same Nurture error in messaging.md Cold Monthly header. Line 311 "Stage: LT FU: Cold / Nurture / Lost" and line 312 "Applies to" includes Nurture. COLD-* templates don't apply to Nurture leads. **Fix:** Remove Nurture from both lines. File: messaging.md lines 311-312.
+- **O9:** Verified section template count inconsistency within for-review.md. Line 156 says "all 50 template IDs" but line 149 says "all 51 template IDs" (51 is correct). **Fix:** Line 156: 50 → 51.
+- **O10:** ROLE.md Last edited date says 2026-03-30 but was edited 2026-04-01 (tag casing per resolved notes, pipeline stages per N-35). **Fix:** 2026-03-30 → 2026-04-01. File: ROLE.md line 2.
+- **O11:** Improvement #21 says "speed-to-lead actual vs. 5-min target" but the target is 10 minutes per rules.md §11 and sequences.md. N-32 corrected this in Decision Log #1 but missed Improvement #21. **Fix:** "5-min" → "10-min". File: for-review.md ~line 360.
+- **O12:** Stale "Dispo:" stage references in improvements (written before 2026-04-01 status restructure). Improvement #9: "Dispo: On MLS" → "Lost (On MLS reason)". Improvement #10: "count of dispos by stage" → "count of Lost/Abandoned status changes". Improvement #25: "Terminal dispo 'No Longer Own'" → "Abandoned + `abandoned: no longer own`". File: for-review.md ~lines 301, 311, 317, 427.
+- **O13:** n8n/intake-workflow.md Future Enhancements lists "Concatenated search field" but this is already implemented — `All Phones` and `All Emails` fields exist in prospect-data/data-model.md and the intake workflow uses them (Steps 2B, 2C). **Fix:** Remove or mark as completed. File: n8n/intake-workflow.md ~line 483.
+- **O14:** n8n/intake-workflow.md Rate Limits says "phone search cascade (up to 18 sequential queries)" but search now uses the concatenated `All Phones` field — single query per type, 3 queries max (ref → phone → email). **Fix:** Update description. File: n8n/intake-workflow.md ~line 440.
+- **O15:** Offer Price % type mismatch. prospect-data/data-model.md = Number. new-leads/data-model.md = Text. Field mapping shows no type conversion note. **Fix:** Align types or add conversion note. Files: prospect-data/data-model.md ~line 26, new-leads/data-model.md ~line 217.
+- **O16:** WF-Cold-Drip-Monthly potential double-trigger. Triggers on LT FU: Lost stage entry, but WF-Dispo-Re-Engage also explicitly enrolls after moving to that stage (Steps 2 + 3). GHL likely deduplicates, but should be verified. **Action:** Add to pre-launch verifications.
+- **O17:** ROLE.md banned phrases slightly less comprehensive than messaging.md. ROLE.md lists "just following up" but messaging.md also bans "following up" (without "just"). ROLE.md lists "checking in" but messaging.md also bans "check-in" (hyphenated). Minor — messaging.md is authoritative. **Fix:** Add slash variants to ROLE.md.
 
 ---
+
+---
+
+### Resolved Notes (2026-04-01) — Multi-Pipeline Restructure
+
+- **P1:** Docs restructured from single pipeline (10 stages in "Bana Land — Seller Pipeline") to 5 pipelines matching GHL reality: 01 : Leads (3 stages), 02 : Qualified (7 stages), 03 : Due Diligence (TBD), 04 : Value Add (TBD), 05 : Long Term FU (3 stages: Cold, Nurture, Lost). Files updated: pipeline.md (full rewrite), data-model.md (Pipeline Setup + Smart Lists), workflows.md (trigger scoping + cross-pipeline moves), sequences.md (stage references), rules.md (movement rules), n8n/intake-workflow.md (pipeline name), for-review.md.
+- **P2:** Cold stage removed from Leads pipeline — Day 11-30 completes → auto-move to LT FU: Cold (cross-pipeline). All Cold stage references updated across docs.
+- **P3:** Nurture in Qualified is now a trigger stage — AM parks stalled deal → immediately auto-moves to LT FU: Nurture. New stage-entry trigger documented in workflows.md.
+- **P4:** Lost status → WF-Dispo-Re-Engage now moves opportunity to LT FU: Lost (cross-pipeline) before enrolling in drip. Lost is both a GHL status AND a stage in LT FU.
+- **P5:** "Due Diligence" stage renamed to "Comps/Pricing" (Qualified pipeline). "Due Diligence" is now a separate pipeline (03) for post-contract, pre-close work. All qualification handoff references updated (move to Qualified: Comps/Pricing).
+- **P6:** "Under Contract" stage renamed to "Contract Signed" (Qualified pipeline). "Additional Info Needed" stage added to Qualified. All stage name references updated across docs.
+
+---
+
+### Resolved Notes (2026-04-01) — Tag Casing
+
+- **Tag casing:** All tag references across all 10 MD files lowercased to match GHL API behavior (GHL lowercases all tags on storage). Files updated: data-model.md, workflows.md, sequences.md, pipeline.md, rules.md, messaging.md, prospect-data/data-model.md, prospect-data/rules.md, n8n/intake-workflow.md, for-review.md, ROLE.md. Convention statements changed from "title case" to "lowercase".
 
 ---
 
@@ -46,17 +90,22 @@ Last full re-run: 2026-03-22 (data model & workflow conflict audit — pre-imple
 - **H1:** Standardized workflow trigger conventions. Stage-specific workflows use stage-entry triggers. Cross-stage workflows (WF-Long-Term-Quarterly) use explicit enrollment. Convention documented at top of workflows.md.
 - **H2:** Added WF-Response-Handler + WF-Missed-Call-Textback to WF-DNC-Handler removal list (now 10 workflows removed on DNC).
 - **H3:** Added WF-Cold-Drip-Monthly to WF-Dispo-Re-Engage defensive cleanup (prevents dual drip from Cold → Dispo Re-Engage).
-- **H4:** Added Stage Entry Date updates to WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-DNC-Handler. Added rules.md note for manual updates on qualified stages.
+- **H4:** ~~Added Stage Entry Date updates to WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-DNC-Handler. Added rules.md note for manual updates on qualified stages.~~ **Superseded 2026-04-01:** Stage Entry Date custom field removed — replaced by GHL's native `lastStageChangeAt` on Opportunities. All workflow update steps and manual update instructions removed.
 - **H5:** Removed Last Contact Date / Last Contact Type custom fields from data-model.md. GHL native activity tracking used for Smart Lists instead.
-- **H6:** Added `Cold: Email Only` tag removal to WF-New-Lead-Entry re-submission cleanup (prevents email-only drip for re-submitted leads who now have a phone).
+- **H6:** Added `cold: email only` tag removal to WF-New-Lead-Entry re-submission cleanup (prevents email-only drip for re-submitted leads who now have a phone).
 - **M1:** Specified "Opportunity" entity on source field updates in WF-New-Lead-Entry Steps 4-6.
 - **M2:** Replaced stale "WF-Day-1-10/03" notation in messaging.md and for-review.md.
 - **M3:** Template count corrected: 51 (was stated as 50 — WR-COLD-SMS-01 was miscounted).
 - **M4:** Rewrote DM-SMS-00 to remove banned phrase "following up."
-- **M5:** Days in Pipeline field marked as reporting-only (calculate at query time, no workflow updates).
+- **M5:** ~~Days in Pipeline field marked as reporting-only (calculate at query time, no workflow updates).~~ **Superseded 2026-04-01:** Field dropped entirely — see M9.
+- **H7:** Hybrid DNC: added native DND (all channels) to WF-DNC-Handler Step 1 as platform-level hard block. Kept `dnc` tag for workflow enrollment gates and n8n intake DNC checks. Dropped DNC Date custom field (write-only, never read). All-or-nothing policy confirmed. Updated data-model.md, workflows.md, rules.md.
 - **M6:** Added automation requirements note to data-model.md Inbound lead entry section.
 - **M7:** Added 1-hour move guidance for Cold Email no-phone leads in WF-New-Lead-Entry notification.
 - **M8:** Changed pause check from `< today` to `≤ today` for true 3-day window (was effectively 8 days with the old 7-day setting). Updated workflows.md, data-model.md, rules.md.
+- **H8:** Lead Entry Date custom field dropped — replaced by GHL's native `dateAdded` on Contacts. GHL sets this automatically on contact creation; in this system contacts are only created on pipeline entry, so `dateAdded` = first entry date. Removed set steps from WF-New-Lead-Entry and n8n intake workflow.
+- **M9:** Days in Pipeline custom field dropped — reporting-only, no workflow used it, derived value calculable at query time from native `dateAdded`.
+- **M10:** Source attribution now uses native Source fields on both Contacts and Opportunities for first-touch attribution. WF-New-Lead-Entry Steps 3-4 set both once (skip if already set). Not updated on re-submission — Latest Source custom field handles that.
+- **M11:** Original Source custom dropdown dropped — replaced by native Opportunity Source (text). Latest Source changed from dropdown to text to match. Eliminates dropdown value validation entirely. GHL action: delete old Original Source and Latest Source dropdown fields, recreate Latest Source as text.
 - **OC:** Cold monthly/quarterly separate stages deferred to post-launch (Decision Log #35). Voice note moved from sequences.md to for-review.md.
 
 ### Resolved Notes (2026-03-19)
@@ -68,7 +117,7 @@ Last full re-run: 2026-03-22 (data model & workflow conflict audit — pre-imple
 - **N-32:** Changed Decision Log #1 speed-to-lead target from "5-min" → "10-min" to match rules.md §11 and sequences.md.
 - **N-33:** Updated template count from 53 → 54 across for-review.md (verified section, N-23, Improvement #24) and MEMORY.md workflow index (was 43).
 - **N-34:** Replaced garbled "through" workflow groupings in workflows.md go-live checklist and README.md with explicit comma-separated list of all 12 workflows matching Step 6 index order.
-- **N-35:** Expanded ROLE.md pipeline stage summary from `Cold → Qualified → Dispo → Nurture` → `Cold → Dispo (Terminal + Re-Engage) → Due Diligence → Make Offer → Negotiations → Contract Sent → Under Contract → Nurture`. Now matches actual pipeline order and names all qualified stages.
+- **N-35:** Expanded ROLE.md pipeline stage summary from `Cold → Qualified → Dispo → Nurture` → full stage list. Now matches actual pipeline order and names all stages. *(Updated 2026-04-01: stage names updated for multi-pipeline restructure — see P1-P6 above.)*
 - **N-36:** Documented PD→NL DNC sync direction in prospect-data/rules.md (automation pushes DNC status to Contact in New Leads if one exists). Updated NL rules.md cheat sheet from "New Leads → Prospect Data" → "Bi-directional." DNC sync is confirmed bi-directional per user.
 - **N-37:** Added 4 missing banned phrases to ROLE.md line 126 ("whenever you're ready," "keeping the door open," "just wanted to make sure you saw it," "we're still here"). List now matches messaging.md exactly (10 phrases). Removed "see messaging.md for full list" since the list is now complete.
 - **N-38:** Changed pipeline.md Cold Email sub-flow from "runs concurrently with normal stage progression" → "runs concurrently with the Day 1–30 sequence (triggers on Day 1-10 entry)." Removes Day 0 ambiguity, matches workflows.md trigger condition.
@@ -98,11 +147,11 @@ Last full re-run: 2026-03-22 (data model & workflow conflict audit — pre-imple
 ### Verified — No Issues (2026-03-18)
 
 - **Nurture sequence** — internally consistent across pipeline.md, sequences.md, messaging.md, and workflows.md. Phase 1 monthly (WF-Nurture-Monthly: 30-day initial wait + 3 monthly sends) → Phase 2 shared Long-Term Quarterly (WF-Long-Term-Quarterly: 90-day leading wait, Q1–Q4 x2 then stops). Template references match.
-- **New Leads 30-day Cold entry** — consistent across NL pipeline.md, sequences.md, and workflows.md (WF-Day-11-30 → Cold → WF-Cold-Drip-Monthly)
-- **Cold drip sequence (WF-Cold-Drip-Monthly monthly + WF-Long-Term-Quarterly)** — template references, timing (30-day initial wait + 14-day spacing), and `Cold: Email Only` SMS skip logic consistent across sequences.md, messaging.md, and workflows.md
+- **New Leads 30-day LT FU entry** — consistent across NL pipeline.md, sequences.md, and workflows.md (WF-Day-11-30 → LT FU: Cold → WF-Cold-Drip-Monthly)
+- **Cold drip sequence (WF-Cold-Drip-Monthly monthly + WF-Long-Term-Quarterly)** — template references, timing (30-day initial wait + 14-day spacing), and `cold: email only` SMS skip logic consistent across sequences.md, messaging.md, and workflows.md
 - **WF-Cold-Email-Subflow-P1/P2 Cold Email Sub-Flow** — email timing (P1: Days 1, 3, 7; P2: Days 14, 21), Day 30 SMS blast, suppression of WF-Day-1-10 / WF-Day-11-30 all consistent across pipeline.md, sequences.md, messaging.md, and workflows.md *(updated 2026-03-22: P1/P2 split)*
 - **Day 1–30 sequence timing** — template references and day assignments in sequences.md match workflows.md WF-Day-1-10 / WF-Day-11-30 step order and wait durations
-- **Source tracking** — Original Source (immutable, set once) + Latest Source (updated on re-submission) + Latest Source Date. 7 dropdown values: Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI AI Call, Referral, Website. Source tags match dropdown values. All 7 sources routed in WF-New-Lead-Entry/WF-Response-Handler.
+- **Source tracking** — native Opportunity Source (immutable, set once — first-touch attribution) + Latest Source custom text field (updated on re-submission) + Latest Source Date. 7 source values: Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI, Referral, Website. Source tags match these values. All 7 sources routed in WF-New-Lead-Entry/WF-Response-Handler.
 - **Source → owner routing** — LM owns Cold Email/SMS/Call; AM owns Direct Mail/VAPI/Referral/Website. Consistent across pipeline.md, sequences.md, workflows.md (WF-New-Lead-Entry, WF-Response-Handler), and ROLE.md.
 - **Campaign Type → destination routing** — all campaign types route to New Leads. Consistent between prospect-data/rules.md and data-model.md.
 - **Prospect Data Campaign rules** — internally consistent between data-model.md and rules.md (naming convention, tag format, status values, campaign types)
@@ -151,18 +200,18 @@ Last full re-run: 2026-03-22 (data model & workflow conflict audit — pre-imple
 
 ### 14. Email Bounce Handling Process
 
-**Gap:** The `Bounced` tag exists in data-model.md but there is no documented process for what happens when an email bounces. Rules.md §8 covers disconnected phone numbers but not bounced emails. Continued sends to bounced addresses damage sender reputation, which affects deliverability for ALL emails across the entire account.
+**Gap:** The `bounced` tag exists in data-model.md but there is no documented process for what happens when an email bounces. Rules.md §8 covers disconnected phone numbers but not bounced emails. Continued sends to bounced addresses damage sender reputation, which affects deliverability for ALL emails across the entire account.
 
 **Why it matters:** Email deliverability is a shared resource. One bad address hurts every email you send. For Cold Email leads especially, email is the primary (sometimes only) channel — a bounce with no fallback means that lead is dead.
 
 **Recommended approach:**
 
 1. Add bounce handling to rules.md §8 (Data Hygiene):
-   - When email bounces → auto-tag `Bounced` → immediately stop email sends to this Contact
+   - When email bounces → auto-tag `bounced` → immediately stop email sends to this Contact
    - Attempt Email 2-4 fallback from Prospect Data (see Improvement #15)
    - If no fallback available → convert to SMS/call-only contact
    - For Cold Email leads with no phone + bounced email → dead lead → move to appropriate Dispo
-2. Configure GHL bounce webhook or automation to auto-apply `Bounced` tag on hard bounce
+2. Configure GHL bounce webhook or automation to auto-apply `bounced` tag on hard bounce
 
 - **Files affected:** rules.md (§8 expansion), workflows.md (bounce automation configuration)
 
@@ -176,13 +225,13 @@ Last full re-run: 2026-03-22 (data model & workflow conflict audit — pre-imple
 
 **Recommended approach:**
 
-1. When `Bounced` tag is applied → look up the original Property record in Prospect Data (via Reference ID)
+1. When `bounced` tag is applied → look up the original Property record in Prospect Data (via Reference ID)
 2. If Email 2, 3, or 4 exists for that owner → update Contact's email field with the next available email
-3. Remove `Bounced` tag → add `Email Fallback Attempted` tag to prevent infinite loops
+3. Remove `bounced` tag → add `email fallback attempted` tag to prevent infinite loops
 4. If that email also bounces → lead is truly email-dead, follow bounce handling process (Improvement #14)
 5. This can be automated via webhook or manual via LM checklist
 
-- **Files affected:** rules.md (fallback protocol), data-model.md (`Email Fallback Attempted` tag), workflows.md (fallback process), prospect-data/rules.md (note Emails 2-4 as fallback source)
+- **Files affected:** rules.md (fallback protocol), data-model.md (`email fallback attempted` tag), workflows.md (fallback process), prospect-data/rules.md (note Emails 2-4 as fallback source)
 
 ---
 
@@ -221,23 +270,23 @@ Last full re-run: 2026-03-22 (data model & workflow conflict audit — pre-imple
 
 ---
 
-### 18. Under Contract Communication Cadence
+### 18. Contract Signed Communication Cadence
 
-**Gap:** Pipeline.md says "Keep seller informed" for Under Contract, but there is no structured communication cadence. Sequences.md says "Regular deal management calls" with no specifics. Land closings take 30-60+ days with often-complicated title work (boundary disputes, easements, mineral rights, unclear chain of title).
+**Gap:** Pipeline.md says "Keep seller informed" for Contract Signed, but there is no structured communication cadence. Sequences.md says "Regular deal management calls" with no specifics. Land closings take 30-60+ days with often-complicated title work (boundary disputes, easements, mineral rights, unclear chain of title).
 
 **Why it matters:** Silence during the closing period causes sellers to panic, call their attorney, or back out. This is where deals fall apart — not because the terms were wrong, but because the seller felt abandoned. A simple weekly check-in prevents most deal falloff.
 
 **Recommended approach:**
 
-1. Add an Under Contract communication cadence to sequences.md:
+1. Add a Contract Signed communication cadence to sequences.md:
    - **Day 1 post-contract:** Expectations SMS — "Contract received. Here's what happens next: [brief title/closing process overview]. I'll keep you updated every step."
    - **Weekly:** Brief update SMS or call — "Title work is progressing, everything looks good" or "Ran into a small item with [X], working on it — nothing to worry about"
    - **Milestone notifications:** Title clear, closing date set, closing instructions sent
    - **Day before closing:** Confirmation SMS
-2. Create 3-4 templates: UC-SMS-01 (contract received / expectations), UC-SMS-02 (weekly check-in), UC-SMS-03 (closing scheduled), UC-SMS-04 (day-before closing)
-3. Semi-automated: AM manually triggers milestone messages, or a weekly timer fires UC-SMS-02 while opportunity is in Under Contract stage
+2. Create 3-4 templates: CS-SMS-01 (contract received / expectations), CS-SMS-02 (weekly check-in), CS-SMS-03 (closing scheduled), CS-SMS-04 (day-before closing)
+3. Semi-automated: AM manually triggers milestone messages, or a weekly timer fires CS-SMS-02 while opportunity is in Qualified: Contract Signed stage
 
-- **Files affected:** messaging.md (add UC templates), sequences.md (add Under Contract cadence), pipeline.md (expand Under Contract stage notes)
+- **Files affected:** messaging.md (add CS templates), sequences.md (add Contract Signed cadence), pipeline.md (expand Contract Signed stage notes)
 
 ---
 
@@ -296,7 +345,7 @@ Last full re-run: 2026-03-22 (data model & workflow conflict audit — pre-imple
 
 ### 19. AM Qualified Stage Playbook
 
-**Gap:** The LM side of the system is exhaustively documented (cadence, templates, workflow steps). The AM qualified stages (Due Diligence through Under Contract) are a black box: "AM handles it, every 1-2 days." No qualification call framework, no offer presentation approach, no stall thresholds, no objection responses.
+**Gap:** The LM side of the system is exhaustively documented (cadence, templates, workflow steps). The AM Qualified stages (Comps/Pricing through Contract Signed) are a black box: "AM handles it, every 1-2 days." No qualification call framework, no offer presentation approach, no stall thresholds, no objection responses.
 
 **Why it matters:** The AM is the revenue-generating role — everything before qualification is just filtering. If you hire a second AM or replace one, there is nothing to train from. The difference between a good and great AM is often a repeatable framework, not just instinct.
 
@@ -305,7 +354,7 @@ Last full re-run: 2026-03-22 (data model & workflow conflict audit — pre-imple
 - Create a new file `new-leads/am-playbook.md` covering:
   - **Qualification call framework:** What to confirm (interest level, motivation, timeline, asking price, authority to sell, property condition/access)
   - **Offer presentation:** NEPQ-style approach — "Based on what I'm seeing, the range I'd be looking at is... how does that sit with you?"
-  - **Stage advancement criteria:** Specific triggers for Due Diligence → Make Offer → Negotiations → Contract Sent → Under Contract
+  - **Stage advancement criteria:** Specific triggers for Comps/Pricing → Make Offer → Negotiations → Contract Sent → Contract Signed
   - **Stall thresholds:** If no progress in X days in a stage, consider next action (escalate, Nurture, Dispo)
   - **Common objection responses:** Price too low, need to think about it, talking to other buyers, spouse needs to agree
 - Link from sequences.md qualified section and pipeline.md qualified stage definitions
@@ -333,11 +382,11 @@ Last full re-run: 2026-03-22 (data model & workflow conflict audit — pre-imple
 
 ---
 
-### 22. VAPI AI Call Integration Details
+### 22. VAPI Integration Details
 
 **Gap:** VAPI is listed as an inbound source with minimal documentation (data-model.md Lead Entry & Routing — Inbound). No script, no data flow, no quality thresholds documented.
 
-**Why it matters:** If the VAPI AI call collects bad data, asks the wrong questions, or fails to set expectations, the leads entering GHL will be low quality or confused by the follow-up. The handoff between AI and human is a critical moment.
+**Why it matters:** If the VAPI collects bad data, asks the wrong questions, or fails to set expectations, the leads entering GHL will be low quality or confused by the follow-up. The handoff between AI and human is a critical moment.
 
 **Recommended approach (GHL-side scope only — VAPI config is external):**
 
@@ -421,7 +470,7 @@ Last full re-run: 2026-03-22 (data model & workflow conflict audit — pre-imple
 
 ### 27. Re-Submission Write-Back Automation
 
-**Gap:** Prospect Data rules.md explicitly notes: "Currently manual — NL WF-New-Lead-Entry does not write back to Prospect Data to update campaign tags and Account Push Date automatically." This means campaign tag stacking and Account Push Date updates require manual work on every re-submission.
+**Gap:** Prospect Data rules.md explicitly notes: "Currently manual — NL WF-New-Lead-Entry does not write back to Prospect Data to update campaign tags and CRM Push Date automatically." This means campaign tag stacking and CRM Push Date updates require manual work on every re-submission.
 
 **Why it matters:** Manual steps get skipped, especially under volume. If campaign tags don't stack automatically, Prospect Data loses its history of which properties were sent to which campaigns. Source tracking becomes unreliable over time.
 
@@ -429,8 +478,7 @@ Last full re-run: 2026-03-22 (data model & workflow conflict audit — pre-imple
 
 - Add a webhook or automation from WF-New-Lead-Entry to Prospect Data on re-submission detection:
   - Update the Property record's campaign tag (stack new tag alongside existing)
-  - Update Account Push Date to today
-  - Re-check `Pushed to New Leads` checkbox
+  - Update CRM Push Date to today
 - Update prospect-data/rules.md to reflect automation instead of manual process
 
 - **Files affected:** workflows.md (WF-New-Lead-Entry webhook step), prospect-data/rules.md (update re-submission section)
@@ -445,14 +493,14 @@ Last full re-run: 2026-03-22 (data model & workflow conflict audit — pre-imple
 | 1   | Speed to Lead          | Push notification + SMS alert to owner. 10-min call target. No auto-call bridge. | 2026-03-18 |
 | 2   | Multi-Property Overlap | Removed — not a real concern for this business.                 | 2026-03-18 |
 | 3   | GHL Looping            | Native re-enrollment (Enroll in same WF at last step)           | 2026-03-17 |
-| 4   | WF-Response-Handler Filter           | Stage filter added (Day 1-10, Day 11-30, Cold, Nurture, Dispo Re-Engage). `Re-Engaged` tag eliminated. `Pause WFs Until` prevents duplicate triggers. Soft opt-out guidance added. | 2026-03-18 |
+| 4   | WF-Response-Handler Filter           | Filter: Day 1-10, Day 11-30, Cold, Nurture (Open) + Lost (any reason) + Abandoned (non-DNC). `Re-Engaged` tag eliminated. `Pause WFs Until` prevents duplicate triggers. Soft opt-out guidance added. Updated 2026-04-01 for status-based dispo migration. | 2026-03-18 |
 | 5   | Missed Call Text-Back  | WF-Missed-Call-Textback built. 2-min delay, MC-SMS-01 template, no task. 11 → 12 workflows. | 2026-03-18 |
 | 6   | Property Merge Fields  | Blocked until GHL setup. Export actual merge field keys after custom fields are created, then update templates. | 2026-03-18 |
 | 7   | Message Variety        | 4 quarterly variants per channel (1-year cycle). Covers both Cold and Nurture. No additional variants needed. | 2026-03-18 |
 | 8   | Voicemail Strategy     | VM scripts (NL-VM-01/02) + combo SMS (NL-VMSMS-01) for manual calls. 3 automated RVM drops in Day 11-30 (NL-RVM-01/02/03). Protocol in rules.md §12. | 2026-03-18 |
 | 9   | Lead Scoring           | Pending                                                         | —          |
 | 10  | Expired MLS Trigger    | Pending                                                         | —          |
-| 11  | Dispo Review           | Pending                                                         | —          |
+| 11  | Dispo Review           | Resolved — see #37 (Dispo → Native Statuses).                  | 2026-04-01 |
 | 12  | Stage Consolidation    | 3 stages → 2: Day 1-10 + Day 11-30. WF-04 eliminated. | 2026-03-18 |
 | 13  | Monthly/Quarterly Split | WF-Cold-Drip-Monthly → WF-Cold-Drip-Monthly + WF-Cold-Drip-Quarterly. WF-Nurture-Monthly → WF-Nurture-Monthly + WF-Nurture-Quarterly. Quarterly self-loops. 10 → 12 workflows. | 2026-03-18 |
 | 14  | WF-07 Removed          | Qualified stages (Due Diligence → Under Contract) are human-led by AM. No automated workflow — smart lists are the safety net. 12 → 11 workflows. | 2026-03-18 |
@@ -478,5 +526,6 @@ Last full re-run: 2026-03-22 (data model & workflow conflict audit — pre-imple
 | 34  | Quarterly Drip Merge   | Merged WF-Cold-Drip-Quarterly + WF-Nurture-Quarterly into single WF-Long-Term-Quarterly. 24-month cap (Q1–Q4 x2, no loop). 8 LTQ templates replace 16 COLDQ+NURQ. 12 → 11 workflows. 58 → 50 templates. Cold Monthly and Nurture Monthly unchanged. | 2026-03-20 |
 | 35  | Cold Monthly/Quarterly Stages | Deferred to post-launch. Two connected questions: (1) Should Cold monthly and Cold quarterly be separate pipeline stages for visibility? Not now. (2) Should leads who say "no" during monthly drip skip directly to quarterly? Requires either separate stage or tag-based mechanism. Revisit with real data on how often this occurs. | 2026-03-22 |
 | 36  | Data Model & Workflow Audit | Pre-implementation audit found 17 issues (2 critical, 6 high, 8 medium, 1 deferred). All resolved. See audit resolution notes below. WF-Cold-Email-Subflow split into P1+P2 (11→12 workflows). Trigger conventions standardized. Template count corrected to 51. | 2026-03-22 |
+| 37  | Dispo → Native Statuses | Replaced all 8 dispo pipeline stages + Exhausted stage with native GHL opportunity statuses. Won = Purchased. Lost + lost reason = No Motivation, Wants Retail, On MLS, Lead Declined (triggers 24-mo drip). Abandoned + tag = DNC, Not a Fit, No Longer Own, Exhausted (no further contact). Pipeline: 18 → 10 stages. Cold/Nurture stay Open (still being dripped). DNC re-submission blocked. All files updated. | 2026-04-01 |
 
 

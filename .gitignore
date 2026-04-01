@@ -1,0 +1,11 @@
+# Sensitive data — never commit CSV files (contain PII)
+*.csv
+
+# Environment variables — API tokens
+.env
+
+# Temp test files
+*.temp
+
+# Validation results (contain location IDs / field IDs)
+scripts/results/
