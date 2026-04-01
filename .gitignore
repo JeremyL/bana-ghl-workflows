@@ -12,3 +12,6 @@ scripts/results/
 
 # n8n workflow exports (contain API keys / location IDs)
 n8n/*.json
+
+# Claude Code config (contains approved commands with embedded tokens)
+.claude/
