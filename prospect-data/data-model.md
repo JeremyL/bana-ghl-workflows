@@ -1,5 +1,5 @@
 # Prospect Data — Data Model
-*Last edited: 2026-04-01 · Last reviewed: —*
+*Last edited: 2026-04-06 · Last reviewed: —*
 
 Prospect Data in the Bana Land GHL system. Stores all raw property and skip trace data in a single flat Custom Object. No contacts, no opportunities, no pipeline.
 
@@ -87,7 +87,7 @@ Same 24 fields as Owner 1, prefixed with `Owner 3`. Created via API 2026-04-01.
 
 | Field           | Type       | Purpose                                       |
 | --------------- | ---------- | --------------------------------------------- |
-| Status            | Dropdown     | Active / DNC / Pipeline / Removed                |
+| Status            | Dropdown     | DNC / Pipeline / Removed (blank = available)     |
 | Skip Trace Date   | Date         | Date skip trace was completed                    |
 | DNC               | Checkbox     | Any owner on this property requested DNC         |
 | DNC Date          | Date         | Date DNC was flagged                             |
@@ -103,7 +103,7 @@ Same 24 fields as Owner 1, prefixed with `Owner 3`. Created via API 2026-04-01.
 
 | Value       | Meaning                                                           |
 | ----------- | ----------------------------------------------------------------- |
-| Active      | Available for campaigns. Default status on upload.                          |
+| *(blank)*   | Available for campaigns. Default on upload — no status needed.              |
 | Pipeline    | Currently active in New Leads. Do not re-send.                              |
 | DNC         | At least one owner requested Do Not Contact. No further outreach.           |
 | Removed     | Off the table — bad data, duplicate, sold, purchased, or disqualified.      |
@@ -142,7 +142,7 @@ One row = one marketing campaign. Linked to Properties via campaign tags.
 | ------------- | ---------- | ----------------------------------------------- |
 | Campaign Name | Text       | Unique name for the campaign                                    |
 | Campaign Tag  | Text       | Exact tag applied to Properties (e.g. `campaign: ce-tx-travis-2026-03`) |
-| Campaign Type | Dropdown   | Cold Email / Cold SMS / Cold Call / Direct Mail                 |
+| Campaign Type | Dropdown   | Cold SMS / Cold Call / Direct Mail                              |
 | Status        | Dropdown   | Planning / Active / Completed / Paused                          |
 | Start Date    | Date       | Campaign launch date                                            |
 | End Date      | Date       | Campaign end date (if applicable)                               |
@@ -170,7 +170,7 @@ Native GHL associations between Properties and Campaigns can be created via auto
 Prospect Data
   │
   └──► New Leads
-         All campaign types (Cold Email, Cold SMS, Cold Call, Direct Mail)
+         All campaign types (Cold SMS, Cold Call, Direct Mail)
          Automation creates Contact + Opportunity from Property fields
 ```
 

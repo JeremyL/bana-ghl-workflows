@@ -1,6 +1,6 @@
 # Bana Land — New Leads Account: Follow-Up Sequences
 
-*Last edited: 2026-04-01 · Last reviewed: 2026-04-01*
+*Last edited: 2026-04-02 · Last reviewed: 2026-04-02*
 
 This is the cadence document for **New Leads**. It defines exactly when to touch a lead,
 with which channel, and whether that touch is human-driven or automated.
@@ -24,7 +24,6 @@ All sources follow the same Day 1–30 cadence (same timing, same channels). The
 
 | Source Tag             | Call Tasks Assigned To |
 | ---------------------- | ---------------------- |
-| `source: cold email`   | Lead Manager           |
 | `source: cold sms`     | Lead Manager           |
 | `source: cold call`    | Lead Manager           |
 | `source: direct mail`  | Acquisition Manager    |
@@ -41,8 +40,6 @@ GHL workflows branch on source tag at each call task creation step to assign to 
 
 This sequence runs from the moment a lead enters the pipeline until they either qualify,
 disqualify themselves, or land in the long-term drip (LT FU: Cold).
-
-**Exception — Cold Email leads with no phone number:** SMS and call steps are skipped until a phone number is received. The Cold Email Sub-Flow (below) runs concurrently to obtain the phone number. Once received, the full cadence applies from the lead's current stage position.
 
 ### Day 0 — Speed to Lead (New Leads Stage)
 
@@ -61,7 +58,7 @@ disqualify themselves, or land in the long-term drip (LT FU: Cold).
 **Notes:**
 
 - Fires automatically via WF-New-Lead-Entry the moment a lead enters the New Leads stage
-- **Day 0 SMS varies by source:** CO-SMS-00/00A for Cold Email, Cold SMS, Cold Call (cold outbound opener). IN-SMS-00/00A for Website, VAPI, Referral (inbound acknowledgment). DM-SMS-00/00A for Direct Mail (letter reference). Rest of Day 1-30 sequence is identical across all sources.
+- **Day 0 SMS varies by source:** CO-SMS-00/00A for Cold SMS, Cold Call (cold outbound opener). IN-SMS-00/00A for Website, VAPI, Referral (inbound acknowledgment). DM-SMS-00/00A for Direct Mail (letter reference). Rest of Day 1-30 sequence is identical across all sources.
 - Speed-to-lead SMS sends before the call task — warms the number and signals we're reaching out
 - Missed-call SMS fires ~1 hour later only if no call was logged
 - Owner works the lead on Day 0 (calls, reviews any reply), then moves stage to Day 1-10 the same day
@@ -152,52 +149,6 @@ disqualify themselves, or land in the long-term drip (LT FU: Cold).
 
 ---
 
-## Cold Email Sub-Flow (Concurrent with Day 1–30)
-
-Cold Email leads may not have a phone number on entry. This sub-flow runs in parallel with the standard Day 1–30 sequence to obtain one. Managed by two workflows that mirror the normal stage relay pattern: **WF-Cold-Email-Subflow-P1** (Day 1-10) and **WF-Cold-Email-Subflow-P2** (Day 11-30).
-
-**When a sub-flow phase is active (no phone #):** The standard sequence for that stage (WF-Day-1-10 or WF-Day-11-30) skips ALL steps for this contact — SMS, call, and email are all suppressed. The sub-flow phase is the sole communicator until a phone number is received or the stage transitions. This avoids sending conflicting messages from two workflows simultaneously.
-
-**When phone # is received:** Active sub-flow phase exits. Standard sequence resumes fully (calls, SMS, and emails all fire from the lead's current stage position). LM call tasks begin.
-
-### P1 — Day 1-10: Get Phone Number (WF-Cold-Email-Subflow-P1)
-
-
-| Touch # | Timing | Channel | Type | Message Ref              |
-| ------- | ------ | ------- | ---- | ------------------------ |
-| 1       | Day 1  | Email   | Auto | WR-EMAIL-01 (ask for #)  |
-| 2       | Day 3  | Email   | Auto | WR-EMAIL-02 (follow-up)  |
-| 3       | Day 7  | Email   | Auto | WR-EMAIL-03 (check-in)   |
-
-When WF-Day-1-10 auto-advances the contact to Day 11-30 (~Day 11), P1 exits via its stage-change exit condition. P2 triggers on Day 11-30 entry.
-
-### P2 — Day 11-30: Continue + Day 30 Steps (WF-Cold-Email-Subflow-P2)
-
-
-| Touch # | Timing | Channel | Type | Message Ref              |
-| ------- | ------ | ------- | ---- | ------------------------ |
-| 4       | Day 14 | Email   | Auto | WR-EMAIL-04 (mid-window) |
-| 5       | Day 21 | Email   | Auto | WR-EMAIL-05 (soft close) |
-
-
-**Notes:**
-
-- These emails specifically ask for a phone number — they are different from the standard NL-EMAIL templates
-- LM monitors replies for phone numbers
-- If phone # received at any point → active sub-flow phase exits, standard cadence resumes in full
-
-### Day 30 — No Phone Number Received
-
-If no phone number is received by Day 30 (handled by WF-Cold-Email-Subflow-P2):
-
-1. **One-time SMS blast** to all skip-traced phone numbers on file (Phone 1–4, if populated) using template WR-COLD-SMS-01
-2. Add tag: `cold: email only` — flags contact for email-only drip (WF-Cold-Drip-Monthly/WF-Long-Term-Quarterly skip SMS steps)
-3. Move to LT FU: Cold (cross-pipeline move — WF-Cold-Drip-Monthly fires automatically on LT FU: Cold stage entry)
-
-If any skip-traced number responds to the one-time SMS blast, WF-Response-Handler fires and LM reviews.
-
----
-
 ## Qualified Leads (02 : Qualified)
 
 These are active deals in the Qualified pipeline. **Fully human-led — no automated workflows.**
@@ -276,8 +227,6 @@ At Month 3 → WF-Nurture-Monthly enrolls contact in WF-Long-Term-Quarterly (see
 
 At ~3.5 months (Day 100) → WF-Cold-Drip-Monthly enrolls contact in WF-Long-Term-Quarterly (shared quarterly phase). After 24 months of quarterly drip → status changes to Abandoned (`abandoned: exhausted`).
 
-**Note:** `cold: email only` contacts (Cold Email leads with no confirmed phone number) receive email steps only — all SMS steps are skipped (in both WF-Cold-Drip-Monthly and WF-Long-Term-Quarterly).
-
 ---
 
 ## Sequence — Long-Term Quarterly Drip (Month 4–28)
@@ -307,7 +256,6 @@ At ~3.5 months (Day 100) → WF-Cold-Drip-Monthly enrolls contact in WF-Long-Ter
 
 - After Q4 plays the second time, WF-Long-Term-Quarterly changes the opportunity status to **Abandoned** + adds tag `abandoned: exhausted` — a clear signal that all automated follow-up is complete.
 - WF-Response-Handler still catches any future inbound reply from Abandoned (non-DNC) contacts — lead is never truly lost
-- `cold: email only` contacts skip all SMS steps
 - If a lead responds at any point (including after moving to Abandoned), standard re-engagement protocol applies — WF-Response-Handler pauses workflows, owner reviews the response and decides next step
 - Re-submission via WF-New-Lead-Entry still works from Abandoned (non-DNC) — flip to Open, full restart as a new lead
 
@@ -373,7 +321,7 @@ A lead in LT FU: Cold, LT FU: Nurture, LT FU: Lost (status = Open), or Abandoned
 - **If owner does nothing after 3 days:** `Pause WFs Until` date expires — drip resumes from where it stopped (drip stages and Lost only). For Abandoned contacts, lead simply stays Abandoned.
 - **Stage/status does NOT change** during re-engagement review — the lead stays in their current stage/status unless owner explicitly changes it.
 - **Active stages (Day 1-10 / Day 11-30):** Same pause mechanic applies — automated sends hold. No 3-day auto-resume for these stages; owner manually clears `Pause WFs Until` field or moves stage.
-- **Owner assignment for re-engagement review:** WF-Response-Handler assigns the review task to the original owner based on source tag (LM for Cold Email/SMS/Call sources, AM for Direct Mail/VAPI/Referral/Website sources).
+- **Owner assignment for re-engagement review:** WF-Response-Handler assigns the review task to the original owner based on source tag (LM for Cold SMS/Call sources, AM for Direct Mail/VAPI/Referral/Website sources).
 
 ### Re-Submission (new external campaign source)
 

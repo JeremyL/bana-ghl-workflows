@@ -1,5 +1,5 @@
 # Bana Land — New Leads Account: Message Templates
-*Last edited: 2026-04-01 · Last reviewed: 2026-04-01*
+*Last edited: 2026-04-02 · Last reviewed: 2026-04-02*
 
 ## Voice & Principles
 
@@ -37,10 +37,9 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 | Prefix | Stage                                       |
 | ------ | ------------------------------------------- |
 | NL     | New Leads (Day 1-30)                        |
-| CO     | Cold Outreach Day 0 (Cold Email, Cold SMS, Cold Call) |
+| CO     | Cold Outreach Day 0 (Cold SMS, Cold Call) |
 | NL-VM  | Voicemail Scripts (manual, with calls)      |
 | NL-RVM | Ringless Voicemail Drops (automated)        |
-| WR     | Cold Email Sub-Flow (get phone #)           |
 | COLD   | Cold Monthly Drip (Months 1–3)              |
 | NUR    | Nurture Monthly (Months 1–3)                |
 | LTQ    | Long-Term Quarterly Drip (Month 4–28)       |
@@ -94,12 +93,6 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 | NUR-SMS-01     | SMS     | Nurture Monthly             | Month 1           | WF-Nurture-Monthly    | Auto        |
 | NUR-EMAIL-01   | Email   | Nurture Monthly             | Month 2           | WF-Nurture-Monthly    | Auto        |
 | NUR-SMS-02     | SMS     | Nurture Monthly             | Month 3           | WF-Nurture-Monthly    | Auto        |
-| WR-EMAIL-01    | Email   | Cold Email Sub-Flow P1      | Day 1             | WF-Cold-Email-Subflow-P1 | Auto        |
-| WR-EMAIL-02    | Email   | Cold Email Sub-Flow P1      | Day 3             | WF-Cold-Email-Subflow-P1 | Auto        |
-| WR-EMAIL-03    | Email   | Cold Email Sub-Flow P1      | Day 7             | WF-Cold-Email-Subflow-P1 | Auto        |
-| WR-EMAIL-04    | Email   | Cold Email Sub-Flow P2      | Day 14            | WF-Cold-Email-Subflow-P2 | Auto        |
-| WR-EMAIL-05    | Email   | Cold Email Sub-Flow P2      | Day 21            | WF-Cold-Email-Subflow-P2 | Auto        |
-| WR-COLD-SMS-01 | SMS     | Cold Email → Cold (one-time)| Day 30            | WF-Cold-Email-Subflow-P2 | Auto        |
 | NL-VM-01       | VM      | New Leads — Day 1-10        | With manual calls | WF-Day-1-10    | Manual      |
 | NL-VM-02       | VM      | New Leads — Day 11-30       | With manual calls | WF-Day-11-30    | Manual      |
 | NL-VMSMS-01    | SMS     | New Leads — Day 1-10 / 11-30| After voicemail   | WF-Day-1-10 / WF-Day-11-30 | Manual      |
@@ -115,7 +108,7 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 
 **Stage:** New Leads | **Cadence:** Immediate (speed to lead) | **Owner:** LM or AM (by source) + GHL auto
 
-Day 0 SMS varies by source: CO-SMS-00/00A (Cold Email, Cold SMS, Cold Call), IN-SMS-00/00A (Website, VAPI, Referral), DM-SMS-00/00A (Direct Mail). Rest of Day 1-30 sequence is identical across all sources.
+Day 0 SMS varies by source: CO-SMS-00/00A (Cold SMS, Cold Call), IN-SMS-00/00A (Website, VAPI, Referral), DM-SMS-00/00A (Direct Mail). Rest of Day 1-30 sequence is identical across all sources.
 
 ---
 
@@ -379,7 +372,7 @@ Either way is fine. Just want to know where we stand.
 **Applies to:** Cold / Nurture / Lost | **Cadence:** SMS + Email same day, every 90 days | **Owner:** GHL auto only
 **Trigger:** WF-Long-Term-Quarterly fires after Cold Monthly or Nurture Monthly completes (or directly to skip monthly)
 **Rotation:** 4 unique quarters (Q1–Q4), plays twice (24 months total), then stops.
-**Note:** `cold: email only` contacts skip all SMS steps. After Q4 plays the second time, no further automated touches — WF-Response-Handler still catches any future inbound reply.
+**Note:** After Q4 plays the second time, no further automated touches — WF-Response-Handler still catches any future inbound reply.
 
 ---
 
@@ -498,94 +491,6 @@ I'm curious — has anything changed, or are you still in the same spot?
 Trigger: WF-Nurture-Monthly enrolls contact in WF-Long-Term-Quarterly at Month 3.
 
 After Nurture Monthly, leads enter the shared **Long-Term Quarterly Drip** (see LTQ templates above). Same templates as Cold leads — both are unresponsive at this point.
-
----
-
-## Cold Email Sub-Flow — Get Phone Number
-
-**Source:** Cold Email leads with no phone number on file | **Owner:** GHL auto (emails) + Lead Manager (monitors replies)
-**Workflows:** WF-Cold-Email-Subflow-P1 (Day 1-10) + WF-Cold-Email-Subflow-P2 (Day 11-30) | **Duration:** Days 1–30 (concurrent with standard Day 1–30 stages)
-
-These templates specifically ask for a phone number. They are different from the standard NL-EMAIL templates and run as a parallel sub-flow for Cold Email leads only.
-
----
-
-#### WR-EMAIL-01 | Ask for Phone Number (Day 1)
-
-**Subject:** Re: Your property
-
-Hey {{first_name}},
-
-Appreciate you getting back to me. I've got a couple of questions about your property that would be a lot quicker over the phone.
-
-What's the best number to reach you at?
-
-— {{agent_name}} | Bana Land
-
----
-
-#### WR-EMAIL-02 | Follow-Up (Day 3)
-
-**Subject:** Re: Your property
-
-Hey {{first_name}},
-
-Happy to do everything over email if that's easier — but a quick call would save us both some back and forth.
-
-If you'd rather talk, just drop your number and I'll reach out at a time that works for you.
-
-— {{agent_name}} | Bana Land
-
----
-
-#### WR-EMAIL-03 | Check-In (Day 7)
-
-**Subject:** Re: Your property
-
-Hey {{first_name}},
-
-If it's easier, you can call or text me directly: [CALLBACK NUMBER]. I'm around most days.
-
-Otherwise just reply with a good number and I'll come to you.
-
-— {{agent_name}} | Bana Land
-
----
-
-#### WR-EMAIL-04 | Mid-Window (Day 14)
-
-**Subject:** Re: Your property
-
-Hey {{first_name}},
-
-I've been looking into your property and have some thoughts I'd rather share over the phone than over email.
-
-Best way to reach you?
-
-— {{agent_name}} | Bana Land
-
----
-
-#### WR-EMAIL-05 | Soft Close (Day 21)
-
-**Subject:** Re: Your property
-
-Hey {{first_name}},
-
-I realize we've been going back and forth over email. Would a 5-minute call make sense, or would you rather keep it to email?
-
-Either way works — just let me know: [CALLBACK NUMBER]
-
-— {{agent_name}} | Bana Land
-
----
-
-#### WR-COLD-SMS-01 | One-Time SMS Blast (Day 30)
-
-**Used by:** WF-Cold-Email-Subflow-P2 — sent once to each skip-traced phone number when a Cold Email lead hits Day 30 with no confirmed phone number.
-**Goal:** Bridge the email conversation to a phone connection. Sent once per number. No further SMS in Cold drip for these contacts.
-
-> Hey {{first_name}}, it's {{agent_name}} from Bana Land — we've been emailing about your property. Is this a good number to reach you?
 
 ---
 

@@ -1,20 +1,20 @@
 # Quick Reference — New Leads Outreach
 
-*Last edited: 2026-04-01 · Last reviewed: —*
+*Last edited: 2026-04-02 · Last reviewed: —*
 
 Every outreach touch across the New Leads pipeline — stage by stage, with template IDs and message counts.
-Templates follow `PREFIX-CHANNEL-##` format. Owner = LM (Cold Email/SMS/Call) or AM (Direct Mail/VAPI/Referral/Website).
+Templates follow `PREFIX-CHANNEL-##` format. Owner = LM (Cold SMS/Call) or AM (Direct Mail/VAPI/Referral/Website).
 
 ```
-[ALL SOURCES: Cold Email / Cold SMS / Cold Call / Direct Mail / VAPI / Referral / Website / Re-Submission]
+[ALL SOURCES: Cold SMS / Cold Call / Direct Mail / VAPI / Referral / Website / Re-Submission]
   └─► NEW LEADS — Day 0: Speed to Lead (immediate on entry)
         │   SMS varies by source (120s wait):
-        │     Cold Email / Cold SMS / Cold Call ──► CO-SMS-00
+        │     Cold SMS / Cold Call ────────────────► CO-SMS-00
         │     Website / VAPI / Referral ───────────► IN-SMS-00
         │     Direct Mail ─────────────────────────► DM-SMS-00
         │   After SMS ──► Call (manual)
         │   ~1hr later ──► Missed-call SMS if no call logged:
-        │     Cold Email / Cold SMS / Cold Call ──► CO-SMS-00A
+        │     Cold SMS / Cold Call ────────────────► CO-SMS-00A
         │     Website / VAPI / Referral ───────────► IN-SMS-00A
         │     Direct Mail ─────────────────────────► DM-SMS-00A
         │   Totals: 2 SMS, 1 Call (per lead — template varies by source)
@@ -61,21 +61,6 @@ Templates follow `PREFIX-CHANNEL-##` format. Owner = LM (Cold Email/SMS/Call) or
                     └─► No response by Day 30 ──────────────────────► [05 : LT FU] Cold → COLD MONTHLY
                     └─► DNC request ────────────────────────────────► Abandoned + `abandoned: dnc` (zero contact)
 
---- COLD EMAIL SPECIAL HANDLING (runs concurrently with Day 1-30) ---
-
-Cold Email (no confirmed phone #) enters New Leads → all standard SMS/call/email suppressed
-  └─► Phase 1: Automated emails asking for phone # (sole communicator)
-        │     Day 1:  Email (WR-EMAIL-01)
-        │     Day 3:  Email (WR-EMAIL-02)
-        │     Day 7:  Email (WR-EMAIL-03)
-        │     Day 14: Email (WR-EMAIL-04)
-        │     Day 21: Email (WR-EMAIL-05)
-        │
-        └─► Phone # received at any point ──────────────────────────► Sub-flow stops, standard Day 1-30 resumes
-        └─► Day 30, no phone # ─────────────────────────────────────► One-time SMS blast (WR-COLD-SMS-01)
-              └─► Tag: cold: email only → [05 : LT FU] Cold (email-only drip)
-  Totals: 5 Emails, 1 SMS
-
 --- COLD MONTHLY (Months 1-3 — fully automated) ---
 
 COLD MONTHLY (SMS + Email alternating every ~14 days)
@@ -86,7 +71,6 @@ COLD MONTHLY (SMS + Email alternating every ~14 days)
   │     Day 86:  SMS (COLD-SMS-03)
   │     Day 100: Email (COLD-EMAIL-03)
   │
-  │   cold: email only contacts skip all SMS steps
   │   Totals: 3 SMS, 3 Emails
   │
   └─► After Month 3 ──────────────────────────────────────────────► Long-Term Quarterly
@@ -112,7 +96,6 @@ SMS + Email same day, every 90 days — Q1-Q4 plays twice (24 months), then stop
   │     Q4: SMS (LTQ-SMS-04) + Email (LTQ-EMAIL-04)
   │     ↻ plays Q1-Q4 twice (24 months), then stops
   │
-  │   cold: email only contacts skip all SMS steps
   │   Totals: 4 SMS, 4 Emails (x2 = 8 SMS, 8 Emails over 24 months)
   │
   └─► Re-engages (replies to drip) ───────────────────────────────► Owner reviews (3-day window)
@@ -131,12 +114,11 @@ Missed inbound call ──► 2 min wait ──► SMS (MC-SMS-01)
 
 ═══════════════════════════════════════════════════════════════════
 
-TEMPLATE TOTALS (51 unique templates)
+TEMPLATE TOTALS (45 unique templates)
 
-  SMS ········ 28   NL-SMS (10) · CO-SMS (2) · IN-SMS (2) · DM-SMS (2) · COLD-SMS (3) · LTQ-SMS (4) · NUR-SMS (2)
-                    WR-COLD-SMS (1) · NL-VMSMS (1) · MC-SMS (1)
-  Email ······ 18   NL-EMAIL (5) · COLD-EMAIL (3) · LTQ-EMAIL (4) · NUR-EMAIL (1)
-                    WR-EMAIL (5)
+  SMS ········ 27   NL-SMS (10) · CO-SMS (2) · IN-SMS (2) · DM-SMS (2) · COLD-SMS (3) · LTQ-SMS (4) · NUR-SMS (2)
+                    NL-VMSMS (1) · MC-SMS (1)
+  Email ······ 13   NL-EMAIL (5) · COLD-EMAIL (3) · LTQ-EMAIL (4) · NUR-EMAIL (1)
   RVM ········  3   NL-RVM-01, 02, 03
   VM Script ··  2   NL-VM-01, NL-VM-02
 ```

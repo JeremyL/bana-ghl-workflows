@@ -1,6 +1,6 @@
 # New Leads — Contact Rules & Compliance
 
-*Last edited: 2026-04-01 · Last reviewed: 2026-04-01*
+*Last edited: 2026-04-02 · Last reviewed: 2026-04-02*
 
 Operational rules that govern all outreach in **New Leads** (the single working account).
 Every GHL workflow, automation, and team member action must respect these rules.
@@ -94,7 +94,7 @@ Not answering calls, not replying to texts, and not opening emails does NOT cons
 
 **Who can change a lead's stage or status:**
 
-- **Lead Manager (LM):** Can move LM-sourced leads (Cold Email/SMS/Call) through Leads pipeline stages. Can change status to Lost (with reason) or Abandoned (with tag). Can qualify and move to Qualified: Comps/Pricing.
+- **Lead Manager (LM):** Can move LM-sourced leads (Cold SMS/Call) through Leads pipeline stages. Can change status to Lost (with reason) or Abandoned (with tag). Can qualify and move to Qualified: Comps/Pricing.
 - **Acquisition Manager (AM):** Can move AM-sourced leads (Direct Mail/VAPI/Referral/Website) through any stage in any pipeline. Can change status. Owns all Qualified stages regardless of source.
 - **GHL automation:** Can advance leads within Leads pipeline (Day 1-10 → Day 11-30). Can auto-move to LT FU: Cold after Day 11-30. Can auto-move Qualified: Nurture → LT FU: Nurture. Can move Lost status → LT FU: Lost. Can change status to Abandoned (exhausted) after 24-month drip completes.
 - **Automation cannot:** Qualify a lead (move to Qualified or beyond) — that requires human confirmation
@@ -129,7 +129,7 @@ There are two distinct re-entry events. Each has its own protocol.
 **WF-Response-Handler only fires for contacts in:** Leads: Day 1-10, Leads: Day 11-30, LT FU: Cold, LT FU: Nurture, LT FU: Lost (status = Open), or Abandoned (non-DNC) — AND `Pause WFs Until` is empty (prevents duplicate triggers during an active review window).
 
 1. Set field: `Pause WFs Until` = today + 3 days — all active workflows hold at the next send condition
-2. Create high-priority review task assigned to **lead owner** (LM for Cold Email/SMS/Call sources, AM for Direct Mail/VAPI/Referral/Website sources)
+2. Create high-priority review task assigned to **lead owner** (LM for Cold SMS/Call sources, AM for Direct Mail/VAPI/Referral/Website sources)
 3. Send internal notification & internal SMS to lead owner with contact link
 4. **Resolution — one of three outcomes:**
   - **Owner moves to a qualified stage** (flip to Open if currently Lost) → workflow exit triggers fire, active workflows killed. Clear `Pause WFs Until`.
@@ -179,7 +179,7 @@ When a lead's status changes to Lost (any reason), WF-Dispo-Re-Engage triggers a
 ## 8. Data Hygiene Rules
 
 - **Phone numbers:** Verify with skip trace or carrier lookup before launching campaigns. Do not blast unverified numbers.
-- **Emails:** Verify email addresses from skip trace data using a service before sending cold emails.
+- **Emails:** Verify email addresses from skip trace data using a verification service before sending.
 - **Duplicate contacts:** Merge duplicates before enrolling in any sequence. GHL can trigger multiple workflows on dupes.
 - **Disconnected numbers:** If a call returns "not in service," tag the lead accordingly. Do not keep sending SMS to dead numbers.
 - **Stage date tracking:** GHL's native `lastStageChangeAt` field on Opportunities updates automatically whenever an opportunity moves to any pipeline stage — no manual updates or workflow steps needed. This covers all stages across all pipelines, including cross-pipeline moves. Used by the Stale New Leads Smart List to detect leads sitting in New Leads > 24 hours.
@@ -229,7 +229,6 @@ If a lead becomes hostile, threatening, or legally threatening:
 | Lead Type                                                 | Target                     | Owner                    |
 | --------------------------------------------------------- | -------------------------- | ------------------------ |
 | Cold SMS, Cold Call, Direct Mail, VAPI, Referral, Website | **Call within 10 minutes** | LM or AM (by source)     |
-| Cold Email (phone # just received via WF-Cold-Email-Subflow-P1/P2)      | **Call within 10 minutes** | LM                       |
 | Re-submitted leads (any source)                           | **Call within 30 minutes** | LM or AM (by new source) |
 
 

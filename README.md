@@ -1,9 +1,9 @@
 # Bana Land — GHL Follow-Up System
-*Last edited: 2026-03-30 · Last reviewed: —*
+*Last edited: 2026-04-02 · Last reviewed: —*
 
 Documentation for Bana Land's multi-channel motivated seller follow-up system, built in Go High Level (GHL). Covers the full lead lifecycle — from first outreach response through deal close, disqualification, or long-term drip.
 
-**CRM:** Go High Level  |  **Niche:** Rural land, all US states  |  **Lead sources:** Cold call, cold email, cold SMS, direct mail, VAPI, referral, website
+**CRM:** Go High Level  |  **Niche:** Rural land, all US states  |  **Lead sources:** Cold call, cold SMS, direct mail, VAPI, referral, website
 
 ---
 
@@ -12,7 +12,7 @@ Documentation for Bana Land's multi-channel motivated seller follow-up system, b
 
 | Account           | Owner                         | Role                                                                                                  |
 | ----------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------- |
-| **New Leads**     | Lead Manager + Acquisition Manager | Single working account for all leads. LM owns Day 1–30 for Cold Email/SMS/Call. AM owns Day 1–30 for Direct Mail/VAPI/Referral/Website + all qualified stages through close. |
+| **New Leads**     | Lead Manager + Acquisition Manager | Single working account for all leads. LM owns Day 1–30 for Cold SMS/Call. AM owns Day 1–30 for Direct Mail/VAPI/Referral/Website + all qualified stages through close. |
 | **Prospect Data** | —                             | Central data warehouse. Raw property + skip trace data. No outreach. Feeds New Leads.                 |
 
 
@@ -39,11 +39,11 @@ Single working account for all lead sources. Handles all leads from entry throug
 | -------------------------------------- | -------------------------------------------------------------------------------- |
 | [quick-reference.md](new-leads/quick-reference.md) | Copywriter-friendly quick reference: every outreach touch by stage with template IDs and counts |
 | [pipeline.md](new-leads/pipeline.md)   | 5 pipelines (Leads, Qualified, Due Diligence, Value Add, Long Term FU) + stage definitions + Opportunity Statuses |
-| [sequences.md](new-leads/sequences.md) | Cadence map: Day 1–30 + Cold Email sub-flow + Cold drip + Nurture + Qualified    |
-| [messaging.md](new-leads/messaging.md) | Message templates: NL-* + WR-EMAIL-* + COLD-* + NUR-* + LTQ-*                   |
+| [sequences.md](new-leads/sequences.md) | Cadence map: Day 1–30 + Cold drip + Nurture + Qualified                          |
+| [messaging.md](new-leads/messaging.md) | Message templates: NL-* + COLD-* + NUR-* + LTQ-*                                |
 | [rules.md](new-leads/rules.md)         | Contact rules and compliance: hours, DNC, stage movement, response protocol, data hygiene |
 | [data-model.md](new-leads/data-model.md) | Account configuration: custom fields, tags, pipeline stages, lead entry rules, smart lists |
-| [workflows.md](new-leads/workflows.md) | 12 workflow definitions (WF-Cold-Email-Subflow-P1, WF-Cold-Email-Subflow-P2, WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback) + checklists |
+| [workflows.md](new-leads/workflows.md) | 10 workflow definitions (WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback) + checklists |
 
 
 ### Account: Prospect Data (`prospect-data/`)

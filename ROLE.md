@@ -25,10 +25,10 @@ I think like a seasoned wholesaling operator who understands:
 | **Company**      | Bana Land                                                                                                                          |
 | **Niche**        | Rural land / rural properties                                                                                                              |
 | **Geography**    | All US states and counties (county-level targeting)                                                                                        |
-| **Lead Sources** | Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI, Referral, Website                                                              |
+| **Lead Sources** | Cold Call, Cold SMS, Direct Mail, VAPI, Referral, Website                                                                          |
 | **CRM**          | Go High Level (GHL) — two sub-accounts                                                                                                     |
 | **Team Size**    | Small — 2 to 5 people                                                                                                                      |
-| **Call Tasks**   | LM-sourced leads (Cold Email/Cold SMS/Cold Call): Lead Manager. AM-sourced leads (Direct Mail/VAPI/Referral/Website): Acquisition Manager. |
+| **Call Tasks**   | LM-sourced leads (Cold SMS/Cold Call): Lead Manager. AM-sourced leads (Direct Mail/VAPI/Referral/Website): Acquisition Manager. |
 
 
 ---
@@ -38,7 +38,7 @@ I think like a seasoned wholesaling operator who understands:
 
 | Role                    | Sources Owned (Day 1–30)                     | Responsibility                                                                                                                                                                                                           |
 | ----------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Lead Manager**        | Cold Email, Cold SMS, Cold Call              | Owns full 30-day pre-qualification follow-up. All calling, SMS/email touches. First successful phone conversation IS the qualifying call (interest, motivation, asking price). When qualified → sets appointment for AM. |
+| **Lead Manager**        | Cold SMS, Cold Call                          | Owns full 30-day pre-qualification follow-up. All calling, SMS/email touches. First successful phone conversation IS the qualifying call (interest, motivation, asking price). When qualified → sets appointment for AM. |
 | **Acquisition Manager** | Direct Mail, VAPI, Referral, Website | For these sources: owns full lifecycle from Day 1 through close. For LM-sourced leads: receives qualified leads via appointment, makes the offer call. If lead misses appointment, AM owns follow-up.                    |
 
 
@@ -56,7 +56,7 @@ The system is split across two GHL sub-accounts:
 
 ### Account: New Leads (`new-leads/`)
 
-**Owner:** Lead Manager (Cold Email/SMS/Call sources) + Acquisition Manager (Direct Mail/VAPI/Referral/Website sources)
+**Owner:** Lead Manager (Cold SMS/Call sources) + Acquisition Manager (Direct Mail/VAPI/Referral/Website sources)
 **Purpose:** Single working account for all leads. Handles all leads from entry through close, disqualification, or long-term drip. Workflows branch on source tag to assign tasks to LM or AM.
 **Pipelines:** 01 : Leads (New Leads → Day 1-10 → Day 11-30) · 02 : Qualified (Comps/Pricing → Make Offer → Negotiations → Additional Info Needed → Contract Sent → Contract Signed → Nurture) · 03 : Due Diligence (TBD) · 04 : Value Add (TBD) · 05 : Long Term FU (Cold → Nurture → Lost)
 **Statuses:** Open (active), Won (purchased), Lost + reason (re-engage drip), Abandoned + tag (terminal)
@@ -64,7 +64,7 @@ The system is split across two GHL sub-accounts:
 
 ### Cross-Account Integration
 
-- **Prospect Data → New Leads:** All campaign types (Cold Email, Cold SMS, Cold Call, Direct Mail). Automation splits Property into Contact + Opportunity.
+- **Prospect Data → New Leads:** All campaign types (Cold SMS, Cold Call, Direct Mail). Automation splits Property into Contact + Opportunity.
 - **DNC Sync:** Bi-directional via automation (New Leads ↔ Prospect Data).
 - **Re-submission:** Always goes to New Leads. WF-New-Lead-Entry fires cleanup and restarts the lead.
 
@@ -78,9 +78,8 @@ See [new-leads/pipeline.md](new-leads/pipeline.md) and [prospect-data/data-model
 | Stage Group              | Channels                                                                     | Who Executes                    |
 | ------------------------ | ---------------------------------------------------------------------------- | ------------------------------- |
 | Not Contacted (Day 1–30) | Calls + SMS + Email + RVM (Day 11-30 only)                                   | LM or AM (by source) + GHL auto |
-| Cold Email Sub-Flow      | Phase 1: Email auto (get phone #). Phase 2: LM calls once # received.        | Lead Manager + GHL auto         |
-| Cold (Months 1–3)        | SMS + Email monthly (~2 wks apart) — `cold: email only` contacts get Email only, no SMS | GHL auto only          |
-| Cold (Month 4+)          | SMS + Email (quarterly) — `cold: email only` contacts get Email only, no SMS | GHL auto only                   |
+| Cold (Months 1–3)        | SMS + Email monthly (~2 wks apart)                                           | GHL auto only                   |
+| Cold (Month 4+)          | SMS + Email (quarterly)                                                      | GHL auto only                   |
 | Qualified (Active)       | Calls + light SMS check-ins                                                  | Acquisition Manager             |
 | Nurture                  | SMS + Email (monthly × 3mo, quarterly thereafter)                            | Full GHL auto                   |
 | Lost (Re-Engage)         | SMS + Email (same Long-Term Drip as Cold)                                    | GHL auto                        |

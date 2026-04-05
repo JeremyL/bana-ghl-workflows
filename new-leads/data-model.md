@@ -1,6 +1,6 @@
 # Bana Land — New Leads Account: Data Model
 
-*Last edited: 2026-04-01 · Last reviewed: 2026-04-01*
+*Last edited: 2026-04-02 · Last reviewed: 2026-04-02*
 
 Static configuration for the New Leads GHL sub-account — fields, tags, pipeline stages, smart lists, and lead entry rules. Build everything in this file before creating workflows.
 
@@ -8,7 +8,7 @@ This is the single working account for all lead sources. All leads enter here an
 
 Reference files:
 
-- [workflows.md](workflows.md) — all 12 workflow definitions
+- [workflows.md](workflows.md) — all 10 workflow definitions
 - [pipeline.md](pipeline.md) — stage definitions
 - [sequences.md](sequences.md) — cadence map
 - [messaging.md](messaging.md) — message templates
@@ -47,7 +47,7 @@ Leads enter this account through one of three mechanisms. Once inside, WF-New-Le
 
 ### Push from Prospect Data
 
-**Who:** All outbound campaign contacts — Cold Email, Cold SMS, Cold Call, Direct Mail.
+**Who:** All outbound campaign contacts — Cold SMS, Cold Call, Direct Mail.
 **How:** Prospect Data automation pushes contacts into this account when a lead comes in that is associated with a property record.
 
 **What automation must send:**
@@ -56,16 +56,14 @@ Leads enter this account through one of three mechanisms. Once inside, WF-New-Le
 | Field                            | Value                                                                                   |
 | -------------------------------- | --------------------------------------------------------------------------------------- |
 | First name, last name            | From campaign data / skip trace                                                         |
-| Email address                    | From campaign data (required for Cold Email; may be absent for others)                  |
-| All phone numbers (Phone 1–4)    | From skip trace data (may be absent for Cold Email responders)                          |
-| Tag                              | `source: cold email`, `source: cold sms`, `source: cold call`, or `source: direct mail` |
+| Email address                    | From campaign data (may be absent for some sources)                                     |
+| All phone numbers (Phone 1–4)    | From skip trace data                                                                    |
+| Tag                              | `source: cold sms`, `source: cold call`, or `source: direct mail`                       |
 | Native Source (Opportunity)      | Matching source value (set once, never overwritten — first-touch attribution)            |
 | Custom field: Latest Source      | Same as native Source on first entry                                                    |
 | Custom field: Latest Source Date | Today                                                                                   |
 | Pipeline stage                   | New Leads                                                                               |
 
-
-**Cold Email note:** Cold Email responders may not have a phone number on entry. WF-Cold-Email-Subflow-P1 (Day 1-10) and WF-Cold-Email-Subflow-P2 (Day 11-30) run concurrently with the standard sequences to obtain one. See workflows.md for details.
 
 ---
 
@@ -120,7 +118,6 @@ After entry, WF-New-Lead-Entry assigns the owner and fires the Day 0 speed-to-le
 
 | Source       | Entry Mechanism | Day 1–30 Owner | Day 0 SMS |
 | ------------ | --------------- | -------------- | --------- |
-| Cold Email   | Campaign Push   | LM             | CO-SMS-00 |
 | Cold SMS     | Campaign Push   | LM             | CO-SMS-00 |
 | Cold Call    | Campaign Push   | LM             | CO-SMS-00 |
 | Direct Mail  | Campaign Push   | AM             | DM-SMS-00 |
@@ -168,8 +165,6 @@ Pipeline stages track **Opportunities**, not Contacts. Each pipeline card IS an 
 - **Unconfirmed Emails** — all skip trace email addresses
 
 If the confirmed phone/email matches one from skip trace, it still goes in the native field. The unconfirmed fields hold everything from skip trace for reference — if a primary bounces or goes dead, the team can manually try an alternate.
-
-Used in WF-Cold-Email-Subflow-P2's one-time SMS blast for `cold: email only` contacts.
 
 ---
 
@@ -220,7 +215,7 @@ Go to **Settings > Custom Fields > Opportunities** and create the following:
 | Lat/Long            | Text       | Latitude and longitude as a single comma-separated value (e.g., `35.1234, -97.5678`).                                                                                            |
 | Offer Price         | Text       | Offer amount or percentage for this property (e.g., "$45,000" or "35%" or "$45k / 32%"). Populated from Prospect Data on push.                                                   |
 | Contract Date       | Date       | Date contract was signed for this deal                                                                                                                                           |
-| Latest Source       | Text       | Most recent channel that brought this lead in. Updated on re-submission. Values: Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI, Referral, Website.                          |
+| Latest Source       | Text       | Most recent channel that brought this lead in. Updated on re-submission. Values: Cold Call, Cold SMS, Direct Mail, VAPI, Referral, Website.                                      |
 | Latest Source Date  | Date       | Date the Latest Source field was last updated                                                                                                                                    |
 
 
@@ -237,9 +232,7 @@ Go to **Settings > Tags** and create these tags:
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | dnc                    | Do Not Contact — blocks all outreach. Triggers DNC sync to Prospect Data.                                                     |
 | re-submitted           | Lead came back in from a new external campaign (different source). Resets to New Leads.                                       |
-| cold: email only       | Cold Email lead with no confirmed phone number. Email-only drip (WF-Cold-Drip-Monthly/WF-Long-Term-Quarterly skip SMS steps). |
 | source: cold call      | Lead came from cold calling.                                                                                                  |
-| source: cold email     | Lead came from cold email campaign.                                                                                           |
 | source: cold sms       | Lead came from SMS blast campaign.                                                                                            |
 | source: direct mail    | Lead came from direct mail.                                                                                                   |
 | source: vapi   | Lead called Bana Land number; AI agent answered.                                                                              |
@@ -331,7 +324,6 @@ Create these Smart Lists under Contacts for daily team use:
 | LM — Today's Call Tasks | Open tasks, type = Call, due today, assigned to LM       |
 | AM — Today's Call Tasks | Open tasks, type = Call, due today, assigned to AM       |
 | Cold — No Response 30d  | Pipeline = LT FU, Stage = Cold, GHL native "Last Activity" > 30 days ago |
-| Cold Email — No Phone   | Tag = `source: cold email`, Phone field is empty         |
 | Active Qualified Leads  | Pipeline = Qualified, Stage is one of: Comps/Pricing, Make Offer, Negotiations |
 | Contracts in Progress   | Pipeline = Qualified, Stage is one of: Contract Sent, Contract Signed |
 | DNC Contacts            | Status = Abandoned, Tag = `abandoned: dnc`               |

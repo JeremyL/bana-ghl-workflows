@@ -1,6 +1,6 @@
 # Bana Land — Quick Reference: Automated Messages
 
-*Last edited: 2026-04-01 · Last reviewed: —*
+*Last edited: 2026-04-02 · Last reviewed: —*
 
 One-pager for tonality planning. Shows every automated message by segment with its concept/angle. No actual copy — just what each message is doing.
 
@@ -17,7 +17,7 @@ One-pager for tonality planning. Shows every automated message by segment with i
     - Both for the lead manager and the acquisition manager, depending on the lead source.
   - Once qualifying call has been had, he lead will exit all day zero through 30 automations upon stage change
 - **Day 0 — Speed to Lead**
-  - **Cold Outbound** (Cold Email / Cold SMS / Cold Call)
+  - **Cold Outbound** (Cold SMS / Cold Call)
     - 120s after entry · SMS · CO-SMS-00
       - Cold intro — this is AGENT NAME, lets know call is coming
     - ~1hr later > Missed-call SMS if no call logged · SMS · CO-SMS-00A
@@ -140,28 +140,6 @@ One-pager for tonality planning. Shows every automated message by segment with i
     - Honest question — what's keeping you from selling?
   - Q4 · Email · LTQ-EMAIL-04
     - Opt-out offer — should I keep you on my list or stop reaching out?
-
----
-
-## Cold Email Sub-Flow
-
-- **Section guide:**
-  - Parallel track for Cold Email leads with no phone number.
-  - Email-only for 30 days trying to get a number.
-  - Runs alongside (and suppresses) the standard Day 0–30 sequence until a phone number is received.
-- **Get Phone Number (Days 1–30)**
-  - Day 1 · Email · WR-EMAIL-01
-    - Ask for phone — questions would be quicker over the phone, what's your number?
-  - Day 3 · Email · WR-EMAIL-02
-    - Offer flexibility — happy to do email, but a call saves back-and-forth
-  - Day 7 · Email · WR-EMAIL-03
-    - Give our number — you can call/text me directly, or reply with yours
-  - Day 14 · Email · WR-EMAIL-04
-    - Tease value — have thoughts to share, better over phone than email
-  - Day 21 · Email · WR-EMAIL-05
-    - Soft close — would a 5-min call make sense, or keep it to email?
-  - Day 30 (one-time blast to skip-traced numbers) · SMS · WR-COLD-SMS-01
-    - Bridge from email — we've been emailing, is this a good number?
 
 ---
 

@@ -1,5 +1,5 @@
 # Prospect Data — Rules
-*Last edited: 2026-04-01 · Last reviewed: —*
+*Last edited: 2026-04-06 · Last reviewed: —*
 
 Operating rules for the Prospect Data instance. Covers data uploads,
 campaign management, status transitions, and push-to-CRM rules.
@@ -13,7 +13,7 @@ campaign management, status transitions, and push-to-CRM rules.
 - Upload via CSV. One row per property.
 - `**reference` (Reference ID) is the master unique key.** If a `reference` already exists, update
 the existing record rather than creating a duplicate. APN is a data point, not the dedup key.
-- Set Status to `Active` on initial upload unless the record is known DNC or Removed.
+- Leave Status blank on initial upload (blank = available for campaigns). Set to DNC or Removed only if the record is known DNC or disqualified.
 - Current CSVs include property data + skip trace data in one file. When both are
 present, set Skip Trace Date = upload date.
 - Leave Owner fields blank if property has not been skip traced yet.
@@ -54,11 +54,11 @@ data overwrites the old data on that record.
   (name, type, status, dates).
 2. Campaign Name must be unique. Use a consistent naming convention:
   `[Type Abbreviation]-[State]-[County]-[Date]`
-   Examples: `CE-TX-Travis-2026-03`, `DM-FL-Marion-2026-Q1`, `CC-AZ-Mohave-2026-03`
-  - CE = Cold Email, CS = Cold SMS, CC = Cold Call, DM = Direct Mail
+   Examples: `CS-TX-Travis-2026-03`, `DM-FL-Marion-2026-Q1`, `CC-AZ-Mohave-2026-03`
+  - CS = Cold SMS, CC = Cold Call, DM = Direct Mail
 3. Set the **Campaign Tag** field to the exact tag that will be applied to Properties.
   Format: `campaign: [campaign name]`
-   Example: Campaign Name = `CE-TX-Travis-2026-03` → Campaign Tag = `campaign: ce-tx-travis-2026-03`
+   Example: Campaign Name = `CS-TX-Travis-2026-03` → Campaign Tag = `campaign: cs-tx-travis-2026-03`
    This is the single source of truth for which tag links Properties to this Campaign.
 4. Set Campaign Status to `Planning` until properties are assigned and ready to send.
 
@@ -75,7 +75,7 @@ Properties can be assigned to a campaign in two ways:
 **Method 2: Tag from within GHL**
 
 - Filter existing Properties by target criteria (state, county, acreage range,
-Status = Active, Skip Trace Date is not blank).
+Status is blank, Skip Trace Date is not blank).
 - Apply the campaign tag to all matching properties: `campaign: [campaign name]`
 - Update Total Records count on the Campaign record.
 
@@ -93,16 +93,16 @@ In either case, set Campaign Status to `Active` when the campaign launches.
 ### Status Transitions
 
 ```
-Active ──► Pipeline       (property pushed to New Leads)
-Active ──► DNC            (owner requests DNC)
-Active ──► Removed        (bad data, duplicate, sold, purchased, disqualified)
+(blank) ──► Pipeline      (property pushed to New Leads)
+(blank) ──► DNC           (owner requests DNC)
+(blank) ──► Removed       (bad data, duplicate, sold, purchased, disqualified)
 
-Pipeline ──► Active       (deal fell through, removed from New Leads)
+Pipeline ──► (blank)      (deal fell through, removed from New Leads)
 Pipeline ──► DNC          (owner requests DNC while in pipeline)
 Pipeline ──► Removed      (bad data discovered, property sold/purchased, disqualified)
 
 DNC ──► Removed           (property sold or otherwise permanently off the table)
-Removed ──► Active        (if data was corrected or error was reversed)
+Removed ──► (blank)       (if data was corrected or error was reversed)
 ```
 
 ### DNC Handling
@@ -196,7 +196,7 @@ All tags are stored lowercase by GHL. Use `category: value` format, matching New
 
 ## 6. Data Hygiene
 
-- **Quarterly review:** Properties with Status = Active that have not been included in any
+- **Quarterly review:** Properties with blank Status that have not been included in any
 campaign for 6+ months should be flagged for re-skip-tracing or removal.
 - **Sold property scrub:** Periodically cross-reference against public records or a sold
 property list. Mark confirmed sales as Removed.

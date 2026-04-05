@@ -1,6 +1,6 @@
 # Bana Land — New Leads Account: Pipeline Definitions
 
-*Last edited: 2026-04-01 · Last reviewed: 2026-04-01*
+*Last edited: 2026-04-02 · Last reviewed: 2026-04-02*
 
 Pipeline reference for **New Leads** — the single working account for all lead sources. Five pipelines organize the full lifecycle from entry through close or long-term follow-up:
 
@@ -29,7 +29,7 @@ See [data-model.md](data-model.md) for the full custom field definitions.
 
 | Role                    | Sources Owned (Day 1–30)                     | Responsibility                                                                                                                                                                                                   |
 | ----------------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Lead Manager**        | Cold Email, Cold SMS, Cold Call               | Owns the full 30-day pre-qualification follow-up for these three sources. All calling, all SMS/email touches. The LM's first successful phone conversation IS the qualifying call (interest, motivation, asking price). When qualified → LM moves to Qualified: Comps/Pricing and sets a call appointment for AM. |
+| **Lead Manager**        | Cold SMS, Cold Call                           | Owns the full 30-day pre-qualification follow-up for these two sources. All calling, all SMS/email touches. The LM's first successful phone conversation IS the qualifying call (interest, motivation, asking price). When qualified → LM moves to Qualified: Comps/Pricing and sets a call appointment for AM. |
 | **Acquisition Manager** | Direct Mail, VAPI, Referral, Website | For these sources: owns full lifecycle from Day 1 through close (fact-finding first call + offer second call). For LM-sourced leads: receives qualified leads via appointment, makes the offer call. If lead misses AM's appointment call, AM owns follow-up from that point. |
 
 ---
@@ -40,7 +40,6 @@ Same Leads pipeline stages, different task assignment based on source tag.
 
 | Source Tag             | Day 1–30 Owner     | Call Tasks Assigned To | Qualifying Call By | After Qualification                       |
 | ---------------------- | ------------------- | ---------------------- | ------------------ | ----------------------------------------- |
-| `source: cold email`   | Lead Manager        | LM                     | LM                 | LM sets appointment → AM makes offer call |
 | `source: cold sms`     | Lead Manager        | LM                     | LM                 | LM sets appointment → AM makes offer call |
 | `source: cold call`    | Lead Manager        | LM                     | LM                 | LM sets appointment → AM makes offer call |
 | `source: direct mail`  | Acquisition Manager | AM                     | AM                 | AM continues through close                |
@@ -51,18 +50,6 @@ Same Leads pipeline stages, different task assignment based on source tag.
 **LM → AM Handoff:** When LM qualifies a lead (confirms interest, motivation, asking price), LM moves the opportunity from Leads to Qualified: Comps/Pricing and sets a call appointment for AM. AM calls the lead for the offer conversation. If the lead misses the appointment, AM owns follow-up from that point forward.
 
 **AM-sourced leads:** Already considered qualified (the person came to us). AM handles fact-finding on the first call and presents an offer on the second call. Full multi-call lifecycle unchanged.
-
----
-
-## Cold Email Special Handling
-
-Cold Email leads may not have a phone number on entry. They get a two-phase sub-flow that runs concurrently with the Day 1–30 sequence — one workflow per stage, matching the normal relay pattern:
-
-- **P1 — Day 1-10 (no phone #):** WF-Cold-Email-Subflow-P1 sends automated emails asking for phone number (WR-EMAIL-01 through 03). Standard WF-Day-1-10 steps suppressed. LM monitors replies.
-- **P2 — Day 11-30 (no phone #):** WF-Cold-Email-Subflow-P2 continues emails (WR-EMAIL-04, 05). Standard WF-Day-11-30 steps suppressed. Day 30: one-time SMS blast to all skip-traced phone numbers on file (Phone 1–4) → move to LT FU: Cold with `cold: email only` tag (email-only drip, no further SMS).
-- **Phone # received (any point):** Active sub-flow phase exits. LM call tasks begin. Normal Day 1–30 cadence applies from that point.
-
-If any skip-traced number responds to the one-time SMS blast, WF-Response-Handler fires and the LM reviews.
 
 ---
 
@@ -79,9 +66,9 @@ All leads enter this pipeline. If no response by end of Day 11-30, the opportuni
 | Field          | Detail                                                                                           |
 | -------------- | ------------------------------------------------------------------------------------------------ |
 | **Definition** | Lead assigned to LM or AM based on source tag. **Day 0 speed-to-lead touches fire here** via WF-New-Lead-Entry. |
-| **Entry**      | All sources: Cold Email, Cold SMS, Cold Call, Direct Mail, VAPI, Referral, Website, re-submission. |
+| **Entry**      | All sources: Cold SMS, Cold Call, Direct Mail, VAPI, Referral, Website, re-submission. |
 | **Exit**       | Owner works Day 0 speed-to-lead (immediate SMS + call + missed-call SMS), then manually moves to Day 1-10 the same day. |
-| **Owner**      | LM (Cold Email/SMS/Call) or AM (Direct Mail/VAPI/Referral/Website) — assigned on entry via WF-New-Lead-Entry. |
+| **Owner**      | LM (Cold SMS/Call) or AM (Direct Mail/VAPI/Referral/Website) — assigned on entry via WF-New-Lead-Entry. |
 | **Actions**    | WF-New-Lead-Entry branches on source tag: assigns to LM or AM, fires Day 0 speed-to-lead (CO-SMS-00 + call task + CO-SMS-00A if no call logged), sends notification to owner. |
 
 ---
@@ -241,13 +228,13 @@ Stages TBD. Fully manual. Not relevant to automated workflows.
 | Field             | Detail                                                                                                                |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------- |
 | **Definition**    | 30+ days of contact attempts with no response or qualification. Never had a real conversation.                        |
-| **Entry**         | Auto-move from Leads: Day 11-30 when sequence completes with no response. Cold Email leads with no phone # get `cold: email only` tag (email-only drip). |
+| **Entry**         | Auto-move from Leads: Day 11-30 when sequence completes with no response. |
 | **Exit**          | Lead responds → WF-Response-Handler (owner reviews). Lead opts out → DNC. 24-month quarterly drip completes → Abandoned + `abandoned: exhausted`. |
 | **Re-Engagement** | Lead replies to drip → WF-Response-Handler: pause drip, owner reviews (LM for LM-sources, AM for AM-sources). 3-day auto-resume if no action. |
 | **Re-Submission** | Lead enters from new external campaign → WF-New-Lead-Entry: stop drip, move to Leads: New Leads, full restart.       |
 | **Owner**         | GHL automation only (no manual call tasks unless lead re-engages).                                                     |
 | **Frequency**     | Months 1–3: Monthly (SMS + Email each month). Month 4+: Quarterly.                                                    |
-| **Channels**      | SMS + Email (monthly → quarterly). `cold: email only` contacts receive email only.                                     |
+| **Channels**      | SMS + Email (monthly → quarterly).                                                                                      |
 | **Actions**       | Automated drip only. If lead responds, WF-Response-Handler fires.                                                      |
 
 ---
@@ -369,11 +356,11 @@ Truly done — no further outreach, no resources spent. The reason is tracked vi
 ## Stage Transition Quick Reference
 
 ```
-[ALL SOURCES: Cold Email / Cold SMS / Cold Call / Direct Mail / VAPI / Referral / Website / Re-Submission]
+[ALL SOURCES: Cold SMS / Cold Call / Direct Mail / VAPI / Referral / Website / Re-Submission]
 
 === 01 : LEADS ===
 
-  └─► NEW LEADS (LM for Cold Email/SMS/Call, AM for Direct Mail/VAPI/Referral/Website)
+  └─► NEW LEADS (LM for Cold SMS/Call, AM for Direct Mail/VAPI/Referral/Website)
         │   Day 0: Speed to Lead — immediate SMS + call task + missed-call SMS (WF-New-Lead-Entry)
         └─► Day 1-10 (2x daily Days 1-2, 1x daily Days 3-10)
               └─► Qualifies ──────────────────────────────────► [02 : Qualified] Comps/Pricing
@@ -381,17 +368,9 @@ Truly done — no further outreach, no resources spent. The reason is tracked vi
                     └─► Qualifies ────────────────────────────► [02 : Qualified] Comps/Pricing
                     └─► No response by Day 30 ────────────────► [05 : LT FU] Cold (auto-move)
 
---- COLD EMAIL SPECIAL HANDLING (runs concurrently with stages above) ---
-
-Cold Email (no phone #) enters New Leads
-  └─► Phase 1: Automated emails asking for phone # (Days 1–10)
-        └─► Phone # received at any point ──────────────────► LM call tasks begin (normal cadence)
-  └─► Phase 2: Continue emails (Days 11–30)
-        └─► Day 30, no phone # ─────────────────────────────► One-time SMS blast → [05 : LT FU] Cold (email-only drip)
-
 --- QUALIFICATION HANDOFF ---
 
-LM qualifies lead (Cold Email/SMS/Call sources)
+LM qualifies lead (Cold SMS/Call sources)
   └─► LM moves to [02 : Qualified] Comps/Pricing + sets call appointment for AM
         └─► AM calls lead (offer conversation)
               └─► Lead misses appointment → AM owns follow-up from here

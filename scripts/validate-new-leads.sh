@@ -357,8 +357,6 @@ EXPECTED_WFS=(
   "WF-New-Lead-Entry"
   "WF-Day-1-10"
   "WF-Day-11-30"
-  "WF-Cold-Email-Subflow-P1"
-  "WF-Cold-Email-Subflow-P2"
   "WF-Cold-Drip-Monthly"
   "WF-Nurture-Monthly"
   "WF-Long-Term-Quarterly"
@@ -563,7 +561,7 @@ ${MD_STAGE_ROWS}
 
 ## Workflows
 
-*$WF_TOTAL total workflows in account. 12 expected.*
+*$WF_TOTAL total workflows in account. 10 expected.*
 
 | Expected Workflow | Status | ID | Result |
 |---|---|---|---|

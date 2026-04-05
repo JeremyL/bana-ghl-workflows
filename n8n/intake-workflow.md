@@ -1,9 +1,11 @@
 # n8n Intake Workflow (Baseline)
-*Last edited: 2026-04-02 · Last reviewed: —*
+*Last edited: 2026-04-06 · Last reviewed: 2026-04-06*
 
-Baseline n8n workflow that proves the Prospect Data → New Leads pipeline. Receives a new lead via webhook, searches Prospect Data for a matching Property record, enriches the lead if found, and creates a Contact + Opportunity in New Leads.
+n8n workflow that processes leads from multiple triggers into the Prospect Data → New Leads pipeline. Searches Prospect Data for a matching Property record, enriches the lead if found, and creates a Contact + Opportunity in New Leads.
 
-This is a **skeleton workflow**. Source-specific automations (Cold Call intake, Cold Email intake, VAPI intake, etc.) will be cloned from this baseline and customized per source.
+**Triggers:**
+- **Webhook** — generic intake endpoint (any source). Includes a Normalize Webhook node that builds a `lead_note` from the raw webhook fields.
+- **Google Sheets Trigger** — Cold Caller intake form ("Form Responses 2"). Includes a Normalize node that maps sheet columns to the standard field shape and builds a `lead_note` with all raw form data.
 
 Reference files:
 
@@ -17,38 +19,41 @@ Reference files:
 ## Overview
 
 ```
-Webhook (lead data)
-  │
-  ▼
-Validate (need at least 1 identifier)
-  │
-  ▼
-Search Prospect Data ──► ref ID → phone → email (cascade)
-  │                          │
-  ├── Match found            ├── Multi-match → flag, use first
-  │   ├── DNC? → halt        │
-  │   └── Enrich lead        └── No match → skip enrichment
-  │
-  ▼
-Check New Leads for existing Contact
-  │
-  ├── Exists + DNC → halt
-  ├── Exists → re-submission path
-  └── New → create path
-  │
-  ▼
-Create/Update Contact + Opportunity in New Leads
-  │
-  ▼
-Update Prospect Data (if match found)
-  │
-  ▼
-Return response
+Webhook (lead data) ──► Normalize Webhook ��─┐
+                                            ▼
+Google Sheets Trigger ──► Normalize GSheet ──► Validate (need at least 1 identifier)
+                                          │
+                                          ▼
+                              Search Prospect Data ──► ref ID → phone → email (cascade)
+                                │                          │
+                                ├── Match found            ├── Multi-match → flag, use first
+                                │   ├── DNC? → halt        │
+                                │   └── Enrich lead        └── No match → skip enrichment
+                                │
+                                ▼
+                              Check New Leads for existing Contact
+                                │
+                                ├── Exists + DNC → halt
+                                ├── Exists → re-submission path
+                                └── New → create path
+                                │
+                                ▼
+                              Create/Update Contact + Opportunity in New Leads
+                                + Create Prospect Data Note (if PD match)
+                                + Create Lead Intake Summary Note
+                                │
+                                ▼
+                              Update Prospect Data (if match found)
+                                │
+                                ▼
+                              Return response (webhook) / End (non-webhook)
 ```
 
 ---
 
-## Webhook Endpoint
+## Triggers
+
+### Webhook Endpoint
 
 **Method:** POST
 **Auth:** Webhook-specific token or header key (configured in n8n)
@@ -76,8 +81,127 @@ Return response
 | `email` | Conditional | String | The confirmed email — the address the lead replied from. |
 | `first_name` | Optional | String | Lead's first name. Enriched from Prospect Data if not provided and match found. |
 | `last_name` | Optional | String | Lead's last name. Enriched from Prospect Data if not provided and match found. |
-| `source` | Required | String | One of: `Cold Call`, `Cold Email`, `Cold SMS`, `Direct Mail`, `VAPI`, `Referral`, `Website` |
+| `source` | Required | String | One of: `Cold Call`, `Cold SMS`, `Direct Mail`, `VAPI`, `Referral`, `Website` |
 | `caller_name` | Optional | String | Third-party cold caller name (paired with `source: cold call` — applies `caller: [name]` tag) |
+| `call_notes` | Optional | String | Free-text call notes from qualifying Q&A. Included in the `lead_note` built by the source's Normalize node. |
+
+---
+
+### Google Sheets Trigger — Cold Caller Intake
+
+**Source sheet:** Cold Caller intake Google Form → "Form Responses 2" tab
+**Poll interval:** Every minute (new rows)
+**Source:** Always `Cold Call` (hardcoded in normalize node)
+
+#### Normalize Node Field Mapping
+
+| Sheet Column | Output Field |
+| --- | --- |
+| `Reference Number` | `reference_id` |
+| `Owner full name` | `first_name` + `last_name` (split on first space) |
+| `Email address  ` | `email` (trimmed, lowercased) |
+| `Phone number (confirmation only)` | `phone` |
+| `Cold Caller Name:` | `caller_name` |
+| *(hardcoded)* | `source` = `Cold Call` |
+| *(built from all fields)* | `lead_note` (complete raw lead data note) |
+
+#### Lead Note (built by Normalize Google Sheet)
+
+The Normalize Google Sheet node builds a complete `lead_note` containing all raw data from the form — header, contact info, and Q&A. This note is passed through to the Create or Update Lead node and posted to the GHL contact timeline.
+
+**Note format:**
+```
+=== LEAD INTAKE SUMMARY ===
+Date: (form timestamp)
+Source: Cold Call
+Caller: (caller name)
+Reference ID: (ref ID)
+
+--- CONTACT ---
+Name: (owner name)
+Phone: (confirmed phone)
+Email: (confirmed email)
+
+--- CALL NOTES ---
+Ownership/History: ...
+Acreage (caller): ...
+Road Access: ...
+Utilities: ...
+Structures: ...
+Other Owners: ...
+Price Point: ...
+Recording: (link)
+```
+
+Empty fields are omitted from the note.
+
+**Q&A field mapping:**
+
+| Label in Note | Sheet Column |
+| --- | --- |
+| Ownership/History | Question 1 |
+| Acreage (caller) | Question 2 |
+| Road Access | Question 3 |
+| Utilities | Question 4 |
+| Structures | Question 5 |
+| Other Owners | Question 6 |
+| Price Point | Question 7 |
+| Recording | Call recording Google Drive link |
+
+### Webhook — Normalize Webhook Node
+
+The **Normalize Webhook** Code node sits between the Webhook trigger and Validate & Configure. It builds a `lead_note` from the raw webhook payload fields.
+
+**Note format:**
+```
+=== LEAD INTAKE SUMMARY ===
+Date: (today)
+Source: (source)
+Caller: (caller name, if present)
+Reference ID: (ref ID, if present)
+
+--- CONTACT ---
+Name: (first + last name)
+Phone: (phone)
+Email: (email)
+
+--- NOTES ---
+(call_notes from payload, if present)
+```
+
+The node passes through all webhook fields unchanged, adding only the `lead_note` field.
+
+---
+
+### Notes Architecture
+
+Each source trigger's Normalize node builds a `lead_note` with the raw data from that source. The **Build Payloads** node passes it through as `contact_note` without modification. This keeps note formatting source-specific and prevents Build Payloads from needing to know about each source's data shape.
+
+**Two notes on the contact timeline:**
+1. **Lead Intake Note** (`contact_note`) — built by the source's Normalize node. Contains only raw lead data.
+2. **Prospect Data Snapshot** (`prospect_note`) — built by Build Payloads. Contains PD enrichment data.
+
+#### Prospect Data Snapshot Note
+
+When a Prospect Data match is found, the **Build Payloads** node builds a `prospect_note` — a snapshot of all raw property and owner data from Prospect Data at intake time.
+
+**Note sections:**
+
+| Section | Fields Included |
+| --- | --- |
+| Prospect Data Snapshot | Pulled date, Reference ID |
+| Property | APN, County, State, Acres, Legal Description, Tier 1/2 Market Price, Blind Offer, Offer Price, Offer Price %, Lat/Long, Map Link |
+| Owner {n} | Name, Age, Deceased, Mailing Address |
+| All Phones (Owner {n}) | Up to 6 phones with type (Mobile, Residential, etc.) |
+| All Emails (Owner {n}) | Up to 4 emails |
+
+Only created when a PD match exists (inbound-only sources like VAPI/Referral/Website with no `reference_id` won't have this note).
+
+#### Note Creation Order
+
+Both notes are created by the **Create or Update Lead** node via `POST /contacts/{id}/notes`. The **Prospect Data note is posted first**, then the **Lead Intake note second** — GHL shows newest notes on top, so the lead intake note appears above the prospect data snapshot in the contact timeline. If either API call fails, the lead still proceeds — notes are best-effort.
+
+**Response handling:** Google Sheets triggers have no webhook to respond to. All `respondToWebhook` nodes are set to `continueOnFail` so they silently skip for non-webhook executions.
 
 ---
 
@@ -91,8 +215,8 @@ Return response
 
 **Check:** `source` is present and is a valid value.
 
-- Valid values: `Cold Call`, `Cold Email`, `Cold SMS`, `Direct Mail`, `VAPI`, `Referral`, `Website`
-- If missing or invalid → respond `400` with `{ "error": "source is required and must be one of: Cold Call, Cold Email, Cold SMS, Direct Mail, VAPI, Referral, Website" }` and stop.
+- Valid values: `Cold Call`, `Cold SMS`, `Direct Mail`, `VAPI`, `Referral`, `Website`
+- If missing or invalid → respond `400` with `{ "error": "source is required and must be one of: Cold Call, Cold SMS, Direct Mail, VAPI, Referral, Website" }` and stop.
 
 ---
 
@@ -337,15 +461,17 @@ Record the returned `opportunity_id`.
 
 **When:** A Property match was found in Step 2 (`property_matched` = `true`).
 
-**GHL API:** `PUT /custom-objects/{schemaId}/records/{propertyId}`
+**GHL API:** `PUT /objects/{schemaId}/records/{propertyId}?locationId={pdLocationId}`
 **Auth:** Prospect Data Private Integration Token (`GHL — Prospect Data`)
+**Body key:** `properties` (not `fields`)
+**Request format:** `json: { locationId, properties }` via `this.helpers.request` (locationId as query param, properties in body)
 
 | Field | Value |
 | --- | --- |
-| Status | Pipeline |
-| CRM Pushed | Checked |
-| CRM Push Date | Today |
-| Push to CRM | Unchecked (clear the trigger field, if it was set) |
+| Status | `pipeline` (lowercase — matches dropdown option key) |
+| CRM Push Date | Today (`YYYY-MM-DD`) |
+
+> **Note:** `CRM Pushed` and `Push to CRM` are Checkbox fields. The GHL Custom Objects API does not support writing Checkbox values (tested 2026-04-06 — arrays return 422, booleans/strings are silently ignored). These fields are skipped. `Status = pipeline` serves the same operational purpose as `CRM Pushed = checked`.
 
 **When no match:** Skip this step.
 
@@ -425,6 +551,7 @@ The `multi_match` field is `true` in the response. The lead is created normally 
 | Add Tags | POST | `/contacts/{id}/tags` | New Leads |
 | Create Opportunity | POST | `/opportunities/` | New Leads |
 | Update Opportunity | PUT | `/opportunities/{id}` | New Leads |
+| Create Contact Note (x2) | POST | `/contacts/{id}/notes` | New Leads |
 
 ### Authentication
 
@@ -480,6 +607,10 @@ All errors should be logged to n8n's execution log. Critical failures (Contact/O
 - [ ] Verify WF-New-Lead-Entry fires in GHL after Contact lands in New Leads stage
 - [ ] Verify owner assignment (LM vs AM) works correctly based on Source tag
 - [ ] Verify Day 0 speed-to-lead SMS fires
+- [ ] Test: Google Sheets trigger (new row) → normalizes fields, creates Contact + Opportunity + Lead Intake Note
+- [ ] Verify Lead Intake Note appears in GHL contact timeline with raw lead data only (no PD-enriched fields)
+- [ ] Verify Prospect Data Snapshot note appears separately with all PD fields (when match found)
+- [ ] Test: webhook → Normalize Webhook builds lead_note from webhook fields
 
 ---
 
