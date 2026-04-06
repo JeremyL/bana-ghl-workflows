@@ -1,11 +1,12 @@
 # n8n Intake Workflow (Baseline)
-*Last edited: 2026-04-06 · Last reviewed: 2026-04-06*
+*Last edited: 2026-04-07 · Last reviewed: 2026-04-06*
 
 n8n workflow that processes leads from multiple triggers into the Prospect Data → New Leads pipeline. Searches Prospect Data for a matching Property record, enriches the lead if found, and creates a Contact + Opportunity in New Leads.
 
 **Triggers:**
 - **Webhook** — generic intake endpoint (any source). Includes a Normalize Webhook node that builds a `lead_note` from the raw webhook fields.
 - **Google Sheets Trigger** — Cold Caller intake form ("Form Responses 2"). Includes a Normalize node that maps sheet columns to the standard field shape and builds a `lead_note` with all raw form data.
+- **VAPI Webhook** — VAPI end-of-call-report webhook. Includes a Normalize VAPI node that extracts caller info, property details, AI summary, and full transcript from the VAPI payload.
 
 Reference files:
 
@@ -19,36 +20,39 @@ Reference files:
 ## Overview
 
 ```
-Webhook (lead data) ──► Normalize Webhook ��─┐
-                                            ▼
-Google Sheets Trigger ──► Normalize GSheet ──► Validate (need at least 1 identifier)
-                                          │
-                                          ▼
-                              Search Prospect Data ──► ref ID → phone → email (cascade)
-                                │                          │
-                                ├── Match found            ├── Multi-match → flag, use first
-                                │   ├── DNC? → halt        │
-                                │   └── Enrich lead        └── No match → skip enrichment
-                                │
-                                ▼
+VAPI (end-of-call) --> Normalize VAPI ------+
+                                            |
+Webhook (lead data) --> Normalize Webhook --+
+                                            v
+Google Sheets Trigger --> Normalize GSheet --> Validate (need at least 1 identifier)
+                                            ^
+Website Form -------> Normalize Website Form +
+                                          |
+                                          v
+                              Search Prospect Data --> ref ID > phone > email (cascade)
+                                |                          |
+                                +-- Match found            +-- Multi-match > flag, use first
+                                |   +-- DNC? > halt        |
+                                |   +-- Enrich lead        +-- No match > skip enrichment
+                                |
+                                v
                               Check New Leads for existing Contact
-                                │
-                                ├── Exists + DNC → halt
-                                ├── Exists → re-submission path
-                                └── New → create path
-                                │
-                                ▼
+                                |
+                                +-- Exists + DNC > halt
+                                +-- Exists > re-submission path
+                                +-- New > create path
+                                |
+                                v
                               Create/Update Contact + Opportunity in New Leads
                                 + Create Prospect Data Note (if PD match)
                                 + Create Lead Intake Summary Note
-                                │
-                                ▼
+                                |
+                                v
                               Update Prospect Data (if match found)
-                                │
-                                ▼
+                                |
+                                v
                               Return response (webhook) / End (non-webhook)
 ```
-
 ---
 
 ## Triggers
@@ -77,7 +81,7 @@ Google Sheets Trigger ──► Normalize GSheet ──► Validate (need at lea
 | Field | Required | Type | Notes |
 | --- | --- | --- | --- |
 | `reference_id` | Conditional | String | Property Reference ID. At least one of `reference_id`, `phone`, or `email` must be present. |
-| `phone` | Conditional | String | The confirmed phone — the number the lead called from, answered on, or texted from. E.164 format preferred. |
+| `phone` | Conditional | String | The confirmed phone — the number the lead called from, answered on, or texted from. Any common format accepted (see Phone Normalization below). |
 | `email` | Conditional | String | The confirmed email — the address the lead replied from. |
 | `first_name` | Optional | String | Lead's first name. Enriched from Prospect Data if not provided and match found. |
 | `last_name` | Optional | String | Lead's last name. Enriched from Prospect Data if not provided and match found. |
@@ -173,6 +177,96 @@ The node passes through all webhook fields unchanged, adding only the `lead_note
 
 ---
 
+### VAPI Webhook — Normalize VAPI Node
+
+**Trigger:** VAPI end-of-call-report webhook
+**Path:** `vapi-intake`
+**Method:** POST
+**Source:** Always `VAPI` (hardcoded in normalize node)
+
+VAPI sends an `end-of-call-report` webhook when a call completes. The payload includes the AI's analysis (summary + structured data extraction), full conversation transcript, and call metadata.
+
+**Data extraction uses two sources (in priority order):**
+
+1. **`artifact.structuredOutputs` (preferred)** — Uses VAPI Structured Outputs with a locked JSON Schema. Field names are guaranteed stable. The UUID key is dynamic; the code grabs the first entry's `.result`. Returns strings for all values — `"yes"`/`"no"` for booleans, `"null"` for missing values.
+2. **`analysis.structuredData` (fallback)** — AI-inferred extraction with unstable field names. Only used if structured outputs are absent.
+
+#### Structured Output Fields (locked schema)
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `caller_name` | string | Caller's full name |
+| `caller_email` | string | Caller's email (or `"null"`) |
+| `reference_number` | string | Mailer reference ID (or `"null"`) |
+| `property_county` | string | Property county |
+| `property_state` | string | Property state |
+| `property_acres` | string | Approximate acreage |
+| `callback_time` | string | Best time for callback |
+| `received_mail` | `"yes"`/`"no"` | Whether they received our mailer |
+| `looking_to_sell` | `"yes"`/`"no"` | Whether they're interested in selling |
+| `wants_removal` | `"yes"`/`"no"` | Whether they want to be removed (DNC) |
+
+#### Normalize Node Field Mapping
+
+| VAPI Payload Field | Output Field |
+| --- | --- |
+| `artifact.variables.customer.number` | `phone` (call metadata — reliable source) |
+| `structuredOutputs.caller_name` → fallback `structuredData.*_name` | `first_name` + `last_name` (split on first space) |
+| `structuredOutputs.caller_email` → fallback `structuredData.*_email` | `email` |
+| `structuredOutputs.reference_number` → fallback `structuredData.reference_number` | `reference_id` |
+| *(hardcoded)* | `source` = `VAPI` |
+| *(hardcoded)* | `caller_name` = `null` (not a third-party caller) |
+| *(built from all fields)* | `lead_note` |
+
+**Important:** The phone number comes from call metadata (`artifact.variables.customer.number` or `call.customer.number`), not structured data. The call metadata is the reliable source.
+
+#### Lead Note (built by Normalize VAPI)
+
+**Note format:**
+```
+=== LEAD INTAKE SUMMARY ===
+Date: (today)
+Source: VAPI
+Call ID: (call ID)
+Call Type: (inboundPhoneCall, etc.)
+
+--- CONTACT ---
+Caller: (caller name)
+Phone: (phone)
+Email: (email, if provided)
+
+--- PROPERTY INFO ---
+County: (county)
+State: (state)
+Acres: (acres)
+Address: (address, if provided)
+Improvements: (improvements, if provided)
+
+--- CALL DETAILS ---
+Looking to Sell: Yes/No
+Received Mailer: Yes/No
+Wants Removal: YES — DNC (only shown if true)
+Best Time to Call: (callback time)
+Has Other Offers: Yes/No
+Offer Details: (details)
+Ended Reason: (ended reason)
+Call Outcome: Successful/Unsuccessful
+
+--- AI SUMMARY ---
+(full AI-generated call summary)
+
+--- TRANSCRIPT ---
+[Rachel]: (bot message)
+[Caller]: (user message)
+...
+```
+
+The transcript includes every message from `artifact.messages` with full text. System messages are excluded. Metadata (timestamps, word-level confidence) is stripped for readability.
+
+Empty sections are omitted from the note.
+
+---
+
 ### Notes Architecture
 
 Each source trigger's Normalize node builds a `lead_note` with the raw data from that source. The **Build Payloads** node passes it through as `contact_note` without modification. This keeps note formatting source-specific and prevents Build Payloads from needing to know about each source's data shape.
@@ -209,14 +303,34 @@ Both notes are created by the **Create or Update Lead** node via `POST /contacts
 
 ### Step 1: Validate Webhook
 
-**Check:** At least one of `reference_id`, `phone`, or `email` is present.
-
-- If none → respond `400` with `{ "error": "At least one identifier required (reference_id, phone, or email)" }` and stop.
+**Identifiers:** Normalizes `phone` (E.164) and checks for `reference_id`, `phone`, `email`. If none are valid, the lead is flagged (`no_identifier = true`) but **still passes through** — a lead should never silently disappear. Leads with no identifier skip Prospect Data search and contact dedup, and are created as new contacts so a human can review the raw data in the notes.
 
 **Check:** `source` is present and is a valid value.
 
 - Valid values: `Cold Call`, `Cold SMS`, `Direct Mail`, `VAPI`, `Referral`, `Website`
 - If missing or invalid → respond `400` with `{ "error": "source is required and must be one of: Cold Call, Cold SMS, Direct Mail, VAPI, Referral, Website" }` and stop.
+
+#### Phone Normalization
+
+The **Validate & Configure** node normalizes all incoming phone numbers to **US E.164 format** (`+1XXXXXXXXXX`) before any downstream processing. This ensures consistent format for Prospect Data search queries, GHL API payloads, and contact dedup searches.
+
+**Accepted input formats:**
+
+| Input | Normalized Output |
+| --- | --- |
+| `6104767077` (10 digits) | `+16104767077` |
+| `16104767077` (11 digits) | `+16104767077` |
+| `+16104767077` (E.164) | `+16104767077` |
+| `(610) 476-7077` | `+16104767077` |
+| `610-476-7077` | `+16104767077` |
+| Empty / null / junk | `null` (does not count as a valid identifier) |
+
+**Where normalization applies:**
+- **Validate & Configure** — normalizes the primary `phone` field once; all downstream nodes receive clean E.164.
+- **Search Prospect Data** — uses `normalizePhone()` to normalize stored Prospect Data phone fields before comparison.
+- **Build Payloads** — normalizes unconfirmed skip trace phones (Owner phone 1–6) written to the Unconfirmed Phones custom field.
+
+**Lead notes** retain the original phone as submitted by the source (raw form data). Normalization only affects fields used for search and API calls.
 
 ---
 
@@ -611,6 +725,12 @@ All errors should be logged to n8n's execution log. Critical failures (Contact/O
 - [ ] Verify Lead Intake Note appears in GHL contact timeline with raw lead data only (no PD-enriched fields)
 - [ ] Verify Prospect Data Snapshot note appears separately with all PD fields (when match found)
 - [ ] Test: webhook → Normalize Webhook builds lead_note from webhook fields
+- [ ] Test: VAPI webhook (end-of-call-report) → normalizes fields, creates Contact + Opportunity + Lead Intake Note
+- [ ] Verify VAPI lead_note includes AI summary, property info, contact details, and full transcript
+- [ ] Verify VAPI phone extracted from call metadata (not structured data)
+- [ ] Verify structured outputs fields preferred over `analysis.structuredData` fallbacks
+- [ ] Verify `"null"` strings converted to actual null, `"yes"`/`"no"` handled correctly
+- [ ] Verify VAPI source tag `Source: VAPI` applied and AM ownership assigned
 
 ---
 
