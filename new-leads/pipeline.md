@@ -1,16 +1,16 @@
 # Bana Land — New Leads Account: Pipeline Definitions
 
-*Last edited: 2026-04-02 · Last reviewed: 2026-04-02*
+*Last edited: 2026-04-07 · Last reviewed: 2026-04-07*
 
 Pipeline reference for **New Leads** — the single working account for all lead sources. Five pipelines organize the full lifecycle from entry through close or long-term follow-up:
 
-1. **01 : Leads** — automated lead follow-up (Day 0 through Day 30)
-2. **02 : Qualified** — manual deal-making (qualification through close)
-3. **03 : Due Diligence** — post-contract, pre-close (TBD stages)
-4. **04 : Value Add** — pre-close, complex deals with property improvements (TBD stages)
-5. **05 : Long Term FU** — long-term drip for unresponsive, stalled, or lost leads
+1. **01 : Acquisition** — automated lead follow-up (Day 0–30) + manual deal-making (qualification through close)
+2. **02 : Due Diligence** — post-contract, pre-close (TBD stages)
+3. **03 : Value Add** — pre-close, complex deals with property improvements (TBD stages)
+4. **04 : Long Term FU** — long-term drip for unresponsive, stalled, or lost leads
+5. **05 : Disposition** — selling properties Bana Land has already purchased (TBD stages)
 
-Opportunities move between pipelines as they progress. Leads is mostly automated. Qualified is human-driven. Due Diligence and Value Add are fully manual. Long Term FU is fully automated drip.
+Opportunities move between pipelines as they progress. Acquisition stages New Leads through Day 11-30 are mostly automated; Comp through Contract Signed are human-driven. Due Diligence, Value Add, and Disposition are fully manual. Long Term FU is fully automated drip.
 
 ---
 
@@ -29,35 +29,37 @@ See [data-model.md](data-model.md) for the full custom field definitions.
 
 | Role                    | Sources Owned (Day 1–30)                     | Responsibility                                                                                                                                                                                                   |
 | ----------------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Lead Manager**        | Cold SMS, Cold Call                           | Owns the full 30-day pre-qualification follow-up for these two sources. All calling, all SMS/email touches. The LM's first successful phone conversation IS the qualifying call (interest, motivation, asking price). When qualified → LM moves to Qualified: Comps/Pricing and sets a call appointment for AM. |
+| **Lead Manager**        | Cold SMS, Cold Call                           | Owns the full 30-day pre-qualification follow-up for these two sources. All calling, all SMS/email touches. The LM's first successful phone conversation IS the qualifying call (interest, motivation, asking price). When qualified → LM moves to Acquisition: Comp and sets a call appointment for AM. |
 | **Acquisition Manager** | Direct Mail, VAPI, Referral, Website | For these sources: owns full lifecycle from Day 1 through close (fact-finding first call + offer second call). For LM-sourced leads: receives qualified leads via appointment, makes the offer call. If lead misses AM's appointment call, AM owns follow-up from that point. |
 
 ---
 
 ## How Source Determines Owner (Day 1–30)
 
-Same Leads pipeline stages, different task assignment based on source tag.
+Same Acquisition pipeline stages, different owner assignment based on source tag. AM-sourced leads round-robin between 2 AMs. No automated call tasks in Day 1–30 workflows — the only task created is the WF-Response-Handler review task (assigned to Contact Owner via If/Else branch).
 
-| Source Tag             | Day 1–30 Owner     | Call Tasks Assigned To | Qualifying Call By | After Qualification                       |
-| ---------------------- | ------------------- | ---------------------- | ------------------ | ----------------------------------------- |
-| `source: cold sms`     | Lead Manager        | LM                     | LM                 | LM sets appointment → AM makes offer call |
-| `source: cold call`    | Lead Manager        | LM                     | LM                 | LM sets appointment → AM makes offer call |
-| `source: direct mail`  | Acquisition Manager | AM                     | AM                 | AM continues through close                |
-| `source: vapi` | Acquisition Manager | AM                     | AM                 | AM continues through close                |
-| `source: referral`     | Acquisition Manager | AM                     | AM                 | AM continues through close                |
-| `source: website`      | Acquisition Manager | AM                     | AM                 | AM continues through close                |
+| Source Tag             | Day 1–30 Owner             | Qualifying Call By | After Qualification                       |
+| ---------------------- | -------------------------- | ------------------ | ----------------------------------------- |
+| `source: cold sms`     | Lead Manager               | LM                 | LM sets appointment → AM makes offer call |
+| `source: cold call`    | Lead Manager               | LM                 | LM sets appointment → AM makes offer call |
+| `source: direct mail`  | Acquisition Manager (RR)   | AM                 | AM continues through close                |
+| `source: vapi`         | Acquisition Manager (RR)   | AM                 | AM continues through close                |
+| `source: referral`     | Acquisition Manager (RR)   | AM                 | AM continues through close                |
+| `source: website`      | Acquisition Manager (RR)   | AM                 | AM continues through close                |
 
-**LM → AM Handoff:** When LM qualifies a lead (confirms interest, motivation, asking price), LM moves the opportunity from Leads to Qualified: Comps/Pricing and sets a call appointment for AM. AM calls the lead for the offer conversation. If the lead misses the appointment, AM owns follow-up from that point forward.
+**(RR)** = Round-robin between Jeremy and [AM2], Split Traffic: Equally. Assignment only fires for unassigned contacts — re-submitted leads keep their existing owner.
+
+**LM → AM Handoff:** When LM qualifies a lead (confirms interest, motivation, asking price), LM moves the opportunity to Acquisition: Comp and sets a call appointment for AM. AM calls the lead for the offer conversation. If the lead misses the appointment, AM owns follow-up from that point forward.
 
 **AM-sourced leads:** Already considered qualified (the person came to us). AM handles fact-finding on the first call and presents an offer on the second call. Full multi-call lifecycle unchanged.
 
 ---
 
-## 01 : Leads
+## 01 : Acquisition
 
-3 stages. Automated lead follow-up for the first 30 days. LM or AM owns based on source tag.
+9 stages. Automated lead follow-up (New Leads through Day 11-30) + manual deal-making (Comp through Contract Signed). Nurture is a trigger stage. LM or AM owns based on source tag.
 
-All leads enter this pipeline. If no response by end of Day 11-30, the opportunity auto-moves to 05 : Long Term FU (Cold stage).
+All leads enter this pipeline at New Leads. If no response by end of Day 11-30, the opportunity auto-moves to 04 : Long Term FU (Cold stage). Qualified leads progress through Comp → Contract Signed within the same pipeline.
 
 ---
 
@@ -65,11 +67,11 @@ All leads enter this pipeline. If no response by end of Day 11-30, the opportuni
 
 | Field          | Detail                                                                                           |
 | -------------- | ------------------------------------------------------------------------------------------------ |
-| **Definition** | Lead assigned to LM or AM based on source tag. **Day 0 speed-to-lead touches fire here** via WF-New-Lead-Entry. |
+| **Definition** | Lead assigned to LM or AM (round-robin for AMs) based on source tag. **Day 0 speed-to-lead touches fire here** via WF-New-Lead-Entry. |
 | **Entry**      | All sources: Cold SMS, Cold Call, Direct Mail, VAPI, Referral, Website, re-submission. |
 | **Exit**       | Owner works Day 0 speed-to-lead (immediate SMS + call + missed-call SMS), then manually moves to Day 1-10 the same day. |
-| **Owner**      | LM (Cold SMS/Call) or AM (Direct Mail/VAPI/Referral/Website) — assigned on entry via WF-New-Lead-Entry. |
-| **Actions**    | WF-New-Lead-Entry branches on source tag: assigns to LM or AM, fires Day 0 speed-to-lead (CO-SMS-00 + call task + CO-SMS-00A if no call logged), sends notification to owner. |
+| **Owner**      | LM (Cold SMS/Call) or AM round-robin (Direct Mail/VAPI/Referral/Website) — assigned on entry via WF-New-Lead-Entry. Re-submitted leads keep existing owner. |
+| **Actions**    | WF-New-Lead-Entry branches on source tag: assigns to LM or AM (round-robin for AMs, unassigned contacts only), fires Day 0 speed-to-lead (CO-SMS-00 + call task + CO-SMS-00A if no call logged), sends notification to owner. |
 
 ---
 
@@ -79,11 +81,11 @@ All leads enter this pipeline. If no response by end of Day 11-30, the opportuni
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | **Definition** | Contact has been attempted on Day 0. Active daily pursuit across ten full calendar days.                                          |
 | **Entry**      | Owner completes Day 0 speed-to-lead work → manual move by lead owner (LM or AM). WF-Day-1-10 waits until next business day to start.   |
-| **Exit**       | Lead responds and qualifies → Qualified: Comps/Pricing (cross-pipeline move). No response by Day 11 → Day 11-30. Disqualifying info → Lost or Abandoned (status change). |
-| **Owner**      | LM or AM based on source tag + GHL automation (SMS, Email).                                                                       |
+| **Exit**       | Lead responds and qualifies → Acquisition: Comp (intra-pipeline move). No response by Day 11 → Day 11-30. Disqualifying info → Lost or Abandoned (status change). |
+| **Owner**      | Contact Owner (LM or AM assigned at entry) + GHL automation (SMS, Email).                                                         |
 | **Frequency**  | Days 1–2: 2x per day (morning + afternoon). Days 3–10: 1x per day. Day 1 = first full calendar day after Day 0.                  |
-| **Channels**   | Call, SMS, Email.                                                                                                                 |
-| **Actions**    | Call tasks + rotating automated SMS/Email. Tasks assigned to LM or AM per source.                                                 |
+| **Channels**   | SMS, Email (automated). Calls manual by owner as needed.                                                                          |
+| **Actions**    | Rotating automated SMS/Email. No manual call tasks — if lead responds, WF-Response-Handler creates a review task for Contact Owner. |
 
 ---
 
@@ -93,28 +95,20 @@ All leads enter this pipeline. If no response by end of Day 11-30, the opportuni
 | -------------- | --------------------------------------------------------------------------------------------------- |
 | **Definition** | Contact attempted for 10+ days without qualification. Winding down — reduced frequency.             |
 | **Entry**      | No meaningful response by end of Day 10. Auto-advanced from Day 1-10.                                |
-| **Exit**       | Lead responds and qualifies → Qualified: Comps/Pricing (cross-pipeline move). Day 30 passes with no response → LT FU: Cold (auto-move, cross-pipeline). Disqualifying info → Lost or Abandoned (status change). |
-| **Owner**      | LM or AM based on source tag + GHL automation.                                                       |
+| **Exit**       | Lead responds and qualifies → Acquisition: Comp (intra-pipeline move). Day 30 passes with no response → 04 : LT FU: Cold (auto-move, cross-pipeline). Disqualifying info → Lost or Abandoned (status change). |
+| **Owner**      | Contact Owner (LM or AM assigned at entry) + GHL automation.                                         |
 | **Frequency**  | Every 2–3 days (11 touches across 20-day window).                                                    |
-| **Channels**   | Call, SMS, Email, RVM.                                                                               |
-| **Actions**    | Scheduled call task + rotating automated message (SMS, Email, or RVM). Tasks assigned to LM or AM per source. |
+| **Channels**   | SMS, Email, RVM (automated). Calls manual by owner as needed.                                        |
+| **Actions**    | Rotating automated messages (SMS, Email, RVM). No manual call tasks — if lead responds, WF-Response-Handler creates a review task for Contact Owner. |
 
 ---
 
-## 02 : Qualified
-
-7 stages. Manual deal-making from qualification through close. **AM owns all stages.**
-
-For LM-sourced leads, AM takes over at Comps/Pricing via call appointment handoff from LM.
-
----
-
-### Comps/Pricing
+### Comp
 
 | Field          | Detail                                                                                         |
 | -------------- | ---------------------------------------------------------------------------------------------- |
-| **Definition** | Lead is qualified. Team is researching the property and preparing an offer.                     |
-| **Entry**      | **LM-sourced:** LM qualifies lead (interest, motivation, asking price confirmed), moves opportunity from Leads to Qualified: Comps/Pricing, sets call appointment for AM. **AM-sourced:** AM qualifies lead during fact-finding call, moves from Leads. |
+| **Definition** | Lead is qualified. Team is researching the property and preparing an offer. **AM owns all stages from Comp through Contract Signed.** |
+| **Entry**      | **LM-sourced:** LM qualifies lead (interest, motivation, asking price confirmed), moves opportunity to Acquisition: Comp, sets call appointment for AM. **AM-sourced:** AM qualifies lead during fact-finding call, moves within Acquisition. |
 | **Exit**       | Research complete → Make Offer.                                                                 |
 | **Owner**      | Acquisition Manager (human-led, every 1–2 days).                                               |
 | **Channels**   | Calls primarily. SMS check-ins.                                                                 |
@@ -128,7 +122,7 @@ For LM-sourced leads, AM takes over at Comps/Pricing via call appointment handof
 | -------------- | -------------------------------------------------------------------------------------- |
 | **Definition** | Research and pricing complete. Team is ready to present an offer to the seller.         |
 | **Entry**      | Comps/pricing finished, offer calculated.                                               |
-| **Exit**       | Offer accepted → Contract Sent. Offer countered → Negotiations. Offer rejected → Lost or Nurture. |
+| **Exit**       | Offer accepted → Contract Sent. Offer countered → Negotiations. Offer rejected → Lost or Acquisition: Nurture (trigger → LT FU). |
 | **Owner**      | Acquisition Manager.                                                                    |
 | **Channels**   | Call (present offer verbally first).                                                    |
 | **Actions**    | Call task to present offer. SMS follow-up if no answer.                                 |
@@ -141,24 +135,11 @@ For LM-sourced leads, AM takes over at Comps/Pricing via call appointment handof
 | -------------- | ---------------------------------------------------------------------------------- |
 | **Definition** | An offer was made but not accepted. Both parties are working toward a number.      |
 | **Entry**      | Seller countered or asked for time to think.                                        |
-| **Exit**       | Agreement reached → Contract Sent. No agreement → Lost (Lead Declined) or Nurture. |
+| **Exit**       | Agreement reached → Contract Sent. No agreement → Lost (Lead Declined) or Acquisition: Nurture (trigger → LT FU). |
 | **Owner**      | Acquisition Manager (active back-and-forth).                                        |
 | **Channels**   | Calls. SMS for quick follow-ups.                                                    |
 | **Frequency**  | Every 1–2 days while negotiating.                                                   |
 | **Actions**    | Call every 1-2 days. SMS for quick follow-ups between calls.                        |
-
----
-
-### Additional Info Needed
-
-| Field          | Detail                                                                                         |
-| -------------- | ---------------------------------------------------------------------------------------------- |
-| **Definition** | More information about the property is needed before a contract can be signed or offer made.    |
-| **Entry**      | AM determines additional info is required — parking stage.                                      |
-| **Exit**       | Info received → return to previous stage (Make Offer, Negotiations, or Contract Sent). Info unavailable → Lost or Nurture. |
-| **Owner**      | Acquisition Manager.                                                                            |
-| **Channels**   | Calls + SMS.                                                                                     |
-| **Actions**    | Follow up on outstanding information. Internal research.                                         |
 
 ---
 
@@ -182,7 +163,7 @@ For LM-sourced leads, AM takes over at Comps/Pricing via call appointment handof
 | -------------- | --------------------------------------------------------------------------------- |
 | **Definition** | Contract is signed. Property is under contract with Bana Land.                    |
 | **Entry**      | Executed contract received.                                                        |
-| **Exit**       | Simple deal → Due Diligence (pipeline 03). Complex deal → Value Add (pipeline 04). Deal closes → Won. Deal falls through → Lost (with reason) or Nurture. |
+| **Exit**       | Simple deal → Due Diligence (pipeline 02). Complex deal → Value Add (pipeline 03). Deal closes → Won. Deal falls through → Lost (with reason) or Acquisition: Nurture (trigger → LT FU). |
 | **Owner**      | Acquisition Manager + transaction coordinator (if applicable).                     |
 | **Channels**   | Calls + SMS (deal management, not follow-up).                                      |
 | **Actions**    | Manage transaction timeline. Keep seller informed. Coordinate closing.             |
@@ -194,14 +175,14 @@ For LM-sourced leads, AM takes over at Comps/Pricing via call appointment handof
 | Field          | Detail                                                                                                            |
 | -------------- | ----------------------------------------------------------------------------------------------------------------- |
 | **Definition** | Qualified lead that couldn't be closed. AM parks the deal here — **immediately auto-moves to LT FU: Nurture**.    |
-| **Entry**      | AM moves deal from any Qualified stage when it stalls (team discretion — not every dead deal uses this).        |
-| **Exit**       | Auto-move to 05 : Long Term FU (Nurture stage) on entry. This is a trigger stage, not a resting stage.            |
+| **Entry**      | AM moves deal from any Acquisition stage (Comp through Contract Signed) when it stalls (team discretion — not every dead deal uses this). |
+| **Exit**       | Auto-move to 04 : Long Term FU (Nurture stage) on entry. This is a trigger stage, not a resting stage.            |
 | **Owner**      | N/A — opportunity passes through immediately.                                                                      |
-| **Actions**    | Stage-entry trigger fires automation to move opportunity to LT FU: Nurture.                                        |
+| **Actions**    | Stage-entry trigger fires automation to move opportunity to LT FU: Nurture (cross-pipeline).                       |
 
 ---
 
-## 03 : Due Diligence (TBD)
+## 02 : Due Diligence (TBD)
 
 Post-contract, pre-close pipeline. Standard closing process — title work, surveys, closing coordination.
 
@@ -209,7 +190,7 @@ Stages TBD. Fully manual. Not relevant to automated workflows.
 
 ---
 
-## 04 : Value Add (TBD)
+## 03 : Value Add (TBD)
 
 Pre-close pipeline for complex deals where Bana does value-add work on the property (not a simple flip). The deal's complexity warrants its own pipeline and tracking.
 
@@ -217,7 +198,7 @@ Stages TBD. Fully manual. Not relevant to automated workflows.
 
 ---
 
-## 05 : Long Term FU
+## 04 : Long Term FU
 
 3 stages. Automated long-term drip for leads that didn't convert during active follow-up. All drip is automated — no manual tasks unless a lead re-engages.
 
@@ -228,9 +209,9 @@ Stages TBD. Fully manual. Not relevant to automated workflows.
 | Field             | Detail                                                                                                                |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------- |
 | **Definition**    | 30+ days of contact attempts with no response or qualification. Never had a real conversation.                        |
-| **Entry**         | Auto-move from Leads: Day 11-30 when sequence completes with no response. |
+| **Entry**         | Auto-move from Acquisition: Day 11-30 when sequence completes with no response. |
 | **Exit**          | Lead responds → WF-Response-Handler (owner reviews). Lead opts out → DNC. 24-month quarterly drip completes → Abandoned + `abandoned: exhausted`. |
-| **Re-Engagement** | Lead replies to drip → WF-Response-Handler: pause drip, owner reviews (LM for LM-sources, AM for AM-sources). 3-day auto-resume if no action. |
+| **Re-Engagement** | Lead replies to drip → WF-Response-Handler: pause drip, Contact Owner reviews. 3-day auto-resume if no action. |
 | **Re-Submission** | Lead enters from new external campaign → WF-New-Lead-Entry: stop drip, move to Leads: New Leads, full restart.       |
 | **Owner**         | GHL automation only (no manual call tasks unless lead re-engages).                                                     |
 | **Frequency**     | Months 1–3: Monthly (SMS + Email each month). Month 4+: Quarterly.                                                    |
@@ -244,9 +225,9 @@ Stages TBD. Fully manual. Not relevant to automated workflows.
 | Field             | Detail                                                                                                                           |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | **Definition**    | Qualified deal that stalled. Had real conversations but couldn't close.                                                          |
-| **Entry**         | Auto-move from Qualified: Nurture (trigger stage).                                                                             |
+| **Entry**         | Auto-move from Acquisition: Nurture (trigger stage).                                                                           |
 | **Exit**          | Lead re-engages → WF-Response-Handler (AM reviews). Lead opts out → DNC. 24-month quarterly drip completes → Abandoned + `abandoned: exhausted`. |
-| **Re-Engagement** | Lead replies to nurture drip → WF-Response-Handler: pause drip, AM 3-day review. AM acts → appropriate Qualified stage or Lost. AM does nothing → drip resumes. |
+| **Re-Engagement** | Lead replies to nurture drip → WF-Response-Handler: pause drip, AM 3-day review. AM acts → appropriate Acquisition stage or Lost. AM does nothing → drip resumes. |
 | **Re-Submission** | Lead enters from new external campaign → WF-New-Lead-Entry: stop drip, move to Leads: New Leads, full restart.                   |
 | **Owner**         | GHL automation (full automation — no manual tasks unless response received).                                                      |
 | **Frequency**     | Monthly for first 3 months → quarterly thereafter.                                                                                |
@@ -268,6 +249,14 @@ Stages TBD. Fully manual. Not relevant to automated workflows.
 | **Frequency**     | Monthly for first 3 months → quarterly thereafter.                                                                                |
 | **Channels**      | SMS + Email (rotating).                                                                                                           |
 | **Actions**       | Automated drip via WF-Dispo-Re-Engage enrollment → WF-Long-Term-Quarterly. If response received, WF-Response-Handler fires.      |
+
+---
+
+## 05 : Disposition (TBD)
+
+Post-acquisition sales pipeline. Selling properties Bana Land has already purchased. This pipeline tracks the sell-side of the business — all prior pipelines track the buy-side (acquiring properties from motivated sellers).
+
+Entry: After Won status / post-close from Due Diligence or Value Add. Stages TBD. Fully manual. Not relevant to automated lead follow-up workflows.
 
 ---
 
@@ -341,14 +330,15 @@ Truly done — no further outreach, no resources spent. The reason is tracked vi
 
 | Trigger | From | To | Mechanism |
 |---|---|---|---|
-| Lead qualifies | Leads: Day 1-10 or Day 11-30 | Qualified: Comps/Pricing | Manual move by LM or AM |
-| Day 11-30 sequence completes, no response | Leads: Day 11-30 | LT FU: Cold | WF-Day-11-30 (auto-move at end of sequence) |
-| AM parks stalled deal | Qualified: Nurture (trigger) | LT FU: Nurture | Auto-move on stage entry |
+| Lead qualifies | Acquisition: Day 1-10 or Day 11-30 | Acquisition: Comp | Manual move by LM or AM (intra-pipeline) |
+| Day 11-30 sequence completes, no response | Acquisition: Day 11-30 | LT FU: Cold | WF-Day-11-30 (auto-move at end of sequence) |
+| AM parks stalled deal | Acquisition: Nurture (trigger) | LT FU: Nurture | Auto-move on stage entry |
 | Status changed to Lost | Any pipeline | LT FU: Lost | WF-Dispo-Re-Engage |
-| Contract signed, simple deal | Qualified: Contract Signed | Due Diligence (pipeline 03) | Manual move |
-| Contract signed, complex deal | Qualified: Contract Signed | Value Add (pipeline 04) | Manual move |
+| Contract signed, simple deal | Acquisition: Contract Signed | Due Diligence (pipeline 02) | Manual move |
+| Contract signed, complex deal | Acquisition: Contract Signed | Value Add (pipeline 03) | Manual move |
 | Re-engagement from LT FU | LT FU: any stage | Human decides | WF-Response-Handler (pause + review task) |
-| Re-submission (new campaign) | Any pipeline/status | Leads: New Leads | WF-New-Lead-Entry |
+| Re-submission (new campaign) | Any pipeline/status | Acquisition: New Leads | WF-New-Lead-Entry |
+| Deal closes (Won) | Due Diligence / Value Add | Disposition (pipeline 05) | Manual move |
 | DNC / Abandoned | Any pipeline | No move — status change only | WF-DNC-Handler |
 
 ---
@@ -358,59 +348,61 @@ Truly done — no further outreach, no resources spent. The reason is tracked vi
 ```
 [ALL SOURCES: Cold SMS / Cold Call / Direct Mail / VAPI / Referral / Website / Re-Submission]
 
-=== 01 : LEADS ===
+=== 01 : ACQUISITION ===
 
-  └─► NEW LEADS (LM for Cold SMS/Call, AM for Direct Mail/VAPI/Referral/Website)
+  └─► NEW LEADS (LM for Cold SMS/Call, AM round-robin for Direct Mail/VAPI/Referral/Website)
         │   Day 0: Speed to Lead — immediate SMS + call task + missed-call SMS (WF-New-Lead-Entry)
         └─► Day 1-10 (2x daily Days 1-2, 1x daily Days 3-10)
-              └─► Qualifies ──────────────────────────────────► [02 : Qualified] Comps/Pricing
+              └─► Qualifies ──────────────────────────────────► Comp (intra-pipeline)
               └─► No response by Day 11 ──────────────────────► Day 11-30 (every 2–3 days)
-                    └─► Qualifies ────────────────────────────► [02 : Qualified] Comps/Pricing
-                    └─► No response by Day 30 ────────────────► [05 : LT FU] Cold (auto-move)
+                    └─► Qualifies ────────────────────────────► Comp (intra-pipeline)
+                    └─► No response by Day 30 ────────────────► [04 : LT FU] Cold (auto-move)
 
---- QUALIFICATION HANDOFF ---
+--- QUALIFICATION HANDOFF (within Acquisition) ---
 
 LM qualifies lead (Cold SMS/Call sources)
-  └─► LM moves to [02 : Qualified] Comps/Pricing + sets call appointment for AM
+  └─► LM moves to Comp + sets call appointment for AM
         └─► AM calls lead (offer conversation)
               └─► Lead misses appointment → AM owns follow-up from here
 
 AM qualifies lead (Direct Mail/VAPI/Referral/Website sources)
-  └─► AM moves to [02 : Qualified] Comps/Pricing → continues through close
+  └─► AM moves to Comp → continues through close
 
-=== 02 : QUALIFIED (AM owns all) ===
+--- DEAL STAGES (AM owns all — Comp through Contract Signed) ---
 
-Comps/Pricing ──► Make Offer ──► Negotiations ──► Contract Sent ──► Contract Signed
-                       │               │                │                  │
-                       └──► Lost /     └──► Lost /      └──► Lost /        └──► [03 : Due Diligence] or
-                            Negotiations     Nurture         Nurture /          [04 : Value Add] or
-                            / Nurture                        Negotiations       Won / Lost / Nurture
+Comp ──► Make Offer ──► Negotiations ──► Contract Sent ──► Contract Signed
+              │               │                │                  │
+              └──► Lost /     └──► Lost /      └──► Lost /        └──► [02 : Due Diligence] or
+                   Negotiations     Nurture         Nurture /          [03 : Value Add] or
+                   / Nurture                        Negotiations       Won / Lost / Nurture
 
-  Additional Info Needed ◄──► any Qualified stage (parking stage)
+  Nurture (trigger stage) ──► immediately moves to [04 : LT FU] Nurture
 
-  Nurture (trigger stage) ──► immediately moves to [05 : LT FU] Nurture
-
-=== 03 : DUE DILIGENCE (manual, TBD stages) ===
+=== 02 : DUE DILIGENCE (manual, TBD stages) ===
 
   Post-contract, pre-close. Standard closing process. ──► Won or Lost
 
-=== 04 : VALUE ADD (manual, TBD stages) ===
+=== 03 : VALUE ADD (manual, TBD stages) ===
 
   Pre-close, complex deal with property improvements. ──► Won or Lost
 
-=== 05 : LONG TERM FU (automated drip) ===
+=== 04 : LONG TERM FU (automated drip) ===
 
-  Cold (from Leads — never had conversation)     ─┐
-  Nurture (from Qualified — deal stalled)      ├──► Monthly → Quarterly drip (24-month cap)
-  Lost (status → Lost, non-terminal)              ─┘
+  Cold (from Acquisition — never had conversation)    ─┐
+  Nurture (from Acquisition — deal stalled)         ├──► Monthly → Quarterly drip (24-month cap)
+  Lost (status → Lost, non-terminal)                   ─┘
 
   Re-engages ──► WF-Response-Handler → owner 3-day review → appropriate stage or drip resumes
   24 months complete ──► Abandoned + `abandoned: exhausted`
 
+=== 05 : DISPOSITION (manual, TBD stages) ===
+
+  Post-acquisition sales. Selling properties Bana Land has already purchased.
+
 === LOST (status change from any pipeline) ===
 
 Status → Lost (No Motivation / Wants Retail / On MLS / Lead Declined)
-  └─► WF-Dispo-Re-Engage ──► [05 : LT FU] Lost ──► 24-month drip ──► Abandoned (exhausted)
+  └─► WF-Dispo-Re-Engage ──► [04 : LT FU] Lost ──► 24-month drip ──► Abandoned (exhausted)
 
 === RE-ENTRY PATHS ===
 
@@ -431,6 +423,6 @@ Abandoned (replies inbound — non-DNC only)
         └─► Owner does nothing ────────────────────────────────► Stays Abandoned
 
 Any status (new external campaign source detected by automation)
-  └─► Re-submitted → strip abandoned tag / clear lost reason → Status → Open → [01 : Leads] New Leads → Full restart
+  └─► Re-submitted → strip abandoned tag / clear lost reason → Status → Open → [01 : Acquisition] New Leads → Full restart
   └─► EXCEPTION: Abandoned + `abandoned: dnc` → Blocked. DNC is permanent.
 ```

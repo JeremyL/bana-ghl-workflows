@@ -244,13 +244,13 @@ section_t "PIPELINES & STAGES"
 # Expected pipelines and their stages (pipe-delimited: "search_term|stage1,stage2,...")
 # Empty stages = TBD (just check pipeline exists)
 EXPECTED_PIPELINES=(
-  "leads|New Leads,Day 1-10,Day 11-30"
-  "qualified|Comps/Pricing,Make Offer,Negotiations,Additional Info Needed,Contract Sent,Contract Signed,Nurture"
+  "acquisition|New Leads,Day 1-10,Day 11-30,Comp,Make Offer,Negotiations,Contract Sent,Contract Signed,Nurture"
   "due diligence|"
   "value add|"
   "long term fu|Cold,Nurture,Lost"
+  "disposition|"
 )
-EXPECTED_PIPE_NAMES=("01 : Leads" "02 : Qualified" "03 : Due Diligence" "04 : Value Add" "05 : Long Term FU")
+EXPECTED_PIPE_NAMES=("01 : Acquisition" "02 : Due Diligence" "03 : Value Add" "04 : Long Term FU" "05 : Disposition")
 
 PIPE_RESPONSE=$(api_get "$BASE_URL/opportunities/pipelines?locationId=$LOC_ID" 2>&1) || true
 PIPE_DATA=$(echo "$PIPE_RESPONSE" | jq -r '.pipelines // . // []' 2>/dev/null)

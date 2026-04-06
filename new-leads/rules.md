@@ -1,6 +1,6 @@
 # New Leads — Contact Rules & Compliance
 
-*Last edited: 2026-04-02 · Last reviewed: 2026-04-02*
+*Last edited: 2026-04-07 · Last reviewed: 2026-04-07*
 
 Operational rules that govern all outreach in **New Leads** (the single working account).
 Every GHL workflow, automation, and team member action must respect these rules.
@@ -94,16 +94,16 @@ Not answering calls, not replying to texts, and not opening emails does NOT cons
 
 **Who can change a lead's stage or status:**
 
-- **Lead Manager (LM):** Can move LM-sourced leads (Cold SMS/Call) through Leads pipeline stages. Can change status to Lost (with reason) or Abandoned (with tag). Can qualify and move to Qualified: Comps/Pricing.
-- **Acquisition Manager (AM):** Can move AM-sourced leads (Direct Mail/VAPI/Referral/Website) through any stage in any pipeline. Can change status. Owns all Qualified stages regardless of source.
-- **GHL automation:** Can advance leads within Leads pipeline (Day 1-10 → Day 11-30). Can auto-move to LT FU: Cold after Day 11-30. Can auto-move Qualified: Nurture → LT FU: Nurture. Can move Lost status → LT FU: Lost. Can change status to Abandoned (exhausted) after 24-month drip completes.
-- **Automation cannot:** Qualify a lead (move to Qualified or beyond) — that requires human confirmation
+- **Lead Manager (LM):** Can move LM-sourced leads (Cold SMS/Call) through Acquisition pipeline stages. Can change status to Lost (with reason) or Abandoned (with tag). Can qualify and move to Acquisition: Comp.
+- **Acquisition Manager (AM):** Can move AM-sourced leads (Direct Mail/VAPI/Referral/Website) through any stage in any pipeline. Can change status. Owns all deal stages (Comp through Contract Signed) regardless of source.
+- **GHL automation:** Can advance leads within Acquisition pipeline (Day 1-10 → Day 11-30). Can auto-move to LT FU: Cold after Day 11-30. Can auto-move Acquisition: Nurture → LT FU: Nurture. Can move Lost status → LT FU: Lost. Can change status to Abandoned (exhausted) after 24-month drip completes.
+- **Automation cannot:** Qualify a lead (move to Comp or beyond) — that requires human confirmation
 
 
 | Trigger                        | Action                                                                                  |
 | ------------------------------ | --------------------------------------------------------------------------------------- |
-| Lead responds and is qualified | Owner manually moves to Qualified: Comps/Pricing. For LM-sourced: LM sets call appointment for AM. |
-| X days pass with no response   | GHL auto-advances to next stage (within Leads) or cross-pipeline to LT FU: Cold         |
+| Lead responds and is qualified | Owner manually moves to Acquisition: Comp. For LM-sourced: LM sets call appointment for AM. |
+| X days pass with no response   | GHL auto-advances to next stage (within Acquisition) or cross-pipeline to LT FU: Cold    |
 | Lead says stop / opt-out       | Status → Abandoned + tag `abandoned: dnc` immediately                                   |
 | Disqualifying info gathered    | Status → Lost (with reason) or Abandoned (with tag) depending on type                   |
 | Offer declined, deal dead      | Status → Lost, lost reason = Lead Declined                                               |
@@ -129,7 +129,7 @@ There are two distinct re-entry events. Each has its own protocol.
 **WF-Response-Handler only fires for contacts in:** Leads: Day 1-10, Leads: Day 11-30, LT FU: Cold, LT FU: Nurture, LT FU: Lost (status = Open), or Abandoned (non-DNC) — AND `Pause WFs Until` is empty (prevents duplicate triggers during an active review window).
 
 1. Set field: `Pause WFs Until` = today + 3 days — all active workflows hold at the next send condition
-2. Create high-priority review task assigned to **lead owner** (LM for Cold SMS/Call sources, AM for Direct Mail/VAPI/Referral/Website sources)
+2. Create high-priority review task assigned to **Contact Owner** (via If/Else branch on Contact Owner field)
 3. Send internal notification & internal SMS to lead owner with contact link
 4. **Resolution — one of three outcomes:**
   - **Owner moves to a qualified stage** (flip to Open if currently Lost) → workflow exit triggers fire, active workflows killed. Clear `Pause WFs Until`.
@@ -148,7 +148,7 @@ There are two distinct re-entry events. Each has its own protocol.
 1. automation detects duplicate contact with a new campaign source
 2. automation adds a new Source tag (stacks on existing), updates Latest Source field + Latest Source Date
 3. automation adds tag: `re-submitted` and moves contact to **New Leads** stage
-4. WF-New-Lead-Entry fires: cleans up all active drips, assigns to owner based on new source tag, creates task
+4. WF-New-Lead-Entry fires: cleans up all active drips, preserves existing owner (assignment only fires for unassigned contacts), creates task
 5. Lead is worked from scratch — full Day 1-10 sequence, identical to a brand-new lead
 6. Native Opportunity Source is never overwritten — first-touch attribution preserved
 
@@ -229,7 +229,7 @@ If a lead becomes hostile, threatening, or legally threatening:
 | Lead Type                                                 | Target                     | Owner                    |
 | --------------------------------------------------------- | -------------------------- | ------------------------ |
 | Cold SMS, Cold Call, Direct Mail, VAPI, Referral, Website | **Call within 10 minutes** | LM or AM (by source)     |
-| Re-submitted leads (any source)                           | **Call within 30 minutes** | LM or AM (by new source) |
+| Re-submitted leads (any source)                           | **Call within 30 minutes** | Existing Contact Owner   |
 
 
 ### How It Works

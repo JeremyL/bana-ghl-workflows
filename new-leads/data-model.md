@@ -1,6 +1,6 @@
 # Bana Land — New Leads Account: Data Model
 
-*Last edited: 2026-04-02 · Last reviewed: 2026-04-02*
+*Last edited: 2026-04-07 · Last reviewed: 2026-04-07*
 
 Static configuration for the New Leads GHL sub-account — fields, tags, pipeline stages, smart lists, and lead entry rules. Build everything in this file before creating workflows.
 
@@ -113,20 +113,20 @@ Leads enter this account through one of three mechanisms. Once inside, WF-New-Le
 
 ### Routing Summary
 
-After entry, WF-New-Lead-Entry assigns the owner and fires the Day 0 speed-to-lead SMS based on source:
+After entry, WF-New-Lead-Entry assigns the owner (if unassigned) and fires the Day 0 speed-to-lead SMS based on source. AM-sourced leads are round-robin assigned between 2 AMs. Re-submitted leads keep their existing owner.
 
 
 | Source       | Entry Mechanism | Day 1–30 Owner | Day 0 SMS |
 | ------------ | --------------- | -------------- | --------- |
 | Cold SMS     | Campaign Push   | LM             | CO-SMS-00 |
 | Cold Call    | Campaign Push   | LM             | CO-SMS-00 |
-| Direct Mail  | Campaign Push   | AM             | DM-SMS-00 |
-| VAPI | Inbound         | AM             | IN-SMS-00 |
-| Referral     | Inbound         | AM             | IN-SMS-00 |
-| Website      | Inbound         | AM             | IN-SMS-00 |
+| Direct Mail  | Campaign Push   | AM (round-robin) | DM-SMS-00 |
+| VAPI | Inbound         | AM (round-robin) | IN-SMS-00 |
+| Referral     | Inbound         | AM (round-robin) | IN-SMS-00 |
+| Website      | Inbound         | AM (round-robin) | IN-SMS-00 |
 
 
-After Day 0, all sources follow the same cadence (Day 1–10 → Day 11–30 → LT FU: Cold). The only ongoing difference is owner assignment (LM vs AM).
+After Day 0, all sources follow the same cadence (Day 1–10 → Day 11–30 → LT FU: Cold). The only ongoing difference is the assigned owner (LM vs one of two AMs). All task assignments throughout workflows use If/Else branching on the Contact Owner field to route to the correct person.
 
 ---
 
@@ -181,7 +181,7 @@ Go to **Settings > Custom Fields > Contacts** and create the following:
 | Unconfirmed Phones | Large Text | All skip trace phone numbers (one per line). Not verified — for reference and manual use.                                                                                                    |
 | Unconfirmed Emails | Large Text | All skip trace email addresses (one per line). Not verified — for reference and manual use.                                                                                                  |
 
-> **Lead assignment** uses GHL's native Assigned User (Contact Owner) field — not a custom field. WF-New-Lead-Entry sets it via the "Assign To User" workflow action based on source tag. The native field appears on contact cards, supports If/Else workflow conditions, Smart List filters, and provides merge fields (`{{user.name}}`, `{{user.first_name}}`, etc.). Contact and Opportunity owners are coupled by default (changing one changes the other).
+> **Lead assignment** uses GHL's native Assigned User (Contact Owner) field — not a custom field. WF-New-Lead-Entry sets it via the "Assign To User" workflow action with "Only Apply to Unassigned Contacts" enabled. LM-sourced leads assign to the single Lead Manager. AM-sourced leads round-robin between 2 Acquisition Managers (Jeremy + [AM2], Split Traffic: Equally). Re-submitted leads keep their existing owner. The native field appears on contact cards, supports If/Else workflow conditions, Smart List filters, and provides merge fields (`{{user.name}}`, `{{user.first_name}}`, etc.). Contact and Opportunity owners are coupled by default (changing one changes the other). All task assignments in workflows use If/Else branching on Contact Owner to route to the correct person (GHL's Create Task action does not support dynamic "assign to contact owner" natively).
 
 > **Stage date tracking** uses GHL's native `lastStageChangeAt` field on Opportunities — not a custom field. GHL updates this automatically whenever an opportunity moves to a new pipeline stage. No workflow step needed. Used by the Stale New Leads Smart List to detect leads sitting in New Leads > 24 hours. **Edge case:** `lastStageChangeAt` does not update when an opportunity is re-submitted to the same stage it's already in (see for-review.md re-sub test item).
 
@@ -252,35 +252,35 @@ Go to **Settings > Tags** and create these tags:
 
 Go to **CRM > Pipelines** and create the following 5 pipelines with stages in exact order:
 
-### 01 : Leads *(LM or AM based on source)*
+### 01 : Acquisition *(LM or AM based on source)*
 
 1. New Leads
 2. Day 1-10
 3. Day 11-30
+4. Comp
+5. Make Offer
+6. Negotiations
+7. Contract Sent
+8. Contract Signed
+9. Nurture *(trigger stage — auto-moves to LT FU: Nurture)*
 
-### 02 : Qualified *(AM owns all)*
-
-1. Comps/Pricing
-2. Make Offer
-3. Negotiations
-4. Additional Info Needed
-5. Contract Sent
-6. Contract Signed
-7. Nurture
-
-### 03 : Due Diligence *(manual, TBD stages)*
+### 02 : Due Diligence *(manual, TBD stages)*
 
 Post-contract, pre-close. Stages TBD.
 
-### 04 : Value Add *(manual, TBD stages)*
+### 03 : Value Add *(manual, TBD stages)*
 
 Pre-close, complex deals with property improvements. Stages TBD.
 
-### 05 : Long Term FU *(automated drip)*
+### 04 : Long Term FU *(automated drip)*
 
 1. Cold
 2. Nurture
 3. Lost
+
+### 05 : Disposition *(manual, TBD stages)*
+
+Post-acquisition sales — selling properties Bana Land has already purchased. Stages TBD.
 
 All stages use **Open** status. Deal outcomes use native GHL statuses — no dispo stages in the pipeline. See [pipeline.md](pipeline.md) for full stage definitions and cross-pipeline movement rules.
 
@@ -321,11 +321,11 @@ Create these Smart Lists under Contacts for daily team use:
 
 | Smart List Name         | Filter Criteria                                          |
 | ----------------------- | -------------------------------------------------------- |
-| LM — Today's Call Tasks | Open tasks, type = Call, due today, assigned to LM       |
-| AM — Today's Call Tasks | Open tasks, type = Call, due today, assigned to AM       |
+| LM — Today's Tasks     | Open tasks, due today, assigned to LM (manually created tasks only — no automated call tasks) |
+| AM — Today's Tasks     | Open tasks, due today, assigned to AM (manually created tasks + WF-Response-Handler review tasks) |
 | Cold — No Response 30d  | Pipeline = LT FU, Stage = Cold, GHL native "Last Activity" > 30 days ago |
-| Active Qualified Leads  | Pipeline = Qualified, Stage is one of: Comps/Pricing, Make Offer, Negotiations |
-| Contracts in Progress   | Pipeline = Qualified, Stage is one of: Contract Sent, Contract Signed |
+| Active Qualified Leads  | Pipeline = Acquisition, Stage is one of: Comp, Make Offer, Negotiations |
+| Contracts in Progress   | Pipeline = Acquisition, Stage is one of: Contract Sent, Contract Signed |
 | DNC Contacts            | Status = Abandoned, Tag = `abandoned: dnc`               |
 | Stale New Leads         | Stage = New Leads, native `lastStageChangeAt` > 24 hours ago |
 

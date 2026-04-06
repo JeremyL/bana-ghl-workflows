@@ -560,7 +560,7 @@ Record the returned `contact_id`.
 
 | Field | Value |
 | --- | --- |
-| Pipeline | 01 : Leads |
+| Pipeline | 01 : Acquisition |
 | Stage | New Leads |
 | Contact | `contact_id` from Step 7A |
 | Opportunity Name | `{first_name} {last_name} — {Property County}, {Property State}` (or `{first_name} {last_name}` if no county/state) |
@@ -707,7 +707,7 @@ All errors should be logged to n8n's execution log. Critical failures (Contact/O
 - [ ] Prospect Data Private Integration Token generated and stored in n8n (`GHL — Prospect Data`)
 - [ ] New Leads Private Integration Token generated and stored in n8n (`GHL — New Leads`)
 - [ ] Properties Custom Object `schemaId` recorded and set in workflow
-- [ ] Pipeline ID for "01 : Leads" recorded and set in workflow
+- [ ] Pipeline ID for "01 : Acquisition" recorded and set in workflow
 - [ ] Stage ID for "New Leads" stage recorded and set in workflow
 - [ ] Test: webhook with `reference_id` only → finds Property, creates Contact + Opportunity
 - [ ] Test: webhook with `phone` only → cascade search finds Property

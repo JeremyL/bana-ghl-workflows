@@ -1,5 +1,5 @@
 # Bana Land — New Leads Account: Workflows
-*Last edited: 2026-04-02 · Last reviewed: 2026-04-02*
+*Last edited: 2026-04-07 · Last reviewed: 2026-04-07*
 
 All 10 workflows for the New Leads GHL sub-account. Build these in **Automation > Workflows** after completing the account configuration in [data-model.md](data-model.md).
 
@@ -34,14 +34,14 @@ Reference files:
 - **Status-triggered workflows** (WF-Dispo-Re-Engage, WF-DNC-Handler) trigger on **opportunity status change** (Lost or Abandoned). These replace the former dispo stage triggers.
 - **Cross-stage workflows** (WF-Long-Term-Quarterly) trigger on **explicit enrollment** from the preceding workflow. These serve multiple stages/statuses (Cold, Nurture, Lost) and cannot rely on a single trigger.
 - **WF-Dispo-Re-Engage** triggers on status → Lost, moves the opportunity to LT FU: Lost (cross-pipeline), then enrolls in WF-Cold-Drip-Monthly.
-- **Cross-pipeline trigger:** Qualified pipeline stage "Nurture" has a stage-entry trigger that immediately moves the opportunity to LT FU pipeline stage "Nurture". This is a 1-action automation (no workflow code needed) — Qualified: Nurture is a trigger stage, not a resting stage.
+- **Cross-pipeline trigger:** Acquisition pipeline stage "Nurture" has a stage-entry trigger that immediately moves the opportunity to LT FU pipeline stage "Nurture". This is a 1-action automation (no workflow code needed) — Acquisition: Nurture is a trigger stage, not a resting stage.
 - **Event-driven workflows** (WF-New-Lead-Entry, WF-Response-Handler, WF-Missed-Call-Textback) trigger on specific events (lead added, inbound reply, missed call).
 
 ---
 
 ### WF-New-Lead-Entry | New Lead Entry
 
-**Trigger:** Contact added to Leads pipeline stage "New Leads"
+**Trigger:** Contact added to Acquisition pipeline stage "New Leads"
 **Actions:**
 
 1. **If contact is tagged `re-submitted` (re-entry from new external campaign):**
@@ -51,11 +51,11 @@ Reference files:
    - **[Opportunity + Contact] If Opportunity status is Abandoned:** Remove `abandoned:` tag from Contact (whichever is present: `abandoned: not a fit`, `abandoned: no longer own`, `abandoned: exhausted`), change Opportunity status to Open
    - **[Contact]** Clear Contact custom field: `Pause WFs Until` (if set from a prior cycle)
    - **[Contact]** Remove tag from Contact: `re-submitted` (cleanup — it has served its purpose as a trigger)
-2. **[Contact] Branch on Contact source tag — assign to LM or AM** (uses GHL "Assign To User" action → sets native Contact Owner; Opportunity owner auto-syncs):
+2. **[Contact] Branch on Contact source tag — assign to LM or AM** (uses GHL "Assign To User" action with "Only Apply to Unassigned Contacts" enabled → sets native Contact Owner; Opportunity owner auto-syncs. Re-submitted leads keep their existing owner):
    - **If Contact tagged `source: cold sms` OR `source: cold call`:**
      - Assign To User: Lead Manager
    - **If Contact tagged `source: direct mail` OR `source: vapi` OR `source: referral` OR `source: website`:**
-     - Assign To User: Acquisition Manager
+     - Assign To User: Jeremy, [AM2] — Split Traffic: Equally (round-robin)
 3. Update **Opportunity** native Source = current source value (skip if already set — first-touch attribution)
 4. Update **Contact** native Source = current source value (skip if already set — mirrors Opportunity Source for GHL built-in reporting)
 5. Update **Opportunity** custom field: Latest Source = current source value
@@ -80,7 +80,7 @@ Reference files:
 
 ### WF-Day-1-10 | Day 1-10 Sequence
 
-**Trigger:** Contact moved to Leads pipeline stage "Day 1-10" (owner manually moves from New Leads after Day 0 speed-to-lead work)
+**Trigger:** Contact moved to Acquisition pipeline stage "Day 1-10" (owner manually moves from New Leads after Day 0 speed-to-lead work)
 **Enrollment condition:** Lead NOT tagged `dnc`
 
 **Actions:**
@@ -90,36 +90,26 @@ Reference files:
 1. Wait: until next business day, 9:00 AM contact local time *(Day 0 speed-to-lead touches already fired in WF-New-Lead-Entry)*
 2. Send SMS: NL-SMS-01 (First Touch)
 3. Wait: 4 hours
-4. Create Task: "Call {{first_name}} — Day 1" — Assigned to: **LM or AM based on source tag** — Due: Today
-5. Wait: 4 hours
-6. Send SMS: NL-SMS-07 (Missed Call Follow-Up)
-7. Wait: until next business day, 9:00 AM contact local time
-8. Send Email: NL-EMAIL-01
-9. Wait: 4 hours
-10. Create Task: "Call {{first_name}} — Day 2" — Assigned to: **LM or AM based on source tag** — Due: Today
-11. Wait: 4 hours
-12. Send SMS: NL-SMS-02
+4. Send SMS: NL-SMS-07 (Missed Call Follow-Up)
+5. Wait: until next business day, 9:00 AM contact local time
+6. Send Email: NL-EMAIL-01
+7. Wait: 4 hours
+8. Send SMS: NL-SMS-02
 
 *Days 3-10 — 1x per day, rotating channels:*
 
-13. Wait: until next day, 9:00 AM contact local time
-14. Create Task: "Call {{first_name}} — Day 3" — Assigned to: **LM or AM** — Due: Today
+9. Wait: until next day, 9:00 AM contact local time
+10. Send SMS: NL-SMS-10
+11. Wait: 1 day
+12. Send Email: NL-EMAIL-05
+13. Wait: 1 day
+14. Send Email: NL-EMAIL-02
 15. Wait: 1 day
-16. Send SMS: NL-SMS-10
+16. Send SMS: NL-SMS-03
 17. Wait: 1 day
-18. Send Email: NL-EMAIL-05
-19. Wait: 1 day
-20. Create Task: "Call {{first_name}} — Day 6" — Assigned to: **LM or AM** — Due: Today
-21. Wait: 1 day
-22. Send Email: NL-EMAIL-02
-23. Wait: 1 day
-24. Send SMS: NL-SMS-03
-25. Wait: 1 day
-26. Create Task: "Call {{first_name}} — Day 9" — Assigned to: **LM or AM** — Due: Today
-27. Wait: 1 day
-28. Send SMS: NL-SMS-08
-29. Wait: until Day 11 begins
-30. If no stage change: Move to pipeline stage: Day 11-30 (WF-Day-11-30 fires automatically on Day 11-30 stage entry)
+18. Send SMS: NL-SMS-08
+19. Wait: until Day 11 begins
+20. If no stage change: Move to pipeline stage: Day 11-30 (WF-Day-11-30 fires automatically on Day 11-30 stage entry)
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` ≤ today" condition before each send step.
 
@@ -129,7 +119,7 @@ Reference files:
 
 ### WF-Day-11-30 | Day 11-30 Sequence
 
-**Trigger:** Contact moved to Leads pipeline stage "Day 11-30" (auto-advanced from WF-Day-1-10 or manually moved)
+**Trigger:** Contact moved to Acquisition pipeline stage "Day 11-30" (auto-advanced from WF-Day-1-10 or manually moved)
 **Enrollment condition:** Lead NOT tagged `dnc`
 
 **Important:** All touches in this workflow must respect the 9am–7pm contact local time window.
@@ -138,26 +128,22 @@ Reference files:
 
 1. Send SMS: NL-SMS-04 (Re-engage)
 2. Wait: 2 days
-3. Create Task: "Call {{first_name}} — Day 13" — Assigned to: **LM or AM** — Due: Today
+3. Send RVM: NL-RVM-01
 4. Wait: 1 day
-5. Send RVM: NL-RVM-01
-6. Wait: 1 day
-7. Send Email: NL-EMAIL-03
-8. Wait: 2 days
-9. Send SMS: NL-SMS-09
-10. Wait: 3 days
-11. Send RVM: NL-RVM-02
+5. Send Email: NL-EMAIL-03
+6. Wait: 2 days
+7. Send SMS: NL-SMS-09
+8. Wait: 3 days
+9. Send RVM: NL-RVM-02
+10. Wait: 2 days
+11. Send SMS: NL-SMS-05
 12. Wait: 2 days
-13. Send SMS: NL-SMS-05
-14. Wait: 2 days
-15. Create Task: "Call {{first_name}} — Day 24" — Assigned to: **LM or AM** — Due: Today
-16. Wait: 3 days
-17. Send RVM: NL-RVM-03
-18. Wait: 2 days
-19. Send Email: NL-EMAIL-04 (Long-game)
-20. Wait: 1 day
-21. Send SMS: NL-SMS-06 (Final touch before cold)
-22. If no stage change: Move opportunity to LT FU pipeline, stage: Cold (cross-pipeline move — WF-Cold-Drip-Monthly fires automatically on LT FU: Cold stage entry)
+13. Send RVM: NL-RVM-03
+14. Wait: 3 days
+15. Send Email: NL-EMAIL-04 (Long-game)
+16. Wait: 1 day
+17. Send SMS: NL-SMS-06 (Final touch before cold)
+18. If no stage change: Move opportunity to 04 : LT FU pipeline, stage: Cold (cross-pipeline move — WF-Cold-Drip-Monthly fires automatically on LT FU: Cold stage entry)
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` ≤ today" condition before each send step.
 
@@ -271,7 +257,7 @@ Workflow ends. No re-enrollment. WF-Response-Handler still catches any future in
 **Actions:**
 
 1. **Defensive cleanup:** Remove from WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly (prevents dual drip if contact was previously in Cold/Nurture)
-2. Move opportunity to LT FU pipeline, stage: Lost (cross-pipeline move)
+2. Move opportunity to 04 : LT FU pipeline, stage: Lost (cross-pipeline move)
 3. Enroll in WF-Cold-Drip-Monthly (Cold Drip — Monthly)
 
 All Lost leads move to LT FU: Lost and flow into the same Long-Term Drip as Cold and Nurture leads (WF-Cold-Drip-Monthly monthly, then WF-Long-Term-Quarterly). After 24 months, WF-Long-Term-Quarterly changes status to Abandoned + `abandoned: exhausted`.
@@ -301,7 +287,7 @@ All Lost leads move to LT FU: Lost and flow into the same Long-Term Drip as Cold
 ### WF-Response-Handler | Inbound Response Handler (Re-Engagement)
 
 **Trigger:** Inbound SMS received OR Email reply received
-**Filter:** Contact is in Leads pipeline stage: Day 1-10 or Day 11-30 — OR LT FU pipeline stage: Cold, Nurture, or Lost (status = Open) — OR opportunity status is Abandoned AND NOT tagged `abandoned: dnc`
+**Filter:** Contact is in Acquisition pipeline stage: Day 1-10 or Day 11-30 — OR LT FU pipeline stage: Cold, Nurture, or Lost (status = Open) — OR opportunity status is Abandoned AND NOT tagged `abandoned: dnc`
 **Enrollment conditions:**
 - Lead NOT tagged `dnc`
 - `Pause WFs Until` field is empty OR `Pause WFs Until` ≤ today (prevents re-trigger during an active review window, but allows re-trigger after a prior pause has expired)
@@ -313,13 +299,10 @@ All Lost leads move to LT FU: Lost and flow into the same Long-Term Drip as Cold
 1. **Check: Is the reply an opt-out keyword?** (STOP, QUIT, UNSUBSCRIBE, CANCEL, END)
    - If yes → route to WF-DNC-Handler (DNC Handler). End this workflow.
 2. Set custom field: `Pause WFs Until` = today + 3 days — all active automated workflows immediately hold at their next send condition
-3. **Branch on source tag — assign review task to original owner:**
-   - **If tagged `source: cold sms` OR `source: cold call`:**
-     - Create Task: "REVIEW — {{first_name}} replied. Read their reply and decide next step." — Assigned to: Lead Manager — Due: Today — Priority: High
-     - Send internal notification to LM: "{{first_name}} replied. Automation paused for 3 days. Review and either move stage or clear the Pause WFs Until field to resume early. [Contact Link]"
-   - **If tagged `source: direct mail` OR `source: vapi` OR `source: referral` OR `source: website`:**
-     - Create Task: "REVIEW — {{first_name}} replied. Read their reply and decide next step." — Assigned to: Acquisition Manager — Due: Today — Priority: High
-     - Send internal notification to AM: "{{first_name}} replied. Automation paused for 3 days. Review and either move stage or clear the Pause WFs Until field to resume early. [Contact Link]"
+3. **Branch on Contact Owner — assign review task to lead owner:**
+   - **If/Else branch on Contact Owner field** (routes task to the actual assigned owner, not a hardcoded role):
+     - Create Task: "REVIEW — {{first_name}} replied. Read their reply and decide next step." — Assigned to: **Contact Owner** (If/Else branch on Contact Owner field) — Due: Today — Priority: High
+     - Send internal notification to Contact Owner: "{{first_name}} replied. Automation paused for 3 days. Review and either move stage or clear the Pause WFs Until field to resume early. [Contact Link]"
 4. **Branch — drip stages/statuses (Cold / Nurture / Lost) only:** Wait 3 days (auto-resume safety net)
 5. **Branch — check resolution:**
    **Branch A — Owner moved contact to a qualified stage (flips to Open if previously Lost):**
@@ -373,15 +356,17 @@ Before going live, verify:
 - All SMS messages identify sender: include "Bana Land" or agent name
 - Phone number has A2P 10DLC registration completed (required for business SMS in US)
 - Unsubscribe footer included in all marketing emails
-- Task assignment mapped to correct team member(s) — LM for Cold SMS/Call, AM for DM/VAPI/Referral/Website
+- AM round-robin assignment verified: Jeremy + [AM2], Split Traffic: Equally
+- "Only Apply to Unassigned Contacts" toggle enabled on Assign To User action (owner preserved on re-submission)
+- WF-Response-Handler review task assigned to Contact Owner via If/Else branch (the only task created by workflows)
 - All workflow enrollments tested with a test contact before live launch
 
 ---
 
 ## Go-Live Checklist
 
-- All 5 pipelines created with stages in correct order (Leads, Qualified, Due Diligence, Value Add, Long Term FU)
-- Qualified: Nurture stage-entry trigger configured (auto-move to LT FU: Nurture)
+- All 5 pipelines created with stages in correct order (Acquisition, Due Diligence, Value Add, Long Term FU, Disposition)
+- Acquisition: Nurture stage-entry trigger configured (auto-move to LT FU: Nurture)
 - All custom fields created
 - All tags created
 - All 10 workflows built and tested (WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback)

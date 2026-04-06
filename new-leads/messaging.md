@@ -1,5 +1,5 @@
 # Bana Land — New Leads Account: Message Templates
-*Last edited: 2026-04-02 · Last reviewed: 2026-04-02*
+*Last edited: 2026-04-07 · Last reviewed: 2026-04-02*
 
 ## Voice & Principles
 
@@ -93,9 +93,9 @@ All template IDs follow the pattern: `STAGE-CHANNEL-##`
 | NUR-SMS-01     | SMS     | Nurture Monthly             | Month 1           | WF-Nurture-Monthly    | Auto        |
 | NUR-EMAIL-01   | Email   | Nurture Monthly             | Month 2           | WF-Nurture-Monthly    | Auto        |
 | NUR-SMS-02     | SMS     | Nurture Monthly             | Month 3           | WF-Nurture-Monthly    | Auto        |
-| NL-VM-01       | VM      | New Leads — Day 1-10        | With manual calls | WF-Day-1-10    | Manual      |
-| NL-VM-02       | VM      | New Leads — Day 11-30       | With manual calls | WF-Day-11-30    | Manual      |
-| NL-VMSMS-01    | SMS     | New Leads — Day 1-10 / 11-30| After voicemail   | WF-Day-1-10 / WF-Day-11-30 | Manual      |
+| NL-VM-01       | VM      | New Leads — Day 1-10        | With manual calls | N/A (manual use) | Manual      |
+| NL-VM-02       | VM      | New Leads — Day 11-30       | With manual calls | N/A (manual use) | Manual      |
+| NL-VMSMS-01    | SMS     | New Leads — Day 1-10 / 11-30| After voicemail   | N/A (manual use) | Manual      |
 | NL-RVM-01      | RVM     | New Leads — Day 11-30       | ~Day 14           | WF-Day-11-30    | Auto        |
 | NL-RVM-02      | RVM     | New Leads — Day 11-30       | ~Day 20           | WF-Day-11-30    | Auto        |
 | NL-RVM-03      | RVM     | New Leads — Day 11-30       | ~Day 27           | WF-Day-11-30    | Auto        |
@@ -518,7 +518,7 @@ After Nurture Monthly, leads enter the shared **Long-Term Quarterly Drip** (see 
 
 #### NL-VM-01 | Day 1-10 Voicemail Script (~15 sec)
 
-**Used by:** LM or AM during manual call tasks in WF-Day-1-10. Leave this voicemail, then send NL-VMSMS-01.
+**Used by:** LM or AM during manual calls in Day 1-10 stage. Leave this voicemail, then send NL-VMSMS-01.
 
 > Hey {{first_name}}, it's {{agent_name}} with Bana Land. I was looking into your property in {{opportunity.property_county}} and something came up I wanted to ask you about. Give me a call when you get this: [CALLBACK NUMBER].
 
@@ -526,7 +526,7 @@ After Nurture Monthly, leads enter the shared **Long-Term Quarterly Drip** (see 
 
 #### NL-VM-02 | Day 11-30 Voicemail Script (~15 sec)
 
-**Used by:** LM or AM during manual call tasks in WF-Day-11-30. Leave this voicemail, then send NL-VMSMS-01.
+**Used by:** LM or AM during manual calls in Day 11-30 stage. Leave this voicemail, then send NL-VMSMS-01.
 
 > Hey {{first_name}}, it's {{agent_name}} from Bana Land. I've got a quick update on your property — call me back when you get a chance: [CALLBACK NUMBER].
 

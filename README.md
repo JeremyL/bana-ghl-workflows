@@ -38,7 +38,7 @@ Single working account for all lead sources. Handles all leads from entry throug
 | File                                   | Purpose                                                                          |
 | -------------------------------------- | -------------------------------------------------------------------------------- |
 | [quick-reference.md](new-leads/quick-reference.md) | Copywriter-friendly quick reference: every outreach touch by stage with template IDs and counts |
-| [pipeline.md](new-leads/pipeline.md)   | 5 pipelines (Leads, Qualified, Due Diligence, Value Add, Long Term FU) + stage definitions + Opportunity Statuses |
+| [pipeline.md](new-leads/pipeline.md)   | 5 pipelines (Acquisition, Due Diligence, Value Add, Long Term FU, Disposition) + stage definitions + Opportunity Statuses |
 | [sequences.md](new-leads/sequences.md) | Cadence map: Day 1–30 + Cold drip + Nurture + Qualified                          |
 | [messaging.md](new-leads/messaging.md) | Message templates: NL-* + COLD-* + NUR-* + LTQ-*                                |
 | [rules.md](new-leads/rules.md)         | Contact rules and compliance: hours, DNC, stage movement, response protocol, data hygiene |
