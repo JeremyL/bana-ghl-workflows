@@ -1,5 +1,5 @@
 # Prospect Data — Rules
-*Last edited: 2026-04-06 · Last reviewed: —*
+*Last edited: 2026-04-07 · Last reviewed: —*
 
 Operating rules for the Prospect Data instance. Covers data uploads,
 campaign management, status transitions, and push-to-CRM rules.
@@ -113,7 +113,8 @@ Removed ──► (blank)       (if data was corrected or error was reversed)
   - Set Status = DNC
 - **Prospect Data → New Leads:** When a property is manually marked DNC in Prospect Data (e.g., external DNC list, prior system data), automation should push DNC status to the corresponding Contact in New Leads if one exists:
   - Tag `dnc` on Contact
-  - Change Opportunity status to Abandoned + add tag `abandoned: dnc`
+  - Change Opportunity status to Lost + Lost Reason = DNC
+  - Set Contact DND for ALL channels
   - Remove from all active workflows
 - DNC applies to the entire property record, not individual owners. If any owner on the
 property is DNC, the property is DNC.

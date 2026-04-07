@@ -502,7 +502,7 @@ Search the New Leads GHL sub-account for an existing Contact.
 
 #### 6A: Contact Found — DNC Check
 
-**Check:** Is the existing Contact tagged `dnc` or `abandoned: dnc` (opportunity status = Abandoned)?
+**Check:** Is the existing Contact tagged `dnc` OR Opportunity Lost Reason = DNC?
 
 - **Yes** → respond `200` with `{ "status": "dnc_blocked", "source": "new_leads", "contact_id": "{id}" }` and stop.
 - **No** → this is a re-submission. Continue to Step 6B.

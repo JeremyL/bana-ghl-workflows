@@ -2,13 +2,14 @@
 
 *Last edited: 2026-04-07 · Last reviewed: 2026-04-07*
 
+
 Static configuration for the New Leads GHL sub-account — fields, tags, pipeline stages, smart lists, and lead entry rules. Build everything in this file before creating workflows.
 
 This is the single working account for all lead sources. All leads enter here and are worked through close, disqualification, or long-term drip.
 
 Reference files:
 
-- [workflows.md](workflows.md) — all 10 workflow definitions
+- [workflows.md](workflows.md) — all 11 workflow definitions
 - [pipeline.md](pipeline.md) — stage definitions
 - [sequences.md](sequences.md) — cadence map
 - [messaging.md](messaging.md) — message templates
@@ -185,7 +186,7 @@ Go to **Settings > Custom Fields > Contacts** and create the following:
 
 > **Stage date tracking** uses GHL's native `lastStageChangeAt` field on Opportunities — not a custom field. GHL updates this automatically whenever an opportunity moves to a new pipeline stage. No workflow step needed. Used by the Stale New Leads Smart List to detect leads sitting in New Leads > 24 hours. **Edge case:** `lastStageChangeAt` does not update when an opportunity is re-submitted to the same stage it's already in (see for-review.md re-sub test item).
 
-> **DNC enforcement** uses GHL's native DND (Do Not Disturb) in addition to the `dnc` tag. WF-DNC-Handler sets DND for ALL channels (SMS, Call, Email) via the "Set Contact DND" workflow action — this is the platform-level hard block that prevents sends regardless of workflow configuration. The `dnc` tag is kept as the workflow-visible marker for enrollment gates and n8n intake DNC checks.
+> **DNC enforcement** uses GHL's native DND (Do Not Disturb) in addition to the `dnc` tag and Lost Reason = DNC. WF-DNC-Handler sets DND for ALL channels (SMS, Call, Email) via the "Set Contact DND" workflow action — this is the platform-level hard block that prevents sends regardless of workflow configuration. The `dnc` tag is kept as the workflow-visible marker for enrollment gates and n8n intake DNC checks. Lost Reason = DNC is the opportunity-level marker. Both are set together.
 
 > **Lead entry tracking** uses GHL's native `dateAdded` field on Contacts — not a custom field. GHL sets this automatically when the contact is created. In this system, contacts are only created on pipeline entry, so `dateAdded` = first entry date. On re-submissions the contact already exists and `dateAdded` does not change — preserving first-touch timing.
 
@@ -238,10 +239,6 @@ Go to **Settings > Tags** and create these tags:
 | source: vapi   | Lead called Bana Land number; AI agent answered.                                                                              |
 | source: referral       | Lead came via referral.                                                                                                       |
 | source: website        | Lead came via website inquiry.                                                                                                |
-| abandoned: dnc         | Abandoned status — lead opted out. Permanent, blocks re-entry.                                                                |
-| abandoned: not a fit   | Abandoned status — property/owner doesn't meet Bana Land's criteria.                                                          |
-| abandoned: no longer own | Abandoned status — lead already sold the property.                                                                           |
-| abandoned: exhausted   | Abandoned status — completed 24-month drip cycle with no conversion.                                                          |
 | bounced                | Email address bounced — do not email until corrected.                                                                         |
 | caller: [agent name]   | Name of the third-party cold caller who generated the lead (paired with `source: cold call`).                                 |
 
@@ -282,35 +279,32 @@ Pre-close, complex deals with property improvements. Stages TBD.
 
 Post-acquisition sales — selling properties Bana Land has already purchased. Stages TBD.
 
-All stages use **Open** status. Deal outcomes use native GHL statuses — no dispo stages in the pipeline. See [pipeline.md](pipeline.md) for full stage definitions and cross-pipeline movement rules.
+All stages use **Open** status. Deal outcomes use native GHL statuses (Won / Lost + Lost Reason) — no dispo stages in the pipeline. Abandoned is never used. See [pipeline.md](pipeline.md) for full stage definitions and cross-pipeline movement rules.
 
 ---
 
 ## Opportunity Statuses & Lost Reasons
 
-GHL has four fixed statuses: **Open, Won, Lost, Abandoned.** These replace our former dispo stages. See [pipeline.md](pipeline.md) for full definitions and re-entry paths.
+GHL has four fixed statuses (Open, Won, Lost, Abandoned) but this system only uses **Open, Won, and Lost.** Abandoned is never used — WF-Abandoned-Alert fires an internal notification if anyone sets it accidentally. See [pipeline.md](pipeline.md) for full definitions and re-entry paths.
 
 **Status → Won:** Deal closed and funded (replaces former "Dispo: Purchased" stage).
 
-**Status → Lost** — configure these custom lost reasons under **Settings > Custom Fields > Lost Reason:**
+**Status → Lost** — configure these 8 custom lost reasons under **Settings > Custom Fields > Lost Reason:**
 
-| Lost Reason      | Former Stage          |
-| ---------------- | --------------------- |
-| No Motivation    | Dispo: No Motivation  |
-| Wants Retail     | Dispo: Wants Retail   |
-| On MLS           | Dispo: On MLS         |
-| Lead Declined    | Dispo: Lead Declined  |
+| Lost Reason    | Group   | Behavior                                                    |
+| -------------- | ------- | ----------------------------------------------------------- |
+| No Motivation  | Drip    | WF-Dispo-Re-Engage → 24-month long-term drip               |
+| Wants Retail   | Drip    | WF-Dispo-Re-Engage → 24-month long-term drip               |
+| On MLS         | Drip    | WF-Dispo-Re-Engage → 24-month long-term drip               |
+| Lead Declined  | Drip    | WF-Dispo-Re-Engage → 24-month long-term drip               |
+| Not a Fit      | No-Drip | No outreach. Re-submission allowed.                         |
+| No Longer Own  | No-Drip | No outreach. Re-submission allowed.                         |
+| Exhausted      | No-Drip | No outreach. Re-submission allowed. Set by WF-Long-Term-Quarterly after 24-month drip completes. |
+| DNC            | DNC     | No outreach. Re-submission **blocked.** DND all channels. Set by WF-DNC-Handler. |
 
-Lost triggers WF-Dispo-Re-Engage → 24-month long-term drip. After drip completes → Abandoned + `abandoned: exhausted`.
+WF-Dispo-Re-Engage triggers on any status change to Lost but branches on Lost Reason — only Drip reasons enroll in the long-term drip. No-Drip and DNC reasons exit immediately.
 
-**Status → Abandoned** — reason tracked via `abandoned:` tags (see Tags section above). No further outreach.
-
-| Tag                        | Former Stage           |
-| -------------------------- | ---------------------- |
-| `abandoned: dnc`           | Dispo: DNC             |
-| `abandoned: not a fit`     | Dispo: Not a Fit       |
-| `abandoned: no longer own` | Dispo: No Longer Own   |
-| `abandoned: exhausted`     | Exhausted              |
+**DNC dual-marker:** Lost Reason = DNC is the opportunity-level marker. The `dnc` Contact tag is also kept — it's used for DND filtering, workflow enrollment gates, and n8n intake checks. Both are set together by WF-DNC-Handler.
 
 ---
 
@@ -326,7 +320,7 @@ Create these Smart Lists under Contacts for daily team use:
 | Cold — No Response 30d  | Pipeline = LT FU, Stage = Cold, GHL native "Last Activity" > 30 days ago |
 | Active Qualified Leads  | Pipeline = Acquisition, Stage is one of: Comp, Make Offer, Negotiations |
 | Contracts in Progress   | Pipeline = Acquisition, Stage is one of: Contract Sent, Contract Signed |
-| DNC Contacts            | Status = Abandoned, Tag = `abandoned: dnc`               |
+| DNC Contacts            | Status = Lost, Lost Reason = DNC (or Tag = `dnc`)        |
 | Stale New Leads         | Stage = New Leads, native `lastStageChangeAt` > 24 hours ago |
 
 

@@ -1,5 +1,5 @@
 # Bana Land — GHL Follow-Up System
-*Last edited: 2026-04-02 · Last reviewed: —*
+*Last edited: 2026-04-07 · Last reviewed: 2026-04-07*
 
 Documentation for Bana Land's multi-channel motivated seller follow-up system, built in Go High Level (GHL). Covers the full lead lifecycle — from first outreach response through deal close, disqualification, or long-term drip.
 
@@ -26,7 +26,6 @@ Documentation for Bana Land's multi-channel motivated seller follow-up system, b
 | File                                 | Purpose                                                                             |
 | ------------------------------------ | ----------------------------------------------------------------------------------- |
 | [ROLE.md](ROLE.md)                   | AI assistant context file — loaded each session to establish role, business profile |
-| [todo.md](todo.md)                   | Cross-account open decisions, unresolved questions, and pending build tasks         |
 | [for-review.md](for-review.md)       | Pre-launch verifications, consistency log, improvement ideas, and decision log      |
 
 
@@ -43,7 +42,7 @@ Single working account for all lead sources. Handles all leads from entry throug
 | [messaging.md](new-leads/messaging.md) | Message templates: NL-* + COLD-* + NUR-* + LTQ-*                                |
 | [rules.md](new-leads/rules.md)         | Contact rules and compliance: hours, DNC, stage movement, response protocol, data hygiene |
 | [data-model.md](new-leads/data-model.md) | Account configuration: custom fields, tags, pipeline stages, lead entry rules, smart lists |
-| [workflows.md](new-leads/workflows.md) | 10 workflow definitions (WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback) + checklists |
+| [workflows.md](new-leads/workflows.md) | 11 workflow definitions (WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback, WF-Abandoned-Alert) + checklists |
 
 
 ### Account: Prospect Data (`prospect-data/`)

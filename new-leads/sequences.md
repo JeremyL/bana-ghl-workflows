@@ -114,7 +114,7 @@ disqualify themselves, or land in the long-term drip (LT FU: Cold).
 **Goal:** Maintain presence without overwhelming. Accept lower response rate. Keep the door open.
 **Stage:** Day 11-30
 **Workflow:** WF-Day-11-30
-**Cadence:** Every 2–3 days — 11 touches spread across the 20-day window.
+**Cadence:** Every 2–3 days — 9 touches spread across the 20-day window.
 
 
 | Touch # | Day (approx) | Channel | Type   | Message Ref             |
@@ -184,7 +184,7 @@ Qualified leads that didn't close. AM parks the deal in Acquisition: Nurture (tr
 | 3       | 3     | SMS     | Auto | NUR-SMS-02   |
 
 
-At Month 3 → WF-Nurture-Monthly enrolls contact in WF-Long-Term-Quarterly (see **Sequence — Long-Term Quarterly Drip** below). After 24 months of quarterly drip → status changes to Abandoned (`abandoned: exhausted`).
+At Month 3 → WF-Nurture-Monthly enrolls contact in WF-Long-Term-Quarterly (see **Sequence — Long-Term Quarterly Drip** below). After 24 months of quarterly drip → status changes to Lost (Exhausted).
 
 **If lead responds at any point (monthly or quarterly):**
 
@@ -216,7 +216,7 @@ At Month 3 → WF-Nurture-Monthly enrolls contact in WF-Long-Term-Quarterly (see
 | 3–4   | Day 100 | Email   | Auto | COLD-EMAIL-03 |
 
 
-At ~3.5 months (Day 100) → WF-Cold-Drip-Monthly enrolls contact in WF-Long-Term-Quarterly (shared quarterly phase). After 24 months of quarterly drip → status changes to Abandoned (`abandoned: exhausted`).
+At ~3.5 months (Day 100) → WF-Cold-Drip-Monthly enrolls contact in WF-Long-Term-Quarterly (shared quarterly phase). After 24 months of quarterly drip → status changes to Lost (Exhausted).
 
 ---
 
@@ -245,18 +245,20 @@ At ~3.5 months (Day 100) → WF-Cold-Drip-Monthly enrolls contact in WF-Long-Ter
 
 **Notes:**
 
-- After Q4 plays the second time, WF-Long-Term-Quarterly changes the opportunity status to **Abandoned** + adds tag `abandoned: exhausted` — a clear signal that all automated follow-up is complete.
-- WF-Response-Handler still catches any future inbound reply from Abandoned (non-DNC) contacts — lead is never truly lost
-- If a lead responds at any point (including after moving to Abandoned), standard re-engagement protocol applies — WF-Response-Handler pauses workflows, owner reviews the response and decides next step
-- Re-submission via WF-New-Lead-Entry still works from Abandoned (non-DNC) — flip to Open, full restart as a new lead
+- After Q4 plays the second time, WF-Long-Term-Quarterly changes the opportunity status to **Lost (Exhausted)** — a clear signal that all automated follow-up is complete. WF-Dispo-Re-Engage fires but exits immediately (Exhausted is a No-Drip reason — no re-enrollment loop).
+- WF-Response-Handler still catches any future inbound reply from Lost (non-DNC) contacts — lead is never truly lost
+- If a lead responds at any point (including after Exhausted), standard re-engagement protocol applies — WF-Response-Handler pauses workflows, owner reviews the response and decides next step
+- Re-submission via WF-New-Lead-Entry still works from any Lost status (except DNC) — clear lost reason, flip to Open, full restart as a new lead
 
 ---
 
-## Lost Status — All Lost Reasons
+## Lost Status — Drip vs No-Drip
 
-No Motivation, Wants Retail, On MLS, and Lead Declined all move to **LT FU: Lost** stage and enroll in the same long-term drip as Cold and Nurture leads.
+WF-Dispo-Re-Engage fires on any status change to Lost and **branches on Lost Reason:**
 
-WF-Dispo-Re-Engage fires on status change to Lost (any lost reason), moves the opportunity to LT FU: Lost (cross-pipeline), and enrolls in WF-Cold-Drip-Monthly (monthly first, then WF-Long-Term-Quarterly).
+**Drip reasons** (No Motivation, Wants Retail, On MLS, Lead Declined) → move to LT FU: Lost stage, enroll in WF-Cold-Drip-Monthly → WF-Long-Term-Quarterly (same drip as Cold and Nurture leads).
+
+**No-Drip reasons** (Not a Fit, No Longer Own, Exhausted, DNC) → exit immediately. No enrollment, no pipeline move. DNC is handled separately by WF-DNC-Handler.
 
 ---
 
@@ -290,12 +292,12 @@ When hitting a lead on the same day with multiple channels (Days 1-2 of Day 1-10
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Lead re-engages (replies to drip)       | WF-Response-Handler: Set `Pause WFs Until` → owner review task → 3-day window. Owner acts or drip auto-resumes.              |
 | Lead re-submitted (new external source) | WF-New-Lead-Entry: Stop all drips → tag `re-submitted` → move to New Leads → full restart.                                   |
-| Lead says stop / opt-out                | Kill all workflows → status → Abandoned + `abandoned: dnc` → DNC sync to Prospect Data.                                      |
+| Lead says stop / opt-out                | Kill all workflows → status → Lost (DNC) + `dnc` tag → DNC sync to Prospect Data.                                           |
 | Lead moves to Comp or later stage    | Stop automated sequence → AM works lead directly (no automated workflow).                                                    |
 | AM moves to Acquisition: Nurture     | Trigger stage → auto-move to LT FU: Nurture → start Sequence — Nurture.                                                     |
-| Status changed to Abandoned             | Stop all sequences permanently. Tag with `abandoned:` reason.                                                                |
-| Status changed to Lost                  | Stop active sequence → WF-Dispo-Re-Engage fires → move to LT FU: Lost → enroll in Sequence — Cold (WF-Cold-Drip-Monthly → WF-Long-Term-Quarterly). |
-| 24-month quarterly drip completes        | WF-Long-Term-Quarterly changes status to Abandoned (`abandoned: exhausted`). All automated outreach finished.                 |
+| Status changed to Lost (Drip reason)    | Stop active sequence → WF-Dispo-Re-Engage fires (Drip branch) → move to LT FU: Lost → enroll in Sequence — Cold (WF-Cold-Drip-Monthly → WF-Long-Term-Quarterly). |
+| Status changed to Lost (No-Drip/DNC)    | Stop all sequences. WF-Dispo-Re-Engage fires but exits immediately. No further enrollment.                                   |
+| 24-month quarterly drip completes        | WF-Long-Term-Quarterly changes status to Lost (Exhausted). All automated outreach finished.                                  |
 
 
 ---
@@ -304,12 +306,12 @@ When hitting a lead on the same day with multiple channels (Days 1-2 of Day 1-10
 
 ### Re-Engagement (responds to our GHL drip)
 
-A lead in LT FU: Cold, LT FU: Nurture, LT FU: Lost (status = Open), or Abandoned (non-DNC) replies to an automated message we sent (or contacts us inbound). Also applies to leads in Acquisition: Day 1-10 or Day 11-30.
+A lead in LT FU: Cold, LT FU: Nurture, LT FU: Lost (status = Open), or Lost with No-Drip reason (Not a Fit, No Longer Own, Exhausted) replies to an automated message we sent (or contacts us inbound). Also applies to leads in Acquisition: Day 1-10 or Day 11-30.
 
 - **What happens:** WF-Response-Handler fires. `Pause WFs Until` field set to today+3 — active workflows hold in place at their next send step (position preserved). Owner gets a 3-day review window.
 - **If owner moves to qualified stage** (flips to Open if previously Lost): Workflow exit triggers fire, drip killed. AM works lead directly (no automated workflow).
 - **If owner clears `Pause WFs Until` field manually:** Drip resumes from exactly where it stopped.
-- **If owner does nothing after 3 days:** `Pause WFs Until` date expires — drip resumes from where it stopped (drip stages and Lost only). For Abandoned contacts, lead simply stays Abandoned.
+- **If owner does nothing after 3 days:** `Pause WFs Until` date expires — drip resumes from where it stopped (drip stages and Lost-Drip only). For Lost No-Drip contacts, lead simply stays Lost.
 - **Stage/status does NOT change** during re-engagement review — the lead stays in their current stage/status unless owner explicitly changes it.
 - **Active stages (Day 1-10 / Day 11-30):** Same pause mechanic applies — automated sends hold. No 3-day auto-resume for these stages; owner manually clears `Pause WFs Until` field or moves stage.
 - **Owner assignment for re-engagement review:** WF-Response-Handler assigns the review task to the Contact Owner via If/Else branch on the Contact Owner field.

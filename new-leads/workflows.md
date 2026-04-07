@@ -1,7 +1,7 @@
 # Bana Land — New Leads Account: Workflows
 *Last edited: 2026-04-07 · Last reviewed: 2026-04-07*
 
-All 10 workflows for the New Leads GHL sub-account. Build these in **Automation > Workflows** after completing the account configuration in [data-model.md](data-model.md).
+All 11 workflows for the New Leads GHL sub-account. Build these in **Automation > Workflows** after completing the account configuration in [data-model.md](data-model.md).
 
 Reference files:
 
@@ -27,11 +27,12 @@ Reference files:
 | **WF-DNC-Handler**  | DNC Handler (+ DNC Sync)                   |
 | **WF-Response-Handler**  | Inbound Response Handler (Re-Engagement)    |
 | **WF-Missed-Call-Textback**  | Missed Call Text-Back                       |
+| **WF-Abandoned-Alert**   | Abandoned Status Alert (safety net)         |
 
 ### Workflow Trigger Convention
 
 - **Stage-specific workflows** (WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly) trigger on **stage entry** within a specific pipeline. The preceding workflow moves the contact to the next stage — that stage change fires the next workflow automatically. No explicit "Enroll in…" action needed. Cross-pipeline moves (e.g., Day 11-30 → LT FU: Cold) also fire the target pipeline's stage-entry trigger.
-- **Status-triggered workflows** (WF-Dispo-Re-Engage, WF-DNC-Handler) trigger on **opportunity status change** (Lost or Abandoned). These replace the former dispo stage triggers.
+- **Status-triggered workflows** (WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Abandoned-Alert) trigger on **opportunity status change** (Lost, or Abandoned for the alert). WF-Dispo-Re-Engage branches on Lost Reason to determine behavior.
 - **Cross-stage workflows** (WF-Long-Term-Quarterly) trigger on **explicit enrollment** from the preceding workflow. These serve multiple stages/statuses (Cold, Nurture, Lost) and cannot rely on a single trigger.
 - **WF-Dispo-Re-Engage** triggers on status → Lost, moves the opportunity to LT FU: Lost (cross-pipeline), then enrolls in WF-Cold-Drip-Monthly.
 - **Cross-pipeline trigger:** Acquisition pipeline stage "Nurture" has a stage-entry trigger that immediately moves the opportunity to LT FU pipeline stage "Nurture". This is a 1-action automation (no workflow code needed) — Acquisition: Nurture is a trigger stage, not a resting stage.
@@ -45,10 +46,9 @@ Reference files:
 **Actions:**
 
 1. **If contact is tagged `re-submitted` (re-entry from new external campaign):**
-   - **[Contact] DNC check:** If Contact tagged `abandoned: dnc` → send internal notification "Re-submission blocked — contact is DNC: {{first_name}}" → End workflow. DNC is permanent.
+   - **[Contact] DNC check:** If Contact tagged `dnc` OR Opportunity Lost Reason = DNC → send internal notification "Re-submission blocked — contact is DNC: {{first_name}}" → End workflow. DNC is permanent.
    - **[Contact]** Remove from all active workflows: WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage
    - **[Opportunity] If Opportunity status is Lost:** Clear lost reason, change Opportunity status to Open
-   - **[Opportunity + Contact] If Opportunity status is Abandoned:** Remove `abandoned:` tag from Contact (whichever is present: `abandoned: not a fit`, `abandoned: no longer own`, `abandoned: exhausted`), change Opportunity status to Open
    - **[Contact]** Clear Contact custom field: `Pause WFs Until` (if set from a prior cycle)
    - **[Contact]** Remove tag from Contact: `re-submitted` (cleanup — it has served its purpose as a trigger)
 2. **[Contact] Branch on Contact source tag — assign to LM or AM** (uses GHL "Assign To User" action with "Only Apply to Unassigned Contacts" enabled → sets native Contact Owner; Opportunity owner auto-syncs. Re-submitted leads keep their existing owner):
@@ -217,15 +217,14 @@ Reference files:
 24. Send Email: LTQ-EMAIL-04
 
 **End of 24-month cycle:**
-25. Change opportunity status to: **Abandoned**
-26. Add tag: `abandoned: exhausted`
-27. Send internal notification to team: "{{first_name}} — 24-month follow-up complete. Status → Abandoned (exhausted). No further automated outreach. [Contact Link]"
+25. Change opportunity status to: **Lost**, Lost Reason = **Exhausted**
+26. Send internal notification to team: "{{first_name}} — 24-month follow-up complete. Status → Lost (Exhausted). No further automated outreach. [Contact Link]"
 
-Workflow ends. No re-enrollment. WF-Response-Handler still catches any future inbound reply from Abandoned (non-DNC) contacts.
+Workflow ends. No re-enrollment. WF-Dispo-Re-Engage will fire on this status change but exits immediately (Exhausted is a No-Drip reason — no re-enrollment loop). WF-Response-Handler still catches any future inbound reply from Lost (non-DNC) contacts.
 
 **Pause mechanic:** "Wait Until `Pause WFs Until` is empty OR `Pause WFs Until` ≤ today" condition before each send step.
 
-**Exit conditions:** Contact stage changes (moved to any other pipeline stage) OR opportunity status changes (e.g., manually moved to Won or Abandoned before drip completes).
+**Exit conditions:** Contact stage changes (moved to any other pipeline stage) OR opportunity status changes (e.g., manually moved to Won or Lost before drip completes).
 
 ---
 
@@ -253,41 +252,44 @@ Workflow ends. No re-enrollment. WF-Response-Handler still catches any future in
 
 ### WF-Dispo-Re-Engage | Lost — Long-Term Drip Enrollment
 
-**Trigger:** Opportunity status changed to **Lost** (any lost reason: No Motivation, Wants Retail, On MLS, or Lead Declined)
+**Trigger:** Opportunity status changed to **Lost** (any lost reason)
 **Actions:**
 
-1. **Defensive cleanup:** Remove from WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly (prevents dual drip if contact was previously in Cold/Nurture)
-2. Move opportunity to 04 : LT FU pipeline, stage: Lost (cross-pipeline move)
-3. Enroll in WF-Cold-Drip-Monthly (Cold Drip — Monthly)
+1. **If/Else branch on Lost Reason:**
+   - **If Lost Reason IN (No Motivation, Wants Retail, On MLS, Lead Declined) — Drip reasons:**
+     1. **Defensive cleanup:** Remove from WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly (prevents dual drip if contact was previously in Cold/Nurture)
+     2. Move opportunity to 04 : LT FU pipeline, stage: Lost (cross-pipeline move)
+     3. Enroll in WF-Cold-Drip-Monthly (Cold Drip — Monthly)
+   - **If Lost Reason IN (Not a Fit, No Longer Own, Exhausted, DNC) — No-Drip / DNC reasons:**
+     - End workflow immediately. No enrollment, no pipeline move.
 
-All Lost leads move to LT FU: Lost and flow into the same Long-Term Drip as Cold and Nurture leads (WF-Cold-Drip-Monthly monthly, then WF-Long-Term-Quarterly). After 24 months, WF-Long-Term-Quarterly changes status to Abandoned + `abandoned: exhausted`.
+Drip-eligible Lost leads move to LT FU: Lost and flow into the same Long-Term Drip as Cold and Nurture leads (WF-Cold-Drip-Monthly monthly, then WF-Long-Term-Quarterly). After 24 months, WF-Long-Term-Quarterly changes status to Lost (Exhausted) — this re-triggers WF-Dispo-Re-Engage, but the If/Else branch catches Exhausted and exits immediately (no loop).
 
 ---
 
 ### WF-DNC-Handler | DNC Handler (+ DNC Sync to Prospect Data)
 
-**Trigger:** SMS reply contains STOP/QUIT/UNSUBSCRIBE/CANCEL/END OR manually triggered by team (status change to Abandoned + `abandoned: dnc` tag)
+**Trigger:** SMS reply contains STOP/QUIT/UNSUBSCRIBE/CANCEL/END OR manually triggered by team (status change to Lost + Lost Reason = DNC)
 **Actions:**
 
 1. **Set Contact DND: ALL channels** (SMS, Call, Email) — platform-level hard block
-2. Change opportunity status to: **Abandoned** (if not already)
-3. Add tag: `abandoned: dnc`
+2. Change opportunity status to: **Lost**, Lost Reason = **DNC** (if not already)
+3. Add tag: `dnc` (Contact-level marker for DND filtering, enrollment gates, and n8n intake checks)
 4. Remove from ALL active workflow enrollments (use "Remove from Workflow" action for each active WF: WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-Response-Handler, WF-Missed-Call-Textback) — defensive list covers all possible enrollments.
-5. Add tag: `dnc`
-6. Cancel all pending tasks for this contact
-7. Send internal notification to team: "{{first_name}} has opted out — DNC applied. Status → Abandoned. [Contact Link]"
-8. **DNC Sync — Prospect Data:** Fire webhook to automation with contact identifier (email + phone numbers)
+5. Cancel all pending tasks for this contact
+6. Send internal notification to team: "{{first_name}} has opted out — DNC applied. Status → Lost (DNC). [Contact Link]"
+7. **DNC Sync — Prospect Data:** Fire webhook to automation with contact identifier (email + phone numbers)
    - automation looks up matching Property record in Prospect Data by phone or email
    - If found → set DNC = checked, DNC Date = today, Status = DNC
    - If not found → no action needed
-9. End — no further actions ever
+8. End — no further actions ever
 
 ---
 
 ### WF-Response-Handler | Inbound Response Handler (Re-Engagement)
 
 **Trigger:** Inbound SMS received OR Email reply received
-**Filter:** Contact is in Acquisition pipeline stage: Day 1-10 or Day 11-30 — OR LT FU pipeline stage: Cold, Nurture, or Lost (status = Open) — OR opportunity status is Abandoned AND NOT tagged `abandoned: dnc`
+**Filter:** Contact is in Acquisition pipeline stage: Day 1-10 or Day 11-30 — OR LT FU pipeline stage: Cold, Nurture, or Lost (status = Open) — OR opportunity status is Lost AND Lost Reason IN (Not a Fit, No Longer Own, Exhausted)
 **Enrollment conditions:**
 - Lead NOT tagged `dnc`
 - `Pause WFs Until` field is empty OR `Pause WFs Until` ≤ today (prevents re-trigger during an active review window, but allows re-trigger after a prior pause has expired)
@@ -309,9 +311,9 @@ All Lost leads move to LT FU: Lost and flow into the same Long-Term Drip as Cold
    - Workflow exit conditions fire, all active workflows killed automatically
    - Clear field: `Pause WFs Until` (cleanup)
    - End workflow. AM works qualified stages directly (no automated workflow).
-   **Branch B — Owner changed status to Lost (with reason) or Abandoned (with tag):**
+   **Branch B — Owner changed status to Lost (with reason):**
    - Clear field: `Pause WFs Until` (cleanup)
-   - End workflow. Status-triggered workflows handle it (WF-Dispo-Re-Engage for Lost, WF-DNC-Handler for Abandoned + DNC).
+   - End workflow. Status-triggered workflows handle it (WF-Dispo-Re-Engage branches on Lost Reason; WF-DNC-Handler for DNC).
    **Branch C — Owner cleared `Pause WFs Until` field early (reply not actionable, lead stays in current stage/status):**
    - Drip resumes from exactly where it stopped. End workflow.
    **Branch D — Owner did nothing, 3 days expired (drip stages and Lost status only):**
@@ -321,9 +323,9 @@ All Lost leads move to LT FU: Lost and flow into the same Long-Term Drip as Cold
 
 **Note for active stages (Day 1-10 / Day 11-30):** There is no 3-day auto-resume for these contacts. The owner is already actively working them. Resolution is: owner moves stage (kills workflow) or clears the `Pause WFs Until` field.
 
-**Note for Abandoned (non-DNC) contacts:** There is no drip to resume — all automated outreach is complete. The 3-day window is a review-only period. If owner does nothing after 3 days, `Pause WFs Until` is cleared and the lead stays Abandoned. Owner can flip to Open + move to a qualified stage, change to Lost (with reason), or leave as Abandoned.
+**Note for Lost — No-Drip contacts (Not a Fit, No Longer Own, Exhausted):** There is no drip to resume — all automated outreach is complete. The 3-day window is a review-only period. If owner does nothing after 3 days, `Pause WFs Until` is cleared and the lead stays Lost. Owner can flip to Open + move to a qualified stage, change Lost Reason, or leave as-is.
 
-**Soft opt-outs:** Replies like "not interested" or "leave me alone" without official opt-out keywords (STOP/CANCEL/etc.) still trigger WF-Response-Handler normally. Owner reviews and decides — may change status to Abandoned (DNC) or Lost (with reason) based on judgment. See rules.md §6A for guidance.
+**Soft opt-outs:** Replies like "not interested" or "leave me alone" without official opt-out keywords (STOP/CANCEL/etc.) still trigger WF-Response-Handler normally. Owner reviews and decides — may change to Lost (DNC) or Lost (with another reason) based on judgment. See rules.md §6A for guidance.
 
 ---
 
@@ -341,6 +343,19 @@ All Lost leads move to LT FU: Lost and flow into the same Long-Term Drip as Cold
 3. Send internal notification to assigned owner: "Missed call from {{first_name}} — auto-text sent"
 
 **Note:** If the lead replies to the SMS, WF-Response-Handler (Inbound Response Handler) fires as usual — pauses drips and creates a review window.
+
+---
+
+### WF-Abandoned-Alert | Abandoned Status Alert (Safety Net)
+
+**Trigger:** Opportunity status changed to **Abandoned**
+**Purpose:** GHL cannot remove the Abandoned status from the UI. This workflow catches accidental use and alerts the team.
+
+**Actions:**
+
+1. Send internal notification to team: "{{first_name}} was set to Abandoned — we no longer use this status. Please change to Lost + select a Lost Reason. [Contact Link]"
+
+**No auto-correction** — just alerts. Team fixes manually so they learn the process.
 
 ---
 
@@ -369,7 +384,7 @@ Before going live, verify:
 - Acquisition: Nurture stage-entry trigger configured (auto-move to LT FU: Nurture)
 - All custom fields created
 - All tags created
-- All 10 workflows built and tested (WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback)
+- All 11 workflows built and tested (WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback, WF-Abandoned-Alert)
 - Smart lists created
 - Team members trained on GHL task queue and stage movement (LM and AM)
 - automation routing confirmed: all campaign types → New Leads

@@ -270,8 +270,8 @@ if [[ -n "$PIPE_DATA" ]] && echo "$PIPE_DATA" | jq -e 'type == "array"' &>/dev/n
     # Search by name (case-insensitive contains)
     found_pipe=$(echo "$PIPE_DATA" | jq -r --arg s "$search_term" '.[] | select(.name | ascii_downcase | contains($s))' 2>/dev/null | head -100)
 
-    # Fallback: for Leads pipeline, also try .env ID
-    if [[ -z "$found_pipe" && "$search_term" == "leads" && -n "$NL_PIPELINE_ID" ]]; then
+    # Fallback: for Acquisition pipeline, also try .env ID
+    if [[ -z "$found_pipe" && "$search_term" == "acquisition" && -n "$NL_PIPELINE_ID" ]]; then
       found_pipe=$(echo "$PIPE_DATA" | jq -r --arg id "$NL_PIPELINE_ID" '.[] | select(.id == $id)' 2>/dev/null)
     fi
 
@@ -286,12 +286,12 @@ if [[ -n "$PIPE_DATA" ]] && echo "$PIPE_DATA" | jq -e 'type == "array"' &>/dev/n
     pass_t "Pipeline: $p_name ($p_id)"
     MD_STAGE_ROWS+="| **$pipe_label** | \`$p_name\` | \`$p_id\` | Pass |"$'\n'
 
-    # For Leads pipeline, check .env match
-    if [[ "$search_term" == "leads" ]]; then
+    # For Acquisition pipeline, check .env match
+    if [[ "$search_term" == "acquisition" ]]; then
       if [[ "$p_id" == "$NL_PIPELINE_ID" ]]; then
-        pass_t "  Leads pipeline ID matches .env (NL_PIPELINE_ID)"
+        pass_t "  Acquisition pipeline ID matches .env (NL_PIPELINE_ID)"
       elif [[ -n "$NL_PIPELINE_ID" ]]; then
-        fail_t "  Leads pipeline ID mismatch — API: $p_id vs .env: $NL_PIPELINE_ID"
+        fail_t "  Acquisition pipeline ID mismatch — API: $p_id vs .env: $NL_PIPELINE_ID"
       fi
     fi
 
@@ -316,7 +316,7 @@ if [[ -n "$PIPE_DATA" ]] && echo "$PIPE_DATA" | jq -e 'type == "array"' &>/dev/n
         pass_t "  $(printf '%d. %-25s %s' "$((s_idx+1))" "$exp_stage" "$s_id")"
 
         env_note=""
-        if [[ "$exp_stage" == "New Leads" && "$search_term" == "leads" ]]; then
+        if [[ "$exp_stage" == "New Leads" && "$search_term" == "acquisition" ]]; then
           if [[ "$s_id" == "$NL_NEW_LEADS_STAGE_ID" ]]; then
             pass_t "    New Leads stage ID matches .env"
             env_note=" (matches .env)"
@@ -364,6 +364,7 @@ EXPECTED_WFS=(
   "WF-DNC-Handler"
   "WF-Response-Handler"
   "WF-Missed-Call-Textback"
+  "WF-Abandoned-Alert"
 )
 
 WF_RESPONSE=$(api_get "$BASE_URL/workflows/?locationId=$LOC_ID" 2>&1) || true
@@ -552,7 +553,7 @@ cat >> "$RESULT_FILE" <<MDEOF
 
 ${MD_PIPE_INFO}
 
-*5 pipelines expected: Leads (3), Qualified (7), Due Diligence (TBD), Value Add (TBD), Long Term FU (3).*
+*5 pipelines expected: Acquisition (9), Due Diligence (TBD), Value Add (TBD), Long Term FU (3), Disposition (TBD).*
 
 | Pipeline | Stage | ID | Status |
 |---|---|---|---|
@@ -561,7 +562,7 @@ ${MD_STAGE_ROWS}
 
 ## Workflows
 
-*$WF_TOTAL total workflows in account. 10 expected.*
+*$WF_TOTAL total workflows in account. 11 expected.*
 
 | Expected Workflow | Status | ID | Result |
 |---|---|---|---|

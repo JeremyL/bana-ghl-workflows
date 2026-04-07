@@ -33,7 +33,7 @@ Templates follow `PREFIX-CHANNEL-##` format. Owner = LM (Cold SMS/Call) or AM (D
               │     Day 7:  SMS (NL-SMS-08)
               │
               │   No automated call tasks — owner calls manually as needed
-              │   Totals: 5 SMS, 3 Emails
+              │   Totals: 6 SMS, 3 Emails
               │
               └─► Qualifies ────────────────────────────────────────► COMP (within Acquisition) (AM takes over)
               └─► No response by Day 11 ────────────────────────────► DAY 11-30
@@ -54,7 +54,7 @@ Templates follow `PREFIX-CHANNEL-##` format. Owner = LM (Cold SMS/Call) or AM (D
                     │
                     └─► Qualifies ──────────────────────────────────► COMP (within Acquisition) (AM takes over)
                     └─► No response by Day 30 ──────────────────────► [04 : LT FU] Cold → COLD MONTHLY
-                    └─► DNC request ────────────────────────────────► Abandoned + `abandoned: dnc` (zero contact)
+                    └─► DNC request ────────────────────────────────► Lost (DNC) — zero contact, permanent
 
 --- COLD MONTHLY (Months 1-3 — fully automated) ---
 
@@ -94,14 +94,21 @@ SMS + Email same day, every 90 days — Q1-Q4 plays twice (24 months), then stop
   │   Totals: 4 SMS, 4 Emails (x2 = 8 SMS, 8 Emails over 24 months)
   │
   └─► Re-engages (replies to drip) ───────────────────────────────► Owner reviews (3-day window)
-  └─► DNC request ─────────────────────────────────────────────────► Abandoned + `abandoned: dnc` (zero contact)
+  └─► DNC request ─────────────────────────────────────────────────► Lost (DNC) — zero contact, permanent
 
---- LOST (Status + Lost Reason → Long-Term Drip) ---
+--- LOST — DRIP REASONS (Status + Lost Reason → Long-Term Drip) ---
 
 Lost (No Motivation) ─────────────────────────────────────────────► Cold Monthly → Long-Term Quarterly (same drip)
 Lost (Wants Retail) ──────────────────────────────────────────────► Cold Monthly → Long-Term Quarterly (same drip)
 Lost (On MLS) ────────────────────────────────────────────────────► Cold Monthly → Long-Term Quarterly (same drip)
 Lost (Lead Declined) ─────────────────────────────────────────────► Cold Monthly → Long-Term Quarterly (same drip)
+
+--- LOST — NO-DRIP REASONS (no further outreach) ---
+
+Lost (Not a Fit) ─────────────────────────────────────────────────► No outreach. Re-submission allowed.
+Lost (No Longer Own) ─────────────────────────────────────────────► No outreach. Re-submission allowed.
+Lost (Exhausted) ─────────────────────────────────────────────────► No outreach. Re-submission allowed.
+Lost (DNC) ───────────────────────────────────────────────────────► Zero contact. Re-submission BLOCKED.
 
 --- MISSED CALL TEXT-BACK (any stage) ---
 

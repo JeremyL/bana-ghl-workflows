@@ -1,5 +1,5 @@
 # AI Role & Project Context — Bana Land Follow-Up System
-*Last edited: 2026-04-02 · Last reviewed: —*
+*Last edited: 2026-04-07 · Last reviewed: 2026-04-07*
 
 ## Who I Am in This Project
 
@@ -59,7 +59,7 @@ The system is split across two GHL sub-accounts:
 **Owner:** Lead Manager (Cold SMS/Call sources) + Acquisition Manager (Direct Mail/VAPI/Referral/Website sources)
 **Purpose:** Single working account for all leads. Handles all leads from entry through close, disqualification, or long-term drip. Workflows branch on source tag to assign tasks to LM or AM.
 **Pipelines:** 01 : Acquisition (New Leads → Day 1-10 → Day 11-30 → Comp → Make Offer → Negotiations → Contract Sent → Contract Signed → Nurture) · 02 : Due Diligence (TBD) · 03 : Value Add (TBD) · 04 : Long Term FU (Cold → Nurture → Lost) · 05 : Disposition (TBD)
-**Statuses:** Open (active), Won (purchased), Lost + reason (re-engage drip), Abandoned + tag (terminal)
+**Statuses:** Open (active), Won (purchased), Lost + reason (Drip = re-engage drip, No-Drip = no outreach, DNC = zero contact). Abandoned is never used.
 **Entry:** All campaign types from Prospect Data + VAPI/Referral/Website inbound + re-submissions
 
 ### Cross-Account Integration
@@ -83,7 +83,7 @@ See [new-leads/pipeline.md](new-leads/pipeline.md) and [prospect-data/data-model
 | Qualified (Active)       | Calls + light SMS check-ins                                                  | Acquisition Manager             |
 | Nurture                  | SMS + Email (monthly × 3mo, quarterly thereafter)                            | Full GHL auto                   |
 | Lost (Re-Engage)         | SMS + Email (same Long-Term Drip as Cold)                                    | GHL auto                        |
-| Abandoned (Terminal)     | No contact — immediate stop                                                  | —                               |
+| Lost (No-Drip / DNC)    | No contact — immediate stop                                                  | —                               |
 
 
 ---
@@ -133,11 +133,12 @@ See [new-leads/pipeline.md](new-leads/pipeline.md) and [prospect-data/data-model
 
 ## Key Rules
 
-- DNC = status → Abandoned + `abandoned: dnc` tag — zero contact, permanent
+- DNC = status → Lost (DNC) + `dnc` tag — zero contact, permanent
 - No outreach outside 9:00 AM – 7:00 PM local time
 - No response to outreach ≠ opt-out (keep following up per cadence)
 - Positive response → pause automation, notify team
-- Both LM and AM can change status to Lost or Abandoned directly
+- Both LM and AM can change status to Lost (any reason) directly
+- Abandoned status is never used — WF-Abandoned-Alert fires if set accidentally
 
 ---
 
@@ -148,7 +149,6 @@ See [new-leads/pipeline.md](new-leads/pipeline.md) and [prospect-data/data-model
 | -------------------------------- | -------------------------------------------------------- |
 | [README.md](README.md)           | Project overview and full file index                     |
 | [new-leads/rules.md](new-leads/rules.md) | Contact rules & compliance                       |
-| [todo.md](todo.md)               | Open decisions and to-do items                           |
 | [for-review.md](for-review.md)   | Pre-launch verifications, improvements, and decision log |
 | [prospect-data/](prospect-data/) | Prospect Data — data warehouse account files             |
 | [new-leads/](new-leads/)         | New Leads — single working account files                 |
