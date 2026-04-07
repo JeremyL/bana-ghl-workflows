@@ -31,7 +31,7 @@ Documentation for Bana Land's multi-channel motivated seller follow-up system, b
 
 ### Account: New Leads (`new-leads/`)
 
-Single working account for all lead sources. Handles all leads from entry through close, disqualification, or long-term drip. Workflows branch on source tag to assign tasks to Lead Manager or Acquisition Manager.
+Single working account for all lead sources. Handles all leads from entry through close, disqualification, or long-term drip. Workflows branch on the Latest Source field to assign leads to Lead Manager or Acquisition Manager.
 
 
 | File                                   | Purpose                                                                          |

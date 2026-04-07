@@ -51,26 +51,26 @@ Reference files:
    - **[Opportunity] If Opportunity status is Lost:** Clear lost reason, change Opportunity status to Open
    - **[Contact]** Clear Contact custom field: `Pause WFs Until` (if set from a prior cycle)
    - **[Contact]** Remove tag from Contact: `re-submitted` (cleanup — it has served its purpose as a trigger)
-2. **[Contact] Branch on Contact source tag — assign to LM or AM** (uses GHL "Assign To User" action with "Only Apply to Unassigned Contacts" enabled → sets native Contact Owner; Opportunity owner auto-syncs. Re-submitted leads keep their existing owner):
-   - **If Contact tagged `source: cold sms` OR `source: cold call`:**
+2. **[Opportunity] Branch on Opportunity Latest Source field — assign to LM or AM** (uses GHL "Assign To User" action with "Only Apply to Unassigned Contacts" enabled → sets native Contact Owner; Opportunity owner auto-syncs. Re-submitted leads keep their existing owner):
+   - **If Opportunity Latest Source = "Cold SMS" OR "Cold Call":**
      - Assign To User: Lead Manager
-   - **If Contact tagged `source: direct mail` OR `source: vapi` OR `source: referral` OR `source: website`:**
+   - **If Opportunity Latest Source = "Direct Mail" OR "VAPI" OR "Referral" OR "Website":**
      - Assign To User: Jeremy, [AM2] — Split Traffic: Equally (round-robin)
 3. Update **Opportunity** native Source = current source value (skip if already set — first-touch attribution)
 4. Update **Contact** native Source = current source value (skip if already set — mirrors Opportunity Source for GHL built-in reporting)
 5. Update **Opportunity** custom field: Latest Source = current source value
 6. Update **Opportunity** custom field: Latest Source Date = Today
 7. **Day 0 — Speed to Lead:**
-   - Send internal notification to assigned owner: "New lead — speed-to-lead touches firing now: {{first_name}} ({{source tag}}). Work the lead, then move to Day 1-10 when done."
+   - Send internal notification to assigned owner: "New lead — speed-to-lead touches firing now: {{first_name}} ({{opportunity.latest_source}}). Work the lead, then move to Day 1-10 when done."
    - **Push notification** (GHL mobile app) to assigned owner: "NEW LEAD — {{first_name}} — call NOW"
    - **Internal SMS alert** to assigned owner's personal number: "NEW LEAD — {{first_name}} — call now: {{phone}}"
-   - **Branch A — Cold outbound (Contact tagged `source: cold sms` OR `source: cold call`):**
+   - **Branch A — Cold outbound (Opportunity Latest Source = "Cold SMS" OR "Cold Call"):**
      - **[Contact]** Send SMS to Contact: CO-SMS-00 (Cold Outbound Speed to Lead) — fires after 120-second wait
      - Wait: 1 hour → If no call logged → **[Contact]** Send SMS to Contact: CO-SMS-00A (Missed Call)
-   - **Branch B — Inbound (Contact tagged `source: website` OR `source: vapi` OR `source: referral`):**
+   - **Branch B — Inbound (Opportunity Latest Source = "Website" OR "VAPI" OR "Referral"):**
      - **[Contact]** Send SMS to Contact: IN-SMS-00 (Inbound Speed to Lead) — fires after 120-second wait
      - Wait: 1 hour → If no call logged → **[Contact]** Send SMS to Contact: IN-SMS-00A (Inbound Missed Call)
-   - **Branch C — Direct Mail (Contact tagged `source: direct mail`):**
+   - **Branch C — Direct Mail (Opportunity Latest Source = "Direct Mail"):**
      - **[Contact]** Send SMS to Contact: DM-SMS-00 (Direct Mail Speed to Lead) — fires after 120-second wait
      - Wait: 1 hour → If no call logged → **[Contact]** Send SMS to Contact: DM-SMS-00A (Direct Mail Missed Call)
 

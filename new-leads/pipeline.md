@@ -36,16 +36,16 @@ See [data-model.md](data-model.md) for the full custom field definitions.
 
 ## How Source Determines Owner (Day 1–30)
 
-Same Acquisition pipeline stages, different owner assignment based on source tag. AM-sourced leads round-robin between 2 AMs. No automated call tasks in Day 1–30 workflows — the only task created is the WF-Response-Handler review task (assigned to Contact Owner via If/Else branch).
+Same Acquisition pipeline stages, different owner assignment based on Latest Source field. AM-sourced leads round-robin between 2 AMs. No automated call tasks in Day 1–30 workflows — the only task created is the WF-Response-Handler review task (assigned to Contact Owner via If/Else branch).
 
-| Source Tag             | Day 1–30 Owner             | Qualifying Call By | After Qualification                       |
+| Latest Source          | Day 1–30 Owner             | Qualifying Call By | After Qualification                       |
 | ---------------------- | -------------------------- | ------------------ | ----------------------------------------- |
-| `source: cold sms`     | Lead Manager               | LM                 | LM sets appointment → AM makes offer call |
-| `source: cold call`    | Lead Manager               | LM                 | LM sets appointment → AM makes offer call |
-| `source: direct mail`  | Acquisition Manager (RR)   | AM                 | AM continues through close                |
-| `source: vapi`         | Acquisition Manager (RR)   | AM                 | AM continues through close                |
-| `source: referral`     | Acquisition Manager (RR)   | AM                 | AM continues through close                |
-| `source: website`      | Acquisition Manager (RR)   | AM                 | AM continues through close                |
+| Cold SMS               | Lead Manager               | LM                 | LM sets appointment → AM makes offer call |
+| Cold Call              | Lead Manager               | LM                 | LM sets appointment → AM makes offer call |
+| Direct Mail            | Acquisition Manager (RR)   | AM                 | AM continues through close                |
+| VAPI                   | Acquisition Manager (RR)   | AM                 | AM continues through close                |
+| Referral               | Acquisition Manager (RR)   | AM                 | AM continues through close                |
+| Website                | Acquisition Manager (RR)   | AM                 | AM continues through close                |
 
 **(RR)** = Round-robin between Jeremy and [AM2], Split Traffic: Equally. Assignment only fires for unassigned contacts — re-submitted leads keep their existing owner.
 
@@ -57,7 +57,7 @@ Same Acquisition pipeline stages, different owner assignment based on source tag
 
 ## 01 : Acquisition
 
-9 stages. Automated lead follow-up (New Leads through Day 11-30) + manual deal-making (Comp through Contract Signed). Nurture is a trigger stage. LM or AM owns based on source tag.
+9 stages. Automated lead follow-up (New Leads through Day 11-30) + manual deal-making (Comp through Contract Signed). Nurture is a trigger stage. LM or AM owns based on Latest Source field.
 
 All leads enter this pipeline at New Leads. If no response by end of Day 11-30, the opportunity auto-moves to 04 : Long Term FU (Cold stage). Qualified leads progress through Comp → Contract Signed within the same pipeline.
 
@@ -67,11 +67,11 @@ All leads enter this pipeline at New Leads. If no response by end of Day 11-30, 
 
 | Field          | Detail                                                                                           |
 | -------------- | ------------------------------------------------------------------------------------------------ |
-| **Definition** | Lead assigned to LM or AM (round-robin for AMs) based on source tag. **Day 0 speed-to-lead touches fire here** via WF-New-Lead-Entry. |
+| **Definition** | Lead assigned to LM or AM (round-robin for AMs) based on Latest Source field. **Day 0 speed-to-lead touches fire here** via WF-New-Lead-Entry. |
 | **Entry**      | All sources: Cold SMS, Cold Call, Direct Mail, VAPI, Referral, Website, re-submission. |
 | **Exit**       | Owner works Day 0 speed-to-lead (immediate SMS + call + missed-call SMS), then manually moves to Day 1-10 the same day. |
 | **Owner**      | LM (Cold SMS/Call) or AM round-robin (Direct Mail/VAPI/Referral/Website) — assigned on entry via WF-New-Lead-Entry. Re-submitted leads keep existing owner. |
-| **Actions**    | WF-New-Lead-Entry branches on source tag: assigns to LM or AM (round-robin for AMs, unassigned contacts only), fires Day 0 speed-to-lead (CO-SMS-00 + call task + CO-SMS-00A if no call logged), sends notification to owner. |
+| **Actions**    | WF-New-Lead-Entry branches on Latest Source field: assigns to LM or AM (round-robin for AMs, unassigned contacts only), fires Day 0 speed-to-lead (CO-SMS-00 + call task + CO-SMS-00A if no call logged), sends notification to owner. |
 
 ---
 

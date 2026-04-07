@@ -59,7 +59,6 @@ Leads enter this account through one of three mechanisms. Once inside, WF-New-Le
 | First name, last name            | From campaign data / skip trace                                                         |
 | Email address                    | From campaign data (may be absent for some sources)                                     |
 | All phone numbers (Phone 1–4)    | From skip trace data                                                                    |
-| Tag                              | `source: cold sms`, `source: cold call`, or `source: direct mail`                       |
 | Native Source (Opportunity)      | Matching source value (set once, never overwritten — first-touch attribution)            |
 | Custom field: Latest Source      | Same as native Source on first entry                                                    |
 | Custom field: Latest Source Date | Today                                                                                   |
@@ -80,14 +79,13 @@ Leads enter this account through one of three mechanisms. Once inside, WF-New-Le
 
 | Field                            | Value                                                            |
 | -------------------------------- | ---------------------------------------------------------------- |
-| Tag                              | `source: vapi`, `source: referral`, or `source: website` |
 | Native Source (Opportunity)      | Matching source value (set once, never overwritten — first-touch attribution) |
 | Custom field: Latest Source      | Same as native Source on first entry                                         |
 | Custom field: Latest Source Date | Today                                                                        |
 | Pipeline stage                   | New Leads                                                        |
 
 
-**VAPI note:** The AI note taker determines the actual marketing source before entry. If the caller responded to a direct mail piece, the lead enters with `source: direct mail` (not `source: vapi`). `source: vapi` is only used when there is no known campaign trigger. No separate channel tracking needed — the source tag reflects the marketing trigger, not the entry channel.
+**VAPI note:** The AI note taker determines the actual marketing source before entry. If the caller responded to a direct mail piece, the lead enters with Latest Source = "Direct Mail" (not "VAPI"). "VAPI" is only used when there is no known campaign trigger. No separate channel tracking needed — the Latest Source field reflects the marketing trigger, not the entry channel.
 
 ---
 
@@ -99,11 +97,10 @@ Leads enter this account through one of three mechanisms. Once inside, WF-New-Le
 **What automation must do:**
 
 1. Detect the contact already exists in this account (duplicate match)
-2. Stack a new source tag on the existing contact (e.g., `source: direct mail` added on top of existing `source: cold call`)
-3. Update custom field: Latest Source = new source value
-4. Update custom field: Latest Source Date = Today
-5. Add tag: `re-submitted`
-6. Move Opportunity to New Leads (same property) or create a new Opportunity (new property)
+2. Update custom field: Latest Source = new source value
+3. Update custom field: Latest Source Date = Today
+4. Add tag: `re-submitted`
+5. Move Opportunity to New Leads (same property) or create a new Opportunity (new property)
 
 **Rules:**
 
@@ -233,14 +230,8 @@ Go to **Settings > Tags** and create these tags:
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | dnc                    | Do Not Contact — blocks all outreach. Triggers DNC sync to Prospect Data.                                                     |
 | re-submitted           | Lead came back in from a new external campaign (different source). Resets to New Leads.                                       |
-| source: cold call      | Lead came from cold calling.                                                                                                  |
-| source: cold sms       | Lead came from SMS blast campaign.                                                                                            |
-| source: direct mail    | Lead came from direct mail.                                                                                                   |
-| source: vapi   | Lead called Bana Land number; AI agent answered.                                                                              |
-| source: referral       | Lead came via referral.                                                                                                       |
-| source: website        | Lead came via website inquiry.                                                                                                |
 | bounced                | Email address bounced — do not email until corrected.                                                                         |
-| caller: [agent name]   | Name of the third-party cold caller who generated the lead (paired with `source: cold call`).                                 |
+| caller: [agent name]   | Name of the third-party cold caller who generated the lead (paired with Cold Call source).                                    |
 
 
 ---

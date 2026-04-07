@@ -57,7 +57,7 @@ The system is split across two GHL sub-accounts:
 ### Account: New Leads (`new-leads/`)
 
 **Owner:** Lead Manager (Cold SMS/Call sources) + Acquisition Manager (Direct Mail/VAPI/Referral/Website sources)
-**Purpose:** Single working account for all leads. Handles all leads from entry through close, disqualification, or long-term drip. Workflows branch on source tag to assign tasks to LM or AM.
+**Purpose:** Single working account for all leads. Handles all leads from entry through close, disqualification, or long-term drip. Workflows branch on the Latest Source field to assign leads to LM or AM.
 **Pipelines:** 01 : Acquisition (New Leads → Day 1-10 → Day 11-30 → Comp → Make Offer → Negotiations → Contract Sent → Contract Signed → Nurture) · 02 : Due Diligence (TBD) · 03 : Value Add (TBD) · 04 : Long Term FU (Cold → Nurture → Lost) · 05 : Disposition (TBD)
 **Statuses:** Open (active), Won (purchased), Lost + reason (Drip = re-engage drip, No-Drip = no outreach, DNC = zero contact). Abandoned is never used.
 **Entry:** All campaign types from Prospect Data + VAPI/Referral/Website inbound + re-submissions

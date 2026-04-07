@@ -21,14 +21,14 @@ All message content lives in [messaging.md](messaging.md).
 
 All sources follow the same Day 1–30 cadence (same timing, same channels). The only difference is who owns the lead:
 
-| Source Tag             | Owner Assigned At Entry     |
+| Latest Source          | Owner Assigned At Entry     |
 | ---------------------- | --------------------------- |
-| `source: cold sms`     | Lead Manager                |
-| `source: cold call`    | Lead Manager                |
-| `source: direct mail`  | Acquisition Manager (RR)    |
-| `source: vapi`         | Acquisition Manager (RR)    |
-| `source: referral`     | Acquisition Manager (RR)    |
-| `source: website`      | Acquisition Manager (RR)    |
+| Cold SMS               | Lead Manager                |
+| Cold Call              | Lead Manager                |
+| Direct Mail            | Acquisition Manager (RR)    |
+| VAPI                   | Acquisition Manager (RR)    |
+| Referral               | Acquisition Manager (RR)    |
+| Website                | Acquisition Manager (RR)    |
 
 **(RR)** = Round-robin between Jeremy and [AM2], Split Traffic: Equally.
 
@@ -320,8 +320,8 @@ A lead in LT FU: Cold, LT FU: Nurture, LT FU: Lost (status = Open), or Lost with
 
 A contact already in GHL is reached by a separate marketing campaign outside GHL and responds.
 
-- **What happens:** automation detects duplicate, updates Latest Source + adds new Source tag + tags `re-submitted` + moves to New Leads.
+- **What happens:** automation detects duplicate, updates Latest Source + Latest Source Date + tags `re-submitted` + moves to New Leads.
 - **WF-New-Lead-Entry fires:** Cleans up all active drips, preserves existing owner (assignment only fires for unassigned contacts), creates task.
 - **Lead is worked from scratch:** Full Day 1-10 → Day 11-30 → Cold sequence, identical to a brand-new lead.
-- **Native Opportunity Source preserved:** First-touch attribution never overwritten. Tags stack all sources.
+- **Native Opportunity Source preserved:** First-touch attribution never overwritten. Latest Source reflects the most recent campaign; Native Source preserves first touch.
 

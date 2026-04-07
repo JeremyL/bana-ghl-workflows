@@ -146,7 +146,7 @@ There are two distinct re-entry events. Each has its own protocol.
 **Protocol:**
 
 1. automation detects duplicate contact with a new campaign source
-2. automation adds a new Source tag (stacks on existing), updates Latest Source field + Latest Source Date
+2. automation updates Latest Source field + Latest Source Date
 3. automation adds tag: `re-submitted` and moves contact to **New Leads** stage
 4. WF-New-Lead-Entry fires: cleans up all active drips, preserves existing owner (assignment only fires for unassigned contacts), creates task
 5. Lead is worked from scratch — full Day 1-10 sequence, identical to a brand-new lead

@@ -86,7 +86,7 @@ Website Form -------> Normalize Website Form +
 | `first_name` | Optional | String | Lead's first name. Enriched from Prospect Data if not provided and match found. |
 | `last_name` | Optional | String | Lead's last name. Enriched from Prospect Data if not provided and match found. |
 | `source` | Required | String | One of: `Cold Call`, `Cold SMS`, `Direct Mail`, `VAPI`, `Referral`, `Website` |
-| `caller_name` | Optional | String | Third-party cold caller name (paired with `source: cold call` — applies `caller: [name]` tag) |
+| `caller_name` | Optional | String | Third-party cold caller name (applies `caller: [name]` tag when source = Cold Call) |
 | `call_notes` | Optional | String | Free-text call notes from qualifying Q&A. Included in the `lead_note` built by the source's Normalize node. |
 
 ---
@@ -511,9 +511,8 @@ Search the New Leads GHL sub-account for an existing Contact.
 
 The contact already exists. Follow the re-submission protocol:
 
-1. **Add source tag:** `source: {source}` (stacks on top of existing source tags)
-2. **Add tag:** `re-submitted`
-3. **Add tag:** `caller: {caller_name}` (only if `caller_name` is present and `source` = `Cold Call`)
+1. **Add tag:** `re-submitted`
+2. **Add tag:** `caller: {caller_name}` (only if `caller_name` is present and `source` = `Cold Call`)
 4. **Update Opportunity:**
    - Latest Source = `source` from webhook
    - Latest Source Date = Today
@@ -523,7 +522,7 @@ The contact already exists. Follow the re-submission protocol:
 
 **GHL API calls:**
 - `PUT /contacts/{id}` — update Contact fields with any new data from Step 4 (merge, don't overwrite existing confirmed data)
-- `POST /contacts/{id}/tags` — add source tag + `re-submitted` + optional `caller:` tag
+- `POST /contacts/{id}/tags` — add `re-submitted` + optional `caller:` tag
 - `PUT /opportunities/{id}` — update Latest Source + Latest Source Date, move to New Leads stage
 
 Go to Step 8.
@@ -546,7 +545,6 @@ No existing Contact found. Continue to Step 7.
 | Field | Value |
 | --- | --- |
 | Source | `{source}` (native Contact Source field — first-touch attribution for GHL reporting) |
-| Tags | `source: {source}` |
 | Tags | `caller: {caller_name}` (only if `caller_name` present and `source` = `Cold Call`) |
 
 Record the returned `contact_id`.
@@ -714,12 +712,12 @@ All errors should be logged to n8n's execution log. Critical failures (Contact/O
 - [ ] Test: webhook with `email` only → cascade search finds Property
 - [ ] Test: webhook with all three → matches on `reference_id` (priority order)
 - [ ] Test: webhook with no match → creates Contact + Opportunity without enrichment
-- [ ] Test: re-submission (existing Contact) → updates existing, stacks source tag, adds `re-submitted`
+- [ ] Test: re-submission (existing Contact) → updates existing, updates Latest Source + Latest Source Date, adds `re-submitted`
 - [ ] Test: DNC Property → returns `dnc_blocked`, no Contact created
 - [ ] Test: DNC Contact in New Leads → returns `dnc_blocked`, no update
 - [ ] Test: multi-match phone → uses first match, returns `multi_match: true`
 - [ ] Verify WF-New-Lead-Entry fires in GHL after Contact lands in New Leads stage
-- [ ] Verify owner assignment (LM vs AM) works correctly based on Source tag
+- [ ] Verify owner assignment (LM vs AM) works correctly based on Latest Source field
 - [ ] Verify Day 0 speed-to-lead SMS fires
 - [ ] Test: Google Sheets trigger (new row) → normalizes fields, creates Contact + Opportunity + Lead Intake Note
 - [ ] Verify Lead Intake Note appears in GHL contact timeline with raw lead data only (no PD-enriched fields)
@@ -730,7 +728,7 @@ All errors should be logged to n8n's execution log. Critical failures (Contact/O
 - [ ] Verify VAPI phone extracted from call metadata (not structured data)
 - [ ] Verify structured outputs fields preferred over `analysis.structuredData` fallbacks
 - [ ] Verify `"null"` strings converted to actual null, `"yes"`/`"no"` handled correctly
-- [ ] Verify VAPI source tag `Source: VAPI` applied and AM ownership assigned
+- [ ] Verify VAPI Latest Source = "VAPI" set and AM ownership assigned
 
 ---
 
