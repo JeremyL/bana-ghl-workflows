@@ -583,7 +583,7 @@ Record the returned `opportunity_id`.
 | Status | `pipeline` (lowercase — matches dropdown option key) |
 | CRM Push Date | Today (`YYYY-MM-DD`) |
 
-> **Note:** `CRM Pushed` and `Push to CRM` are Checkbox fields. The GHL Custom Objects API does not support writing Checkbox values (tested 2026-04-06 — arrays return 422, booleans/strings are silently ignored). These fields are skipped. `Status = pipeline` serves the same operational purpose as `CRM Pushed = checked`.
+> **Note:** `Push to CRM` is a Checkbox field. The GHL Custom Objects API does not support writing Checkbox values (tested 2026-04-06 — arrays return 422, booleans/strings are silently ignored). This field is skipped. `Status = Pipeline` is the primary indicator that a property has been pushed to New Leads.
 
 **When no match:** Skip this step.
 

@@ -1,5 +1,5 @@
 # FUB → GHL Import Mapping
-*Last edited: 2026-04-02 · Last reviewed: —*
+*Last edited: 2026-04-08 · Last reviewed: —*
 
 Column mapping for the Follow Up Boss (FUB) export CSV (`all-people-2026-03-21 --- IMPORT TEST.csv`) to the GHL Prospect Data Properties custom object.
 
@@ -109,7 +109,6 @@ Properties fields that exist in GHL but are not populated from the FUB CSV. Thes
 | Skip Trace Date | Set on skip trace refresh |
 | Status | Custom object status — set by automation |
 | Push to CRM | Transient trigger checkbox |
-| CRM Pushed | Set by automation after push |
 | CRM Push Date | Set by automation after push |
 | DNC | Set by automation (WF-DNC-Handler sync) |
 | DNC Date | Set by automation |

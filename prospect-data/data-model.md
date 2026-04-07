@@ -1,5 +1,5 @@
 # Prospect Data — Data Model
-*Last edited: 2026-04-06 · Last reviewed: —*
+*Last edited: 2026-04-08 · Last reviewed: —*
 
 Prospect Data in the Bana Land GHL system. Stores all raw property and skip trace data in a single flat Custom Object. No contacts, no opportunities, no pipeline.
 
@@ -92,7 +92,6 @@ Same 24 fields as Owner 1, prefixed with `Owner 3`. Created via API 2026-04-01.
 | DNC               | Checkbox     | Any owner on this property requested DNC         |
 | DNC Date          | Date         | Date DNC was flagged                             |
 | Push to CRM         | Checkbox     | Trigger to push this property to New Leads. Checked to request push; unchecked by automation after completion. |
-| CRM Pushed          | Checkbox     | Whether this property has been pushed to New Leads. Permanent — never unchecked. |
 | CRM Push Date       | Date         | Date property was last pushed to New Leads       |
 | Date Added        | Date         | Date this property record was created (GHL default field) |
 | Notes             | Large Text   | Free-form notes                                  |
@@ -115,8 +114,8 @@ GHL Custom Objects only support `query` search on fields listed in `searchablePr
 
 | Field      | Type | Searchable | Purpose                                                        |
 | ---------- | ---- | ---------- | -------------------------------------------------------------- |
-| All Phones | Text | Yes        | All phones across all owners, space-separated. Populated on import and by automation. Enables phone cascade search from n8n intake workflow. |
-| All Emails | Text | Yes        | All emails across all owners, space-separated. Populated on import and by automation. Enables email cascade search from n8n intake workflow. |
+| All Phones | Large Text | Yes        | All phones across all owners, space-separated. Populated on import and by automation. Enables phone cascade search from n8n intake workflow. |
+| All Emails | Large Text | Yes        | All emails across all owners, space-separated. Populated on import and by automation. Enables email cascade search from n8n intake workflow. |
 
 **Searchable Properties (3 of 3 slots used):** Reference ID, All Phones, All Emails
 

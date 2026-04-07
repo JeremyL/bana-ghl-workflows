@@ -1,5 +1,5 @@
 # Prospect Data — Rules
-*Last edited: 2026-04-07 · Last reviewed: —*
+*Last edited: 2026-04-08 · Last reviewed: —*
 
 Operating rules for the Prospect Data instance. Covers data uploads,
 campaign management, status transitions, and push-to-CRM rules.
@@ -123,8 +123,8 @@ property is DNC, the property is DNC.
 
 ### CRM Push Tracking
 
-- When a property is pushed to New Leads, check `CRM Pushed` and set `CRM Push Date`.
-- `CRM Pushed` is permanent. Once a property has been pushed, it stays checked regardless of what happens to the lead in the pipeline.
+- When a property is pushed to New Leads, set `Status = Pipeline` and set `CRM Push Date`.
+- `Status = Pipeline` indicates the property is active in New Leads. No separate "pushed" checkbox — the status itself is the record.
 - `Push to CRM` is a separate trigger field for manual pushes (see Section 4).
 
 ### Re-Submission Behavior
@@ -133,7 +133,6 @@ When a property is re-submitted to New Leads from a new external campaign (NL WF
 
 - **Status:** Stays `Pipeline`. No transition needed — the property is already active in a pipeline.
 - **Campaign tag:** Add the new campaign tag (`campaign: [new campaign name]`). Do not remove old campaign tags — they stack as history.
-- **CRM Pushed:** Should already be checked.
 - **CRM Push Date:** Update to today's date to reflect the new push.
 
 These updates are currently manual. The re-submission automation (NL WF-New-Lead-Entry) does not write back to Prospect Data. Until automated, whoever manages the re-submission should update the Property record at the same time.
@@ -155,13 +154,13 @@ There are two paths:
 **Automated push (most common):**
 A lead comes in → automation searches Prospect Data by reference ID, phone number, etc.
 → match found → automation reads the Property record → creates Contact + Opportunity
-in New Leads → checks `CRM Pushed` + sets `CRM Push Date`.
+in New Leads → sets `Status = Pipeline` + sets `CRM Push Date`.
 
 **Manual push:**
 No auto-match found, or the team manually identifies a property in Prospect Data that
 needs to be pushed. The user checks `Push to CRM` on the Property record → automation
 fires on field change → reads the Property record → creates Contact + Opportunity in
-New Leads → checks `CRM Pushed` + sets `CRM Push Date` → unchecks `Push to CRM`.
+New Leads → sets `Status = Pipeline` + sets `CRM Push Date` → unchecks `Push to CRM`.
 
 Both paths end with the same result in New Leads and the same post-push updates in
 Prospect Data. The only difference is how the push is initiated.
@@ -179,7 +178,6 @@ field mapping in data-model.md.
 After successful push to New Leads:
 
 - Set Status = Pipeline
-- Check `CRM Pushed`
 - Set `CRM Push Date`
 - If push was triggered via `Push to CRM`, uncheck it
 
