@@ -22,6 +22,11 @@
 - "just wanted to make sure you saw it"
 - "we're still here"
 
+**What this sounds like:**
+
+- GOOD: "{{first_name}}, I've been trying to connect about your property — where should we go from here?"
+- BAD: "Please call me back, I'm very interested in buying your property ASAP!"
+
 Use `{{first_name}}` for GHL merge tag (first name of contact).
 Use `{{agent_name}}` for the team member's name.
 Use `{{opportunity.property_county}}` for the property's county (Opportunity custom field).

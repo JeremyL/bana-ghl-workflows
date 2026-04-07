@@ -1,6 +1,7 @@
 # Bana Land — GHL Follow-Up System
 *Last edited: 2026-04-07 · Last reviewed: 2026-04-07*
 
+
 Documentation for Bana Land's multi-channel motivated seller follow-up system, built in Go High Level (GHL). Covers the full lead lifecycle — from first outreach response through deal close, disqualification, or long-term drip.
 
 **CRM:** Go High Level  |  **Niche:** Rural land, all US states  |  **Lead sources:** Cold call, cold SMS, direct mail, VAPI, referral, website
@@ -37,12 +38,16 @@ Single working account for all lead sources. Handles all leads from entry throug
 | File                                   | Purpose                                                                          |
 | -------------------------------------- | -------------------------------------------------------------------------------- |
 | [quick-reference.md](new-leads/quick-reference.md) | Copywriter-friendly quick reference: every outreach touch by stage with template IDs and counts |
+| [quick-reference-messages.md](new-leads/quick-reference-messages.md) | Full message text for every template referenced in quick-reference.md |
 | [pipeline.md](new-leads/pipeline.md)   | 5 pipelines (Acquisition, Due Diligence, Value Add, Long Term FU, Disposition) + stage definitions + Opportunity Statuses |
 | [sequences.md](new-leads/sequences.md) | Cadence map: Day 1–30 + Cold drip + Nurture + Qualified                          |
 | [messaging.md](new-leads/messaging.md) | Message templates: NL-* + COLD-* + NUR-* + LTQ-*                                |
 | [rules.md](new-leads/rules.md)         | Contact rules and compliance: hours, DNC, stage movement, response protocol, data hygiene |
 | [data-model.md](new-leads/data-model.md) | Account configuration: custom fields, tags, pipeline stages, lead entry rules, smart lists |
 | [workflows.md](new-leads/workflows.md) | 11 workflow definitions (WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback, WF-Abandoned-Alert) + checklists |
+| [bana_land_lead_lifecycle_overview.svg](new-leads/diagrams/bana_land_lead_lifecycle_overview.svg) | Diagram: full lead lifecycle from entry to close/lost |
+| [day_0_to_30_sequence_detail.svg](new-leads/diagrams/day_0_to_30_sequence_detail.svg) | Diagram: Day 0–30 sequence timing and channels |
+| [cold_nurture_reentry_flows.svg](new-leads/diagrams/cold_nurture_reentry_flows.svg) | Diagram: cold drip, nurture, and re-entry flows |
 
 
 ### Account: Prospect Data (`prospect-data/`)
@@ -54,6 +59,7 @@ Stores all raw property and skip trace data in GHL Custom Objects. No contacts, 
 | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | [data-model.md](prospect-data/data-model.md) | Custom Object schemas (Properties + Campaigns), field definitions, associations, field mapping to New Leads                 |
 | [rules.md](prospect-data/rules.md)           | Data upload standards, campaign rules, status management, push-to-account rules                                             |
+| [fub-import-mapping.md](prospect-data/fub-import-mapping.md) | Field mapping for Follow Up Boss data import                                                  |
 
 
 ### Automation: n8n (`n8n/`)
