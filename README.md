@@ -1,5 +1,5 @@
 # Bana Land — GHL Follow-Up System
-*Last edited: 2026-04-07 · Last reviewed: 2026-04-07*
+*Last edited: 2026-04-09 · Last reviewed: 2026-04-07*
 
 
 Documentation for Bana Land's multi-channel motivated seller follow-up system, built in Go High Level (GHL). Covers the full lead lifecycle — from first outreach response through deal close, disqualification, or long-term drip.
@@ -70,3 +70,4 @@ n8n workflows that connect the two GHL sub-accounts. Handles lead intake, data e
 | File                                           | Purpose                                                                                     |
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | [intake-workflow.md](n8n/intake-workflow.md)   | Baseline intake workflow: webhook → Prospect Data lookup → Contact + Opportunity in New Leads |
+| [pull-workflow.md](n8n/pull-workflow.md)       | Pull from Prospect Data workflow: operator-triggered gap-fill enrichment for existing Opportunities |

@@ -1,5 +1,5 @@
 # n8n Intake Workflow (Baseline)
-*Last edited: 2026-04-07 · Last reviewed: 2026-04-06*
+*Last edited: 2026-04-09 · Last reviewed: 2026-04-06*
 
 n8n workflow that processes leads from multiple triggers into the Prospect Data → New Leads pipeline. Searches Prospect Data for a matching Property record, enriches the lead if found, and creates a Contact + Opportunity in New Leads.
 
@@ -401,6 +401,12 @@ Record the owner number (1, 2, or 3) as `primary_owner` for field mapping in Ste
 
 ---
 
+### Steps 4–5: Build Contact + Opportunity Payloads (Shared Sub-Workflow)
+
+Steps 4 and 5 are implemented in the **Map PD to NL Fields** shared sub-workflow, called with `mode = "create"`. This sub-workflow is also used by the [Pull from Prospect Data workflow](pull-workflow.md) with `mode = "enrich"` (gap-fill only). See [pull-workflow.md](pull-workflow.md) for the sub-workflow interface and mode behavior.
+
+The field mappings below define the "create" mode behavior.
+
 ### Step 4: Build Contact Payload
 
 #### 4A: Match Found — Merge Webhook + Prospect Data
@@ -737,4 +743,4 @@ All errors should be logged to n8n's execution log. Critical failures (Contact/O
 - **Multi-owner Contact creation:** Create Contacts for all owners with valid contact info, not just the primary. Link all to the same Opportunity.
 - ~~**Concatenated search field:**~~ ✅ Implemented — `All Phones` and `All Emails` fields exist on Properties custom object and are used in Steps 2B/2C.
 - **Batch webhook support:** Accept an array of leads in a single webhook call for cold calling session imports.
-- **Manual push trigger:** Listen for `Push to CRM` checkbox change on Property records via GHL webhook → fire this same pipeline.
+- **Manual push trigger:** Listen for `Push to CRM` checkbox change on Property records via GHL webhook → fire this same pipeline. Should include dedup check: if a Contact already exists in New Leads, route to Pull/enrich logic (see [pull-workflow.md](pull-workflow.md)) instead of creating a duplicate.

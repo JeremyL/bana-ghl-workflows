@@ -1,7 +1,7 @@
 # Bana Land — New Leads Account: Workflows
-*Last edited: 2026-04-07 · Last reviewed: 2026-04-07*
+*Last edited: 2026-04-09 · Last reviewed: 2026-04-07*
 
-All 11 workflows for the New Leads GHL sub-account. Build these in **Automation > Workflows** after completing the account configuration in [data-model.md](data-model.md).
+All 12 workflows for the New Leads GHL sub-account. Build these in **Automation > Workflows** after completing the account configuration in [data-model.md](data-model.md).
 
 Reference files:
 
@@ -28,6 +28,7 @@ Reference files:
 | **WF-Response-Handler**  | Inbound Response Handler (Re-Engagement)    |
 | **WF-Missed-Call-Textback**  | Missed Call Text-Back                       |
 | **WF-Abandoned-Alert**   | Abandoned Status Alert (safety net)         |
+| **WF-Pull-From-PD**     | Pull from Prospect Data                     |
 
 ### Workflow Trigger Convention
 
@@ -359,6 +360,36 @@ Drip-eligible Lost leads move to LT FU: Lost and flow into the same Long-Term Dr
 
 ---
 
+### WF-Pull-From-PD | Pull from Prospect Data
+
+**Trigger:** Opportunity custom field changed → `Pull from PD` → is checked
+**Purpose:** Pulls property and owner data from the matching Property record in Prospect Data and merges it onto the existing Contact + Opportunity. Gap-fill only — existing NL data is never overwritten.
+
+**Prerequisite:** The Opportunity must have a `Reference ID` populated. If empty, the workflow posts an error note and unchecks the box.
+
+**Actions:**
+
+1. **Webhook POST** to n8n `/pull-from-pd` endpoint with `opportunity_id`, `contact_id`, and `reference_id` (from the Opportunity's Reference ID field).
+
+n8n handles all remaining steps — see [n8n/pull-workflow.md](../n8n/pull-workflow.md) for the full spec:
+
+- Searches Prospect Data for the Property by Reference ID
+- DNC check (blocks if Property is DNC)
+- Fetches existing Contact + Opportunity data from New Leads
+- Builds merge payloads (gap-fill: only populates empty fields)
+- Updates Contact (mailing address, age, deceased, unconfirmed phones/emails — only if empty)
+- Updates Opportunity (property data fields — only if empty)
+- Posts PD Snapshot Note on Contact timeline
+- Updates PD Property record (Status = Pipeline, CRM Push Date = today)
+- Unchecks `Pull from PD` on the Opportunity
+- Posts result summary note on Contact timeline
+
+**Merge rule:** Every field is PRESERVE if populated. PD data only fills blanks. NL data (from the lead or the operator) is always authoritative. Source fields (native Source, Latest Source, Latest Source Date) are never touched — this is a data enrichment action, not a lead event.
+
+**Error handling:** All error cases (no Reference ID, no PD match, DNC, API failure) post an error note on the Contact timeline and uncheck the box. Operator can re-check to retry.
+
+---
+
 ## Compliance Verification Checklist
 
 Before going live, verify:
@@ -384,7 +415,7 @@ Before going live, verify:
 - Acquisition: Nurture stage-entry trigger configured (auto-move to LT FU: Nurture)
 - All custom fields created
 - All tags created
-- All 11 workflows built and tested (WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback, WF-Abandoned-Alert)
+- All 12 workflows built and tested (WF-New-Lead-Entry, WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly, WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Response-Handler, WF-Missed-Call-Textback, WF-Abandoned-Alert, WF-Pull-From-PD)
 - Smart lists created
 - Team members trained on GHL task queue and stage movement (LM and AM)
 - automation routing confirmed: all campaign types → New Leads

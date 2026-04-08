@@ -1,5 +1,5 @@
 # Prospect Data — Rules
-*Last edited: 2026-04-08 · Last reviewed: —*
+*Last edited: 2026-04-09 · Last reviewed: —*
 
 Operating rules for the Prospect Data instance. Covers data uploads,
 campaign management, status transitions, and push-to-CRM rules.
@@ -139,47 +139,72 @@ These updates are currently manual. The re-submission automation (NL WF-New-Lead
 
 ---
 
-## 4. Push-to-CRM Rules
+## 4. CRM Data Transfer Rules
 
-### When to Push
+Three mechanisms move data between Prospect Data and New Leads. They serve different use cases:
 
-Properties are pushed to New Leads when a lead comes in that is associated with the
-property record. This is not tied to campaigns — it happens whenever the property data
-needs to exist in the CRM for lead follow-up.
+| Mechanism | Direction | Initiator | Starting Point | Result |
+| --- | --- | --- | --- | --- |
+| **Automated push** | PD → NL | External lead event | New or existing Contact | Creates or re-submits Contact + Opportunity |
+| **Manual push** | PD → NL | Operator in Prospect Data | Property record, no existing lead | Creates new Contact + Opportunity |
+| **Pull from PD** | PD → NL | Operator in New Leads | Existing Opportunity with Reference ID | Enriches existing Contact + Opportunity (gap-fill only) |
 
-### How a Push Happens
+### Automated Push (Most Common)
 
-There are two paths:
-
-**Automated push (most common):**
 A lead comes in → automation searches Prospect Data by reference ID, phone number, etc.
 → match found → automation reads the Property record → creates Contact + Opportunity
 in New Leads → sets `Status = Pipeline` + sets `CRM Push Date`.
 
-**Manual push:**
+See [n8n/intake-workflow.md](../n8n/intake-workflow.md) for the full spec.
+
+### Manual Push (Future — Not Yet Built)
+
 No auto-match found, or the team manually identifies a property in Prospect Data that
 needs to be pushed. The user checks `Push to CRM` on the Property record → automation
 fires on field change → reads the Property record → creates Contact + Opportunity in
 New Leads → sets `Status = Pipeline` + sets `CRM Push Date` → unchecks `Push to CRM`.
 
-Both paths end with the same result in New Leads and the same post-push updates in
-Prospect Data. The only difference is how the push is initiated.
+When built, manual push should include a dedup check: search New Leads for an existing
+Contact by phone/email before creating. If a match is found, route to the Pull/enrich
+logic instead of creating a duplicate.
 
-### What Gets Pushed
+### Pull from PD (Data Enrichment)
+
+Operator checks `Pull from PD` checkbox on an existing Opportunity in New Leads →
+GHL workflow fires webhook to n8n → n8n reads the Opportunity's Reference ID →
+searches Prospect Data for the matching Property → merges property and owner data
+onto the existing Contact + Opportunity → unchecks the checkbox.
+
+**Gap-fill only:** Existing NL data is never overwritten. PD data only populates empty
+fields. The lead and the operator are the source of truth — PD is supplemental. Source
+fields are never touched (this is a data enrichment action, not a lead event).
+
+**Use cases:**
+- Opportunity was created without a PD match (no enrichment at intake). Operator later
+  identifies the matching Property and wants to pull data in.
+- PD data was updated after initial push (re-skip-trace, price updates). Operator wants
+  to fill in any fields that were empty at intake.
+
+**Prerequisite:** The Opportunity must have a Reference ID populated.
+
+See [n8n/pull-workflow.md](../n8n/pull-workflow.md) for the full spec.
+
+### What Gets Pushed/Pulled
 
 - Automation reads the Property record and splits it into Contact + Opportunity per the
-field mapping in data-model.md.
+field mapping in the shared `Map PD to NL Fields` sub-workflow.
 - One Contact is created per owner that has at least one valid phone number or email.
 - One Opportunity is created per property, linked to the primary owner's Contact.
 - If multiple owners exist, additional Contacts are created and linked to the same Opportunity.
 
-### Post-Push Updates
+### Post-Push/Pull Updates
 
-After successful push to New Leads:
+After successful push or pull to New Leads:
 
-- Set Status = Pipeline
+- Set Status = Pipeline (if not already)
 - Set `CRM Push Date`
 - If push was triggered via `Push to CRM`, uncheck it
+- If pull was triggered via `Pull from PD`, uncheck it
 
 ---
 

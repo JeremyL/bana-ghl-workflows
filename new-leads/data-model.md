@@ -1,6 +1,6 @@
 # Bana Land — New Leads Account: Data Model
 
-*Last edited: 2026-04-07 · Last reviewed: 2026-04-07*
+*Last edited: 2026-04-09 · Last reviewed: 2026-04-07*
 
 
 Static configuration for the New Leads GHL sub-account — fields, tags, pipeline stages, smart lists, and lead entry rules. Build everything in this file before creating workflows.
@@ -215,6 +215,7 @@ Go to **Settings > Custom Fields > Opportunities** and create the following:
 | Contract Date       | Date       | Date contract was signed for this deal                                                                                                                                           |
 | Latest Source       | Text       | Most recent channel that brought this lead in. Updated on re-submission. Values: Cold Call, Cold SMS, Direct Mail, VAPI, Referral, Website.                                      |
 | Latest Source Date  | Date       | Date the Latest Source field was last updated                                                                                                                                    |
+| Pull from PD        | Checkbox   | Trigger field for data pull. Operator checks this to pull property data from Prospect Data using the Opportunity's Reference ID. Unchecked by automation after execution. Requires Reference ID to be populated. Triggers WF-Pull-From-PD. |
 
 
 ---
