@@ -1,6 +1,6 @@
 # Bana Land — New Leads Account: Pipeline Definitions
 
-*Last edited: 2026-04-07 · Last reviewed: 2026-04-07*
+*Last edited: 2026-04-21 · Last reviewed: 2026-04-07*
 
 Pipeline reference for **New Leads** — the single working account for all lead sources. Five pipelines organize the full lifecycle from entry through close or long-term follow-up:
 
@@ -248,7 +248,7 @@ Stages TBD. Fully manual. Not relevant to automated workflows.
 | **Owner**         | GHL automation (full automation — no manual tasks unless response received).                                                      |
 | **Frequency**     | Monthly for first 3 months → quarterly thereafter.                                                                                |
 | **Channels**      | SMS + Email (rotating).                                                                                                           |
-| **Actions**       | Automated drip via WF-Dispo-Re-Engage enrollment → WF-Long-Term-Quarterly. If response received, WF-Response-Handler fires.      |
+| **Actions**       | Automated drip via WF-Dispo-Re-Engage enrollment → WF-Nurture-Monthly (shared with LT FU: Nurture) → WF-Long-Term-Quarterly. Softer cadence than Cold — Lost leads gave a reason, so they're warmer than never-responded Cold. If response received, WF-Response-Handler fires. |
 
 ---
 

@@ -1,5 +1,5 @@
 # Bana Land — New Leads Account: Message Templates
-*Last edited: 2026-04-07 · Last reviewed: 2026-04-07*
+*Last edited: 2026-04-21 · Last reviewed: 2026-04-07*
 
 ## Voice & Principles
 
@@ -306,9 +306,9 @@ Bana Land | [CALLBACK NUMBER]
 
 ## Cold — Monthly Drip (Months 1–3)
 
-**Stage:** LT FU: Cold / Lost | **Cadence:** 30-day wait on entry, then SMS + Email each month, ~2 weeks apart | **Owner:** GHL auto only
-**Applies to:** LT FU: Cold leads (no response) and LT FU: Lost leads (non-terminal Lost status)
-**Trigger:** WF-Cold-Drip-Monthly fires on LT FU: Cold/Lost stage entry or enrollment by WF-Dispo-Re-Engage
+**Stage:** LT FU: Cold | **Cadence:** 30-day wait on entry, then SMS + Email each month, ~2 weeks apart | **Owner:** GHL auto only
+**Applies to:** LT FU: Cold leads only (no response after Day 30). LT FU: Lost leads use the Nurture monthly drip (NUR-* templates, softer cadence).
+**Trigger:** WF-Cold-Drip-Monthly fires on LT FU: Cold stage entry
 
 ---
 
@@ -463,8 +463,9 @@ Either way is fine.
 
 ## Nurture — Monthly (Months 1–3)
 
-**Stage:** LT FU: Nurture | **Cadence:** Every 30 days (30-day wait before first touch) | **Owner:** GHL auto only
-**Trigger:** WF-Nurture-Monthly fires on LT FU: Nurture stage entry
+**Stage:** LT FU: Nurture + LT FU: Lost | **Cadence:** Every 30 days (30-day wait before first touch) | **Owner:** GHL auto only
+**Applies to:** LT FU: Nurture (stalled qualified deals) and LT FU: Lost (drip-eligible lost reasons, enrolled via WF-Dispo-Re-Engage). Same NUR-* templates for both — messaging is generic enough to work for stalled deals and warm lost leads alike.
+**Trigger:** WF-Nurture-Monthly fires on LT FU: Nurture stage entry, LT FU: Lost stage entry, or direct enrollment by WF-Dispo-Re-Engage
 **Channels:** SMS + Email only
 
 ---

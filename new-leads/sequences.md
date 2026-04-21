@@ -1,6 +1,6 @@
 # Bana Land — New Leads Account: Follow-Up Sequences
 
-*Last edited: 2026-04-07 · Last reviewed: 2026-04-07*
+*Last edited: 2026-04-21 · Last reviewed: 2026-04-07*
 
 This is the cadence document for **New Leads**. It defines exactly when to touch a lead,
 with which channel, and whether that touch is human-driven or automated.
@@ -163,13 +163,17 @@ AM monitors qualified leads via GHL smart lists. No automated SMS or task genera
 
 ---
 
-## Sequence — Nurture (LT FU: Nurture — Stalled Qualified Leads)
+## Sequence — Nurture (LT FU: Nurture + Lost — Stalled Qualified + Drip-Eligible Lost)
 
-Qualified leads that didn't close. AM parks the deal in Acquisition: Nurture (trigger stage) → auto-moves to LT FU: Nurture. Fully automated from there. Long game.
+**Applies to:**
+- **LT FU: Nurture** — Qualified leads that didn't close. AM parks the deal in Acquisition: Nurture (trigger stage) → auto-moves to LT FU: Nurture.
+- **LT FU: Lost** — Leads marked Lost with a Drip reason (No Motivation, Wants Retail, On MLS, Lead Declined). WF-Dispo-Re-Engage moves opportunity to LT FU: Lost and enrolls in this same monthly drip.
+
+Both are "warm" leads that were engaged enough to have a conversation or give a reason — softer cadence than Cold.
 
 **Owner:** GHL automation — no manual call tasks unless lead responds
 **Channels:** SMS + Email (rotating).
-**Trigger:** WF-Nurture-Monthly fires on LT FU: Nurture stage entry. WF-Long-Term-Quarterly fires after monthly phase completes.
+**Trigger:** WF-Nurture-Monthly fires on LT FU: Nurture stage entry, LT FU: Lost stage entry, or direct enrollment by WF-Dispo-Re-Engage. WF-Long-Term-Quarterly fires after monthly phase completes.
 
 ### Nurture Monthly (Months 1–3)
 
@@ -194,16 +198,16 @@ At Month 3 → WF-Nurture-Monthly enrolls contact in WF-Long-Term-Quarterly (see
 
 ---
 
-## Sequence — Cold (LT FU: Cold / Nurture / Lost — Long-Term Drip)
+## Sequence — Cold (LT FU: Cold — Long-Term Drip)
 
-**Applies to:** LT FU: Cold leads (no response after Day 30), LT FU: Nurture leads (stalled deals), and LT FU: Lost leads (non-terminal Lost status)
+**Applies to:** LT FU: Cold leads only (no response after Day 30 — never had a real conversation). LT FU: Nurture and LT FU: Lost leads follow the softer Sequence — Nurture above.
 **Owner:** GHL automation only — no manual call tasks unless lead responds
 
 ### Cold Monthly (Months 1–3)
 
 **Goal:** Stay alive in their mind. Rural sellers often take months or years to decide to sell.
 **Cadence:** 30-day wait on entry, then SMS + Email each month, spaced ~2 weeks apart
-**Workflow:** WF-Cold-Drip-Monthly — fires automatically when contact enters LT FU: Cold, LT FU: Lost, or is enrolled by WF-Dispo-Re-Engage.
+**Workflow:** WF-Cold-Drip-Monthly — fires automatically when contact enters LT FU: Cold.
 
 
 | Month | Timing  | Channel | Type | Message Ref   |
@@ -256,7 +260,7 @@ At ~3.5 months (Day 100) → WF-Cold-Drip-Monthly enrolls contact in WF-Long-Ter
 
 WF-Dispo-Re-Engage fires on any status change to Lost and **branches on Lost Reason:**
 
-**Drip reasons** (No Motivation, Wants Retail, On MLS, Lead Declined) → move to LT FU: Lost stage, enroll in WF-Cold-Drip-Monthly → WF-Long-Term-Quarterly (same drip as Cold and Nurture leads).
+**Drip reasons** (No Motivation, Wants Retail, On MLS, Lead Declined) → move to LT FU: Lost stage, enroll in WF-Nurture-Monthly → WF-Long-Term-Quarterly (shared with LT FU: Nurture — Lost leads gave a reason, so they're treated as warm, not cold).
 
 **No-Drip reasons** (Not a Fit, No Longer Own, Exhausted, DNC) → exit immediately. No enrollment, no pipeline move. DNC is handled separately by WF-DNC-Handler.
 
@@ -295,7 +299,7 @@ When hitting a lead on the same day with multiple channels (Days 1-2 of Day 1-10
 | Lead says stop / opt-out                | Kill all workflows → status → Lost (DNC) + `dnc` tag → DNC sync to Prospect Data.                                           |
 | Lead moves to Comp or later stage    | Stop automated sequence → AM works lead directly (no automated workflow).                                                    |
 | AM moves to Acquisition: Nurture     | Trigger stage → auto-move to LT FU: Nurture → start Sequence — Nurture.                                                     |
-| Status changed to Lost (Drip reason)    | Stop active sequence → WF-Dispo-Re-Engage fires (Drip branch) → move to LT FU: Lost → enroll in Sequence — Cold (WF-Cold-Drip-Monthly → WF-Long-Term-Quarterly). |
+| Status changed to Lost (Drip reason)    | Stop active sequence → WF-Dispo-Re-Engage fires (Drip branch) → move to LT FU: Lost → enroll in Sequence — Nurture (WF-Nurture-Monthly → WF-Long-Term-Quarterly). |
 | Status changed to Lost (No-Drip/DNC)    | Stop all sequences. WF-Dispo-Re-Engage fires but exits immediately. No further enrollment.                                   |
 | 24-month quarterly drip completes        | WF-Long-Term-Quarterly changes status to Lost (Exhausted). All automated outreach finished.                                  |
 

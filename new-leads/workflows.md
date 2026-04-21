@@ -1,5 +1,5 @@
 # Bana Land — New Leads Account: Workflows
-*Last edited: 2026-04-09 · Last reviewed: 2026-04-07*
+*Last edited: 2026-04-21 · Last reviewed: 2026-04-07*
 
 All 12 workflows for the New Leads GHL sub-account. Build these in **Automation > Workflows** after completing the account configuration in [data-model.md](data-model.md).
 
@@ -35,7 +35,7 @@ Reference files:
 - **Stage-specific workflows** (WF-Day-1-10, WF-Day-11-30, WF-Cold-Drip-Monthly, WF-Nurture-Monthly) trigger on **stage entry** within a specific pipeline. The preceding workflow moves the contact to the next stage — that stage change fires the next workflow automatically. No explicit "Enroll in…" action needed. Cross-pipeline moves (e.g., Day 11-30 → LT FU: Cold) also fire the target pipeline's stage-entry trigger.
 - **Status-triggered workflows** (WF-Dispo-Re-Engage, WF-DNC-Handler, WF-Abandoned-Alert) trigger on **opportunity status change** (Lost, or Abandoned for the alert). WF-Dispo-Re-Engage branches on Lost Reason to determine behavior.
 - **Cross-stage workflows** (WF-Long-Term-Quarterly) trigger on **explicit enrollment** from the preceding workflow. These serve multiple stages/statuses (Cold, Nurture, Lost) and cannot rely on a single trigger.
-- **WF-Dispo-Re-Engage** triggers on status → Lost, moves the opportunity to LT FU: Lost (cross-pipeline), then enrolls in WF-Cold-Drip-Monthly.
+- **WF-Dispo-Re-Engage** triggers on status → Lost, moves the opportunity to LT FU: Lost (cross-pipeline), then enrolls in WF-Nurture-Monthly (softer drip — Lost leads gave a reason, so treated as warm, not cold).
 - **Cross-pipeline trigger:** Acquisition pipeline stage "Nurture" has a stage-entry trigger that immediately moves the opportunity to LT FU pipeline stage "Nurture". This is a 1-action automation (no workflow code needed) — Acquisition: Nurture is a trigger stage, not a resting stage.
 - **Event-driven workflows** (WF-New-Lead-Entry, WF-Response-Handler, WF-Missed-Call-Textback) trigger on specific events (lead added, inbound reply, missed call).
 
@@ -154,8 +154,8 @@ Reference files:
 
 ### WF-Cold-Drip-Monthly | Cold Drip — Monthly (Months 1–3)
 
-**Trigger:** Contact moved to LT FU pipeline stage "Cold" OR "Lost" OR enrolled directly by WF-Dispo-Re-Engage
-**Applies to:** LT FU: Cold leads (no response after Day 30) and LT FU: Lost leads (enrolled via WF-Dispo-Re-Engage)
+**Trigger:** Contact moved to LT FU pipeline stage "Cold"
+**Applies to:** LT FU: Cold leads (no response after Day 30)
 **Enrollment condition:** Lead NOT tagged `dnc`
 
 **Actions:**
@@ -231,7 +231,8 @@ Workflow ends. No re-enrollment. WF-Dispo-Re-Engage will fire on this status cha
 
 ### WF-Nurture-Monthly | Nurture — Monthly (Months 1–3)
 
-**Trigger:** Contact moved to LT FU pipeline stage "Nurture"
+**Trigger:** Contact moved to LT FU pipeline stage "Nurture" OR "Lost" OR enrolled directly by WF-Dispo-Re-Engage
+**Applies to:** LT FU: Nurture leads (stalled qualified deals) and LT FU: Lost leads (drip-eligible lost reasons, enrolled via WF-Dispo-Re-Engage)
 **Enrollment condition:** Lead NOT tagged `dnc`
 
 **Actions:**
@@ -260,11 +261,11 @@ Workflow ends. No re-enrollment. WF-Dispo-Re-Engage will fire on this status cha
    - **If Lost Reason IN (No Motivation, Wants Retail, On MLS, Lead Declined) — Drip reasons:**
      1. **Defensive cleanup:** Remove from WF-Cold-Drip-Monthly, WF-Nurture-Monthly, WF-Long-Term-Quarterly (prevents dual drip if contact was previously in Cold/Nurture)
      2. Move opportunity to 04 : LT FU pipeline, stage: Lost (cross-pipeline move)
-     3. Enroll in WF-Cold-Drip-Monthly (Cold Drip — Monthly)
+     3. Enroll in WF-Nurture-Monthly (Nurture — Monthly)
    - **If Lost Reason IN (Not a Fit, No Longer Own, Exhausted, DNC) — No-Drip / DNC reasons:**
      - End workflow immediately. No enrollment, no pipeline move.
 
-Drip-eligible Lost leads move to LT FU: Lost and flow into the same Long-Term Drip as Cold and Nurture leads (WF-Cold-Drip-Monthly monthly, then WF-Long-Term-Quarterly). After 24 months, WF-Long-Term-Quarterly changes status to Lost (Exhausted) — this re-triggers WF-Dispo-Re-Engage, but the If/Else branch catches Exhausted and exits immediately (no loop).
+Drip-eligible Lost leads move to LT FU: Lost and flow into the softer Nurture monthly drip (WF-Nurture-Monthly, then WF-Long-Term-Quarterly) — same sequence as stalled qualified Nurture leads. Lost leads gave a reason, so they're warmer than never-responded Cold leads and receive fewer, less aggressive touches. After 24 months, WF-Long-Term-Quarterly changes status to Lost (Exhausted) — this re-triggers WF-Dispo-Re-Engage, but the If/Else branch catches Exhausted and exits immediately (no loop).
 
 ---
 
@@ -302,10 +303,15 @@ Drip-eligible Lost leads move to LT FU: Lost and flow into the same Long-Term Dr
 1. **Check: Is the reply an opt-out keyword?** (STOP, QUIT, UNSUBSCRIBE, CANCEL, END)
    - If yes → route to WF-DNC-Handler (DNC Handler). End this workflow.
 2. Set custom field: `Pause WFs Until` = today + 3 days — all active automated workflows immediately hold at their next send condition
-3. **Branch on Contact Owner — assign review task to lead owner:**
-   - **If/Else branch on Contact Owner field** (routes task to the actual assigned owner, not a hardcoded role):
-     - Create Task: "REVIEW — {{first_name}} replied. Read their reply and decide next step." — Assigned to: **Contact Owner** (If/Else branch on Contact Owner field) — Due: Today — Priority: High
-     - Send internal notification to Contact Owner: "{{first_name}} replied. Automation paused for 3 days. Review and either move stage or clear the Pause WFs Until field to resume early. [Contact Link]"
+3. **Branch on Contact Owner — assign review task to lead owner or AM round-robin fallback:**
+   - **If/Else branch on Contact Owner field:**
+     - **If Contact Owner is set** (routes to the actual assigned owner, not a hardcoded role):
+       - Create Task: "REVIEW — {{first_name}} replied. Read their reply and decide next step." — Assigned to: **Contact Owner** — Due: Today — Priority: High
+       - Send internal notification to Contact Owner: "{{first_name}} replied. Automation paused for 3 days. Review and either move stage or clear the Pause WFs Until field to resume early. [Contact Link]"
+     - **Else (Contact Owner is empty — typical for LT FU: Cold / Nurture / Lost, where contacts are intentionally unassigned):**
+       - Create Task: "REVIEW (unassigned lead) — {{first_name}} replied. Read their reply and decide next step. If actionable, move stage and self-assign." — Assigned to: Jeremy, [AM2] via round-robin (Split Traffic: Equally) — Due: Today — Priority: High
+       - Send internal notification to the task assignee: "Unassigned lead {{first_name}} replied. Automation paused for 3 days. Review and either move stage (and self-assign) or clear the Pause WFs Until field to resume early. [Contact Link]"
+       - **Do NOT set Contact Owner.** The contact stays unassigned unless the AM self-assigns after reviewing.
 4. **Branch — drip stages/statuses (Cold / Nurture / Lost) only:** Wait 3 days (auto-resume safety net)
 5. **Branch — check resolution:**
    **Branch A — Owner moved contact to a qualified stage (flips to Open if previously Lost):**
@@ -404,7 +410,7 @@ Before going live, verify:
 - Unsubscribe footer included in all marketing emails
 - AM round-robin assignment verified: Jeremy + [AM2], Split Traffic: Equally
 - "Only Apply to Unassigned Contacts" toggle enabled on Assign To User action (owner preserved on re-submission)
-- WF-Response-Handler review task assigned to Contact Owner via If/Else branch (the only task created by workflows)
+- WF-Response-Handler review task assigned to Contact Owner via If/Else branch, with AM round-robin fallback (Jeremy + [AM2]) when Contact Owner is empty — Contact Owner is not set by the fallback; AM self-assigns only if they decide to work the lead (the only task created by workflows)
 - All workflow enrollments tested with a test contact before live launch
 
 ---

@@ -7,14 +7,17 @@
 # Temp test files
 *.temp
 
-# Validation results (contain location IDs / field IDs)
-scripts/results/
+# Local scripts & exports (ad-hoc data-processing, API outputs, checkpoints)
+scripts/
 
 # n8n workflow exports (contain API keys / location IDs)
 n8n/*.json
 
 # VAPI agent configs (may contain API keys / sensitive config)
 vapi/
+
+# FUB import scripts & data (one-time migration, contains PII + API calls)
+new-leads/import/
 
 # Claude Code config (contains approved commands with embedded tokens)
 .claude/

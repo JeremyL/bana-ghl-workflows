@@ -1,6 +1,6 @@
 # New Leads — Contact Rules & Compliance
 
-*Last edited: 2026-04-07 · Last reviewed: 2026-04-07*
+*Last edited: 2026-04-21 · Last reviewed: 2026-04-07*
 
 Operational rules that govern all outreach in **New Leads** (the single working account).
 Every GHL workflow, automation, and team member action must respect these rules.
@@ -129,8 +129,10 @@ There are two distinct re-entry events. Each has its own protocol.
 **WF-Response-Handler only fires for contacts in:** Acquisition: Day 1-10, Acquisition: Day 11-30, LT FU: Cold, LT FU: Nurture, LT FU: Lost (status = Open), or Lost with No-Drip reason (Not a Fit, No Longer Own, Exhausted) — AND `Pause WFs Until` is empty (prevents duplicate triggers during an active review window).
 
 1. Set field: `Pause WFs Until` = today + 3 days — all active workflows hold at the next send condition
-2. Create high-priority review task assigned to **Contact Owner** (via If/Else branch on Contact Owner field)
-3. Send internal notification & internal SMS to lead owner with contact link
+2. Create high-priority review task via If/Else branch on Contact Owner field:
+  - **If Contact Owner is set:** task + internal notification assigned to Contact Owner.
+  - **Else (Contact Owner empty — typical for LT FU: Cold / Nurture / Lost):** task + notification round-robin to AMs (Jeremy + [AM2], Split Traffic: Equally). Task text flags it as unassigned and prompts the AM to self-assign only if they decide to work the lead. **Contact Owner is not written to** — these contacts are intentionally unassigned and stay that way unless the AM claims the lead.
+3. Internal notification goes to whoever received the task (Contact Owner or the round-robined AM) with contact link
 4. **Resolution — one of three outcomes:**
   - **Owner moves to a qualified stage** (flip to Open if currently Lost) → workflow exit triggers fire, active workflows killed. Clear `Pause WFs Until`.
   - **Owner changes status to Lost** (with reason) → appropriate workflows take over (WF-Dispo-Re-Engage branches on reason). Clear `Pause WFs Until`.
@@ -175,7 +177,7 @@ All deal outcomes that aren't Won use **Lost** status with a Lost Reason. The Lo
 - DNC — lead opted out (permanent, zero contact, re-submission blocked)
 
 When status changes to Lost, WF-Dispo-Re-Engage triggers and **branches on Lost Reason:**
-- **Drip reasons** → enroll in WF-Cold-Drip-Monthly → WF-Long-Term-Quarterly (monthly first, then quarterly with a 24-month cap)
+- **Drip reasons** → enroll in WF-Nurture-Monthly → WF-Long-Term-Quarterly (softer monthly drip shared with LT FU: Nurture, then quarterly with a 24-month cap — Lost leads gave a reason, so they're treated as warm, not cold)
 - **No-Drip / DNC reasons** → exit immediately, no enrollment
 
 Key rules:
