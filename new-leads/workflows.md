@@ -1,5 +1,5 @@
 # Bana Land — New Leads Account: Workflows
-*Last edited: 2026-04-21 · Last reviewed: 2026-04-07*
+*Last edited: 2026-04-21 · Last reviewed: 2026-04-21*
 
 All 12 workflows for the New Leads GHL sub-account. Build these in **Automation > Workflows** after completing the account configuration in [data-model.md](data-model.md).
 
@@ -43,6 +43,8 @@ Reference files:
 
 ### WF-New-Lead-Entry | New Lead Entry
 
+Diagram: [diagrams/workflow-diagrams.md#wf-new-lead-entry--new-lead-entry](diagrams/workflow-diagrams.md#wf-new-lead-entry--new-lead-entry)
+
 **Trigger:** Contact added to Acquisition pipeline stage "New Leads"
 **Actions:**
 
@@ -57,11 +59,8 @@ Reference files:
      - Assign To User: Lead Manager
    - **If Opportunity Latest Source = "Direct Mail" OR "VAPI" OR "Referral" OR "Website":**
      - Assign To User: Jeremy, [AM2] — Split Traffic: Equally (round-robin)
-3. Update **Opportunity** native Source = current source value (skip if already set — first-touch attribution)
-4. Update **Contact** native Source = current source value (skip if already set — mirrors Opportunity Source for GHL built-in reporting)
-5. Update **Opportunity** custom field: Latest Source = current source value
-6. Update **Opportunity** custom field: Latest Source Date = Today
-7. **Day 0 — Speed to Lead:**
+3. Update **Contact** native Source = current source value (skip if already set — mirrors Opportunity Source for GHL built-in reporting). *Opportunity native Source, Latest Source, and Latest Source Date are set by n8n during lead intake — see [../n8n/intake-workflow.md](../n8n/intake-workflow.md).*
+4. **Day 0 — Speed to Lead:**
    - Send internal notification to assigned owner: "New lead — speed-to-lead touches firing now: {{first_name}} ({{opportunity.latest_source}}). Work the lead, then move to Day 1-10 when done."
    - **Push notification** (GHL mobile app) to assigned owner: "NEW LEAD — {{first_name}} — call NOW"
    - **Internal SMS alert** to assigned owner's personal number: "NEW LEAD — {{first_name}} — call now: {{phone}}"

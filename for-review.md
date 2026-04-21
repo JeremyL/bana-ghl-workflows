@@ -33,6 +33,10 @@ Items that require hands-on GHL testing before go-live. Cannot be verified from 
 | Pull from PD — error cases                    | New Leads     | n8n pull workflow                            | Test: (1) Opportunity with no Reference ID → error note posted, checkbox unchecked. (2) Reference ID with no PD match → error note, unchecked. (3) DNC Property → warning note, unchecked.                                                                                                                                                                                                                                                                        |
 | Pull from PD — PD post-pull update            | Prospect Data | n8n pull workflow                            | After successful pull, verify PD Property record has Status = Pipeline and CRM Push Date = today.                                                                                                                                                                                                                                                                                                                                                                  |
 | Shared sub-workflow — intake regression       | New Leads     | n8n intake workflow                          | After extracting Build Payloads into shared `Map PD to NL Fields` sub-workflow, verify intake workflow still functions identically: new lead creates Contact + Opportunity with full enrichment, re-submission updates correctly.                                                                                                                                                                                                                                   |
+| Re-sub over qualified stage (Improvement #28) | New Leads     | n8n intake / WF-New-Lead-Entry               | Put a test Opportunity in Make Offer / Contract Sent / Contract Signed. Simulate a re-submission for the same Contact via any channel. Verify: Opportunity stays in its current stage, Latest Source + Date update, no speed-to-lead SMS fires, owner gets a notification. If current behavior yanks the Opportunity back to New Leads → confirms gap, apply Improvement #28 fix.                                                                                    |
+| Re-sub for second property, same owner (Improvement #29) | New Leads     | n8n intake                                    | Contact owns Properties X and Y. X has an active Opportunity (Day 11-30). Submit Y via any channel. Verify whether: (a) a second Opportunity is created for Y (desired), (b) Property X's Opportunity gets Latest Source updated but Y's property data is dropped (current broken behavior), or (c) X's Opportunity is overwritten with Y's property data. Document actual behavior.                                                              |
+| DNC re-sub with Lost Reason only, no `dnc` tag (Improvement #30) | New Leads     | n8n intake / WF-New-Lead-Entry               | Create a test Contact with Lost Reason = DNC but NO `dnc` tag (simulate data drift). Submit via any channel. Verify: n8n should block (after fix) or currently lets through (confirms gap). Also verify that WF-DNC-Handler always sets both the tag and the Lost Reason atomically — no drift at the source.                                                                                                 |
+| DNC-blocked re-sub removes `re-submitted` tag (Improvement #30) | New Leads     | WF-New-Lead-Entry                            | Apply `re-submitted` + `dnc` to a test Contact, move Opportunity to New Leads stage. Verify WF-New-Lead-Entry removes the `re-submitted` tag before the DNC-blocked exit. Currently the tag persists — fix: move cleanup step ahead of end-workflow action.                                                                                                                                                                   |
 
 
 ---
@@ -139,6 +143,76 @@ Last full re-run: 2026-04-07 (full file-by-file cross-file audit — all files c
 3. Track re-skip-trace results: how many numbers changed, how many new numbers found — helps calibrate the refresh cadence over time
 
 - **Files affected:** prospect-data/rules.md (§6 expansion with refresh schedule + pre-push validation)
+
+---
+
+### 28. Re-Submission Over Qualified / Under-Contract Stages (Deal-Risk)
+
+**Gap:** The re-submission flow has no guard for the current pipeline stage. [n8n/intake-workflow.json](n8n/intake-workflow.json) `Create or Update Lead` node (line 198) does `PUT /opportunities/{id}` with `pipelineStageId: new_leads_stage_id` unconditionally when a duplicate Contact is found. [new-leads/workflows.md](new-leads/workflows.md) WF-New-Lead-Entry (lines 44–77) only checks the `re-submitted` tag + DNC — no stage check.
+
+**Scenario:** A lead who is in Acquisition: Make Offer / Negotiations / Contract Sent / Contract Signed calls the main line (VAPI) or triggers any other channel. n8n yanks their Opportunity back to the "New Leads" stage. WF-New-Lead-Entry clears drips (there are none in qualified stages, so no damage there), resets owner logic, clears `Pause WFs Until`, and fires Day 0 speed-to-lead SMS (CO/IN/DM-SMS-00) — blasting a "speed to lead" message to a seller who is already under contract. The AM loses the stage position and has to manually move the Opportunity back.
+
+**Why it matters:** This is the worst re-submission case. A seller under contract who calls to ask a closing question gets treated like a brand-new cold lead, receives a scripted inbound-SMS, and their deal card disappears from Contract Signed. Deals can fall apart from exactly this kind of confusion.
+
+**Recommended approach (pick one):**
+
+1. **n8n-side guard (preferred):** Before moving the Opportunity stage, read its current `pipelineStageId`. If it's in Acquisition: Comp, Make Offer, Negotiations, Contract Sent, Contract Signed (or any Due Diligence / Value Add / Disposition stage), skip the stage move and skip the `re-submitted` tag. Still update `Latest Source` + `Latest Source Date` (tracking value). Post a note on the timeline: "Re-entry via {{source}} while in {{stage}} — stage preserved. Owner notified." and send an internal notification to the Contact Owner.
+2. **GHL-side guard (fallback):** Add an If/Else at the top of WF-New-Lead-Entry: if current Opportunity stage is anything past Day 11-30 in Acquisition (or any stage in pipelines 02/03/05), skip all re-submission cleanup, notify owner, end workflow. Does not prevent n8n from moving the stage — n8n still needs the guard to keep the stage card in place.
+
+**Note:** Approach 1 is cleaner because n8n is where the stage move happens. Approach 2 doesn't actually prevent the stage change.
+
+- **Files affected:** [n8n/intake-workflow.json](n8n/intake-workflow.json) (`Create or Update Lead` node — add stage read + conditional), [n8n/intake-workflow.md](n8n/intake-workflow.md) § 6B (document stage guard), [new-leads/workflows.md](new-leads/workflows.md) (WF-New-Lead-Entry stage guard), [new-leads/rules.md](new-leads/rules.md) § 6B (add stage-guard rule)
+
+---
+
+### 29. Re-Submission for Multi-Property Owners (Data Overwrite)
+
+**Gap:** [n8n/intake-workflow.json](n8n/intake-workflow.json) `Create or Update Lead` node picks `opps[0].id` from `GET /opportunities/search?contact_id={id}` — takes the first returned Opportunity with no filter for which property it belongs to. The PUT then overwrites Latest Source + Latest Source Date, moves stage to New Leads, and (if no Opportunity found) creates a new one. The documented Build Contact & Opportunity Payloads step set `Reference ID`, `Property County`, `Acres`, `APN` etc. on the `opportunity_payload` based on the newly matched Property — but the n8n re-submission branch only writes `customFields: [Latest Source, Latest Source Date]` in the PUT, not the property fields. So Property fields are preserved (not overwritten) on the re-submission PUT path. However, the broader assumption in [new-leads/data-model.md:137](new-leads/data-model.md#L137) — "A Contact will only ever have one active Opportunity at a time" — is violated the moment a single owner's Property B enters the funnel while Property A's Opportunity is still open.
+
+**Scenarios:**
+
+- **Scenario A — Same property, new campaign:** Owner was in the system for Property X; responds to a new Direct Mail piece for Property X. Opportunity is moved to New Leads, Latest Source updated. This is the intended behavior. ✅
+- **Scenario B — Different property, same owner:** Owner was in the system for Property X (active Day 11-30 Opportunity); Property Y (different parcel, same owner) enters via Cold SMS. n8n finds the Contact by phone, finds Property X's Opportunity, moves *it* to New Leads, stamps it with `Latest Source = Cold SMS`. Property Y's data (ref ID, county, acres, APN) sits in the `opportunity_payload` but never gets written — the re-submission PUT only sends Latest Source + Date + stage. Property Y is lost. The operator now sees Property X's card in New Leads with Latest Source = Cold SMS, but Cold SMS was actually targeting Property Y.
+- **Scenario C — Different property, same owner, new campaign overlaps with LT FU:** Similar to B but Property X was in LT FU: Cold. Same outcome. Property Y dropped on the floor.
+
+**Why it matters:** Rural landowners frequently own multiple parcels. The system's core promise is "one Property → one Opportunity". Scenario B silently breaks that without logging, without a note on either property, and without alerting the operator. Property Y data exists in Prospect Data but never lands on an Opportunity. Attribution breaks — the Cold SMS campaign on Property Y gets credit only for an (incorrectly tagged) Opportunity on Property X.
+
+**Recommended approach:**
+
+1. In `GET /opportunities/search`, filter by Reference ID (via Opportunity custom field) as the primary match. Only if no Opportunity for the incoming `reference_id` exists on this Contact → then decide: (a) create a new Opportunity for the new property (violating "one active Opportunity" but matching data-model intent "create a new Opportunity (new property)" from [data-model.md:103](new-leads/data-model.md#L103)), or (b) flag for operator review.
+2. Update [data-model.md:137](new-leads/data-model.md#L137) to reflect the decision — "one active Opportunity per Contact **per property**" is the real invariant, not per-Contact.
+3. Post a timeline note on the Contact: "Re-entry for Property Y while Property X Opportunity is active — new Opportunity created" (or review flag).
+4. Decide product question: **do we want two active Opportunities for the same Contact when they own multiple parcels?** Current rules say no. n8n behavior silently says no too (but in a broken way). The cleanest answer is yes — one Opportunity per property per Contact is the correct mental model.
+
+- **Files affected:** [n8n/intake-workflow.json](n8n/intake-workflow.json) (`Create or Update Lead` — add ref-ID filter on Opportunity search), [n8n/intake-workflow.md](n8n/intake-workflow.md) § 6B (document Opportunity match logic), [new-leads/data-model.md](new-leads/data-model.md) (revise "one active Opportunity" rule), [new-leads/rules.md](new-leads/rules.md) § 6B (document multi-property re-submission)
+
+---
+
+### 30. DNC Re-Submission Edge Cases (Tag Drift + Stranded Stage)
+
+**Gap:** Two related DNC edge cases in the re-submission flow.
+
+**Gap A — Lost Reason = DNC without `dnc` tag:** [n8n/intake-workflow.json](n8n/intake-workflow.json) `Create or Update Lead` (line 198) only checks for the Contact `dnc` tag (`tags.some(t => t.toLowerCase() === 'dnc')`). It does NOT read the Opportunity's Lost Reason. If DNC was applied by a source other than WF-DNC-Handler (manual operator change, automation misfire, data import), the Lost Reason might be DNC while the tag is missing. n8n then:
+
+1. Lets the re-submission through (tag check passes)
+2. Adds the `Re-Submitted` tag to the Contact
+3. Moves the Opportunity to the New Leads stage
+4. PUT updates Latest Source + Date
+5. WF-New-Lead-Entry fires on the stage move, detects Lost Reason = DNC in its own DNC check (workflows.md:50), sends the "Re-submission blocked" internal notification, and **ends the workflow before the cleanup steps**
+
+Result: Opportunity is stuck in the New Leads stage with status = Lost, Lost Reason = DNC, `re-submitted` tag stuck on the Contact, and no speed-to-lead touches (workflow bailed). Operator has to manually move it back to wherever it belongs (LT FU: Lost or similar) and strip the `re-submitted` tag. WF-DNC-Handler ([workflows.md:272](new-leads/workflows.md#L272)) is designed to keep the `dnc` tag + Lost Reason in sync, so this drift should be rare — but data imports, manual edits, and historical records from before WF-DNC-Handler existed could all produce it.
+
+**Gap B — `re-submitted` tag accumulation on DNC-tagged contacts:** Even in the normal DNC path (both `dnc` tag and Lost Reason = DNC set), if an operator manually applies `re-submitted` to a DNC contact and moves them to New Leads, WF-New-Lead-Entry's DNC check fires at step 1 and exits before reaching the "remove `re-submitted` tag" cleanup at step 5. Tag persists. Cosmetic, but it breaks the invariant that `re-submitted` is transient. Over time, a DNC contact may accumulate the tag repeatedly.
+
+**Why it matters:** Gap A leaves Opportunities stranded in the wrong pipeline stage. DNC should be a no-op, not a stage-mover. Gap B is minor but violates the stated invariant about `re-submitted` being transient — could confuse future Smart Lists or reporting that filter on the tag.
+
+**Recommended approach:**
+
+1. **n8n DNC check expansion (Gap A):** In `Create or Update Lead`, extend the DNC check to also read the existing Opportunity's Lost Reason before doing the re-submission PUT. Query: `GET /opportunities/search?location_id={id}&contact_id={id}` (already called later), check each Opportunity's `lostReason` custom field. If any is "DNC" → return `status: dnc_blocked` and stop. Optionally also detect the mismatch and fire an alert ("Contact has Lost Reason DNC but missing `dnc` tag — data drift").
+2. **WF-New-Lead-Entry DNC cleanup (Gap B):** Before ending the workflow on DNC detection, remove the `re-submitted` tag (move step 5 ahead of the end-workflow action). Keeps the tag transient per the invariant.
+3. **Separate verification:** Add a pre-launch verification row to confirm WF-DNC-Handler always sets both the `dnc` tag and Lost Reason = DNC together (no drift at the source of truth).
+
+- **Files affected:** [n8n/intake-workflow.json](n8n/intake-workflow.json) (`Create or Update Lead` — Lost Reason DNC check), [n8n/intake-workflow.md](n8n/intake-workflow.md) § 6A (document expanded DNC check), [new-leads/workflows.md](new-leads/workflows.md) (WF-New-Lead-Entry — remove `re-submitted` tag before DNC exit; also add pre-launch verification)
 
 ---
 
@@ -369,3 +443,6 @@ Last full re-run: 2026-04-07 (full file-by-file cross-file audit — all files c
 | 30  | Win-Back No Longer Own        | Pending                                                                                                                                                                                                                                                                                                                                                                                                             | —          |
 | 31  | NL-SMS-07 Wording             | Pending                                                                                                                                                                                                                                                                                                                                                                                                             | —          |
 | 32  | Re-Submission Write-Back      | Pending                                                                                                                                                                                                                                                                                                                                                                                                             | —          |
+| 33  | Re-Sub Qualified-Stage Guard  | Pending                                                                                                                                                                                                                                                                                                                                                                                                             | —          |
+| 34  | Re-Sub Multi-Property Handling| Pending                                                                                                                                                                                                                                                                                                                                                                                                             | —          |
+| 35  | Re-Sub DNC Edge Cases         | Pending                                                                                                                                                                                                                                                                                                                                                                                                             | —          |

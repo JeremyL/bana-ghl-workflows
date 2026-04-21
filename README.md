@@ -1,5 +1,5 @@
 # Bana Land — GHL Follow-Up System
-*Last edited: 2026-04-09 · Last reviewed: 2026-04-07*
+*Last edited: 2026-04-21 · Last reviewed: 2026-04-07*
 
 
 Documentation for Bana Land's multi-channel motivated seller follow-up system, built in Go High Level (GHL). Covers the full lead lifecycle — from first outreach response through deal close, disqualification, or long-term drip.
@@ -48,6 +48,7 @@ Single working account for all lead sources. Handles all leads from entry throug
 | [bana_land_lead_lifecycle_overview.svg](new-leads/diagrams/bana_land_lead_lifecycle_overview.svg) | Diagram: full lead lifecycle from entry to close/lost |
 | [day_0_to_30_sequence_detail.svg](new-leads/diagrams/day_0_to_30_sequence_detail.svg) | Diagram: Day 0–30 sequence timing and channels |
 | [cold_nurture_reentry_flows.svg](new-leads/diagrams/cold_nurture_reentry_flows.svg) | Diagram: cold drip, nurture, and re-entry flows |
+| [workflow-diagrams.md](new-leads/diagrams/workflow-diagrams.md) | Per-workflow internal-logic flowcharts (Mermaid) — starts with WF-New-Lead-Entry |
 
 
 ### Account: Prospect Data (`prospect-data/`)
